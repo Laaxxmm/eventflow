@@ -46,13 +46,16 @@ class PlatformSeeder extends Seeder
         ]);
     }
 
-    private function password(?string $password, string $env): string
+    public function password(?string $password, string $env): string
     {
         if (blank($password)) {
             throw new RuntimeException("Set {$env} in .env before seeding demo accounts (see .env.example).");
         }
         if (app()->isProduction() && in_array($password, self::EXAMPLE_PASSWORDS, true)) {
             throw new RuntimeException("{$env} still has the .env.example value; choose a real password.");
+        }
+        if (! app()->environment('local', 'testing') && str_contains($password, 'CHANGE_ME')) {
+            throw new RuntimeException("{$env} is still the CHANGE_ME placeholder; choose a real password.");
         }
 
         return $password; // hashed by the User model's cast

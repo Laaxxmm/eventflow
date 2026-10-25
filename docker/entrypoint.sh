@@ -27,6 +27,11 @@ if [ "$#" -gt 0 ]; then
     exec su-exec www-data "$@"
 fi
 
+# Placeholders left from deploy/*.env.example are a security problem; say so loudly.
+env | grep -E '^[A-Z_]+=(base64:)?CHANGE_ME' | cut -d= -f1 | while read -r name; do
+    echo "WARNING: ${name} is still the CHANGE_ME placeholder. Set a real value." >&2
+done
+
 prepare_web() {
     su-exec www-data php artisan storage:link --force >/dev/null 2>&1 || true
     if [ "${RUN_MIGRATIONS:-0}" = "1" ]; then

@@ -21,6 +21,22 @@ use Symfony\Component\Yaml\Yaml;
  */
 class DemoSeeder extends Seeder
 {
+    public const EMAILS = ['owner@demo.test', 'volunteer@demo.test'];
+
+    /** DEMO_PASSWORD, refusing "password" in production and the CHANGE_ME placeholder outside local/testing. */
+    public static function password(): string
+    {
+        $password = (string) config('plans.demo.demo_password');
+        if (app()->isProduction() && in_array($password, ['', 'password'], true)) {
+            throw new RuntimeException('Set DEMO_PASSWORD to a real password before seeding demo data in production.');
+        }
+        if (! app()->environment('local', 'testing') && str_contains($password, 'CHANGE_ME')) {
+            throw new RuntimeException('DEMO_PASSWORD is still the CHANGE_ME placeholder; choose a real password.');
+        }
+
+        return $password;
+    }
+
     public function run(): void
     {
         $config = Yaml::parseFile(base_path('events/demo/example-marathon.yaml'));
@@ -42,10 +58,7 @@ class DemoSeeder extends Seeder
             'modules' => Module::cases(),
         ]);
 
-        $password = (string) config('plans.demo.demo_password');
-        if (app()->isProduction() && in_array($password, ['', 'password'], true)) {
-            throw new RuntimeException('Set DEMO_PASSWORD to a real password before seeding demo data in production.');
-        }
+        $password = self::password();
 
         foreach ([['owner@demo.test', 'Demo Owner', Role::Owner], ['volunteer@demo.test', 'Demo Volunteer', Role::Volunteer]] as [$email, $name, $role]) {
             User::withoutGlobalScopes()->updateOrCreate(['email' => $email], [
