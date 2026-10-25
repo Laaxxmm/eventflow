@@ -2,6 +2,8 @@
 
 namespace App\Landing;
 
+use App\Enums\Sport;
+use App\RaceSheets\RaceSheetConfig;
 use Carbon\CarbonImmutable;
 
 /**
@@ -28,10 +30,13 @@ final readonly class EventConfig
         public array $fields = [],
         public array $faq = [],
         public ?Certificate $certificate = null,
+        public Sport $sport = Sport::Generic,
+        public ?RaceSheetConfig $raceSheet = null,
     ) {}
 
     /**
-     * @param  array<string, mixed>  $data  Decoded YAML/JSON matching events/schema.json
+     * @param  array<string, mixed>  $data  Decoded YAML/JSON matching events/schema.json,
+     *                                      after SportPack::applyTo() has filled in defaults
      */
     public static function fromArray(array $data): self
     {
@@ -48,6 +53,8 @@ final readonly class EventConfig
             fields: array_map(fn (array $f) => new FormField(...$f), $data['fields'] ?? []),
             faq: array_map(fn (array $f) => new Faq(...$f), $data['faq'] ?? []),
             certificate: isset($data['certificate']) ? new Certificate(...$data['certificate']) : null,
+            sport: Sport::from($data['sport'] ?? Sport::Generic->value),
+            raceSheet: isset($data['race_sheet']) ? RaceSheetConfig::fromArray($data['race_sheet']) : null,
         );
     }
 }

@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eventflow.app/schemas/sport-pack.json",
+  "title": "EventFlow sport pack defaults",
+  "description": "Partial event config. Events inherit any top-level key they omit (see App\\Sports\\SportPack).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sport",
+    "label"
+  ],
+  "properties": {
+    "sport": {
+      "$ref": "event.json#/definitions/sport"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "distances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "label"
+        ],
+        "description": "Like an event distance but unpriced: organisers must set price_inr per event.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,20}$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capacity": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "age_bands": {
+      "type": "array",
+      "items": {
+        "$ref": "event.json#/definitions/ageBand"
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "$ref": "event.json#/definitions/field"
+      }
+    },
+    "race_sheet": {
+      "$ref": "event.json#/definitions/raceSheet"
+    },
+    "certificate": {
+      "$ref": "event.json#/definitions/certificate"
+    }
+  }
+}

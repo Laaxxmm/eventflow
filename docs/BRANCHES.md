@@ -8,7 +8,7 @@
 | `feat/c-<short>` | 3 | Landing pages & registration form |
 | `feat/d-<short>` | 4 | Passes (PNG/PDF, QR) & email |
 | `feat/e-<short>` | 5 | Organiser auth & dashboard |
-| `feat/f-<short>` | 6 | Check-in & ops (CI, Docker) |
+| `feat/f-<short>` | 6 | Check-in, race sheets & ops (CI, Docker) |
 
 ## Workflow
 

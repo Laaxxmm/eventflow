@@ -39,7 +39,13 @@ Contracts every other stream codes against. Change them only via a `feat/a-` PR.
 | `App\Contracts\LandingSource` | `load(org, slug): EventConfig`. |
 | `App\Landing\EventConfig` | Typed view of `events/schema.json`; `EventConfig::fromArray()`. |
 | `App\Events\RegistrationPaid` | `registrationId`. Dispatched by payments (B), handled by passes (D). Fires after DB commit. |
-| `config/eventflow.php` | Payment provider + credentials, pass prefix/pattern/signing key, events paths. |
+| `App\Contracts\Entitlements` | Season Pass + module toggles: `activeSeasonPass(org)`, `enabled(org, Module)`. |
+| `App\Contracts\SportPackRepository` | `get(Sport): SportPack` from `events/sports/<sport>.yaml`. |
+| `App\Contracts\RaceSheetBuilder` | `build(Event): RaceSheet` (heats from `race_sheet` config). |
+| `App\Contracts\CertificateRenderer` | `render(Registration): CertificateFile` (A4 PDF). |
+| `App\Enums\{Sport, Module}` | `skating, cycling, running, generic`; `registration, payments, passes, checkin, race_sheets, certificates`. |
+| `App\Support\EventSchema` | `errors($data, EventSchema::EVENT\|SPORT_PACK)`: the one shared validator. |
+| `config/eventflow.php` | Payment provider + credentials, pass prefix/pattern/signing key, events paths, modules, race sheet presets, certificate gallery and A4 sizes. |
 
 Schema (`database/migrations`): `orgs`, `users` (+`org_id`, `role` owner|staff|volunteer),
 `events` (unique `org_id + slug`), `registrations` (`pass_no` EF-XXXXXXXXXXXX,
@@ -49,3 +55,25 @@ Event configs: `events/schema.json` (JSON Schema draft-07), demo in
 `events/demo/example-marathon.yaml`; `tests/Feature/ContractsTest.php` validates it.
 
 Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
+
+### Product rules
+
+- **Season Pass, not per-event invoices.** A `season_passes` row (dates, status,
+  included `modules`) grants an org a season. Core modules (registration,
+  payments, passes) are on while a pass is active. Optional modules (check-in,
+  race sheets, certificates) are toggled in Org Settings (`orgs.modules`) and
+  only work when the pass includes them. With no active pass, every module is off.
+- **Sport packs.** `events.sport` / YAML `sport:` picks `events/sports/<sport>.yaml`.
+  An event inherits each top-level key it omits (`distances`, `age_bands`, `fields`,
+  `race_sheet`, `certificate`); keys it sets replace the pack's value entirely.
+  Pack distances carry no price, so they must be priced per event.
+- **Race sheets are config.** `race_sheet: {heat_size, group_by, seeding}`;
+  `heat_size` presets 6/8/10, any N in 2..64. Heats never mix `group_by` groups.
+  No `race_sheet` means a mass start.
+- **Certificates.** `certificate.template` is a gallery key (`classic`, `podium`,
+  `minimal`) or `upload` with a `background` at exactly A4 300 dpi
+  (3508x2480 landscape, 2480x3508 portrait). Custom layouts are not built in-app:
+  organisers contact Indefine (`CUSTOM_TEMPLATE_CONTACT`).
+
+Demos: `events/demo/example-marathon.yaml` (running, no heats) and
+`events/demo/example-skating.yaml` (skating pack, heats of 6, uploaded certificate).

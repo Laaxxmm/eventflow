@@ -11,10 +11,10 @@ use App\Models\PaymentEvent;
 use App\Models\Registration;
 use App\Payments\Dto\PaymentOrder;
 use App\Payments\PaymentStatus;
+use App\Support\EventSchema;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Schema;
-use JsonSchema\Validator;
 use Symfony\Component\Yaml\Yaml;
 
 function demoConfig(): array
@@ -24,12 +24,7 @@ function demoConfig(): array
 
 function schemaErrors(array $data): array
 {
-    $validator = new Validator;
-    $payload = json_decode(json_encode($data));
-    $schema = json_decode(file_get_contents(config('eventflow.schema_path')));
-    $validator->validate($payload, $schema);
-
-    return $validator->getErrors();
+    return EventSchema::errors($data);
 }
 
 it('validates the demo marathon against events/schema.json', function () {
@@ -52,7 +47,7 @@ it('maps the demo config onto EventConfig', function () {
         ->and($config->distances[0]->pricePaise())->toBe(59900)
         ->and($config->ageBands[0]->min)->toBe(12)
         ->and($config->fields[1]->options)->toContain('Female')
-        ->and($config->certificate?->template)->toBe('certificates/default');
+        ->and($config->certificate?->template)->toBe('classic');
 });
 
 it('declares the contract interfaces', function () {

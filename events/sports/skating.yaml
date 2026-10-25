@@ -1,0 +1,30 @@
+# Skating pack defaults. Events inherit any top-level key they omit.
+sport: skating
+label: Roller skating
+distances:
+  - { code: 1LAP, label: 1 Lap (rink) }
+  - { code: 500M, label: 500 m }
+  - { code: 1000M, label: 1000 m }
+  - { code: ROAD1, label: Road 1 lap }
+age_bands:
+  - { label: Under 6, min: 0, max: 5 }
+  - { label: 6-8, min: 6, max: 7 }
+  - { label: 8-10, min: 8, max: 9 }
+  - { label: 10-12, min: 10, max: 11 }
+  - { label: 12-14, min: 12, max: 13 }
+  - { label: 14-16, min: 14, max: 15 }
+  - { label: Above 16, min: 16, max: 99 }
+fields:
+  - { key: age, label: Age, type: number, required: true }
+  - { key: gender, label: Gender, type: select, required: true, options: [Boy, Girl] }
+  - { key: skate_type, label: Skate type, type: select, required: true, options: [Quad, Inline, Tenacity] }
+  - { key: club, label: Club / academy, type: text, required: false }
+  - { key: parent_name, label: Parent / guardian name, type: text, required: true }
+  - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
+race_sheet:
+  heat_size: 8
+  group_by: [distance, age_band, gender, skate_type]
+  seeding: registration_order
+certificate:
+  template: classic
+  orientation: landscape
