@@ -7,6 +7,7 @@ use App\Landing\DatabaseLandingSource;
 use App\Landing\EventStatus;
 use App\Landing\RegistrationForm;
 use App\Landing\Theme;
+use App\View\LandingPage;
 use Illuminate\View\View;
 
 class PublicEventController extends Controller
@@ -36,13 +37,17 @@ class PublicEventController extends Controller
         $event = $this->landing->event($org, $slug);
         $config = $this->landing->load($org, $slug);
 
-        return view('landing.show', [
-            'event' => $event,
-            'config' => $config,
-            'form' => new RegistrationForm($config),
-            'remaining' => Capacity::remaining($event, $config),
-            'open' => RegistrationController::isOpen($config),
-            'theme' => Theme::for($config->branding),
+        // Layout from the event's landing template (config `template`, else the sport pack's).
+        return view('landings.templates.'.$config->template, [
+            'page' => new LandingPage(
+                config: $config,
+                orgName: $event->org->name,
+                orgSlug: $event->org->slug,
+                form: new RegistrationForm($config),
+                theme: Theme::for($config->branding),
+                remaining: Capacity::remaining($event, $config),
+                open: RegistrationController::isOpen($config),
+            ),
         ]);
     }
 }

@@ -1,98 +1,139 @@
-@php($inr = fn (int $paise) => \Illuminate\Support\Number::currency($paise / 100, in: 'INR', locale: 'en_IN'))
+@php
+    $inr = fn (int $paise) => \Illuminate\Support\Number::currency($paise / 100, in: 'INR', locale: 'en_IN');
+    $org = auth()->user()->org;
+    $on = fn (\App\Enums\Module $m) => ! app()->bound(\App\Contracts\Entitlements::class) || app(\App\Contracts\Entitlements::class)->enabled($org, $m);
+    $raceSheets = Route::has('reports.race-sheet') && $on(\App\Enums\Module::RaceSheets);
+    $certificates = Route::has('reports.certificates') && $on(\App\Enums\Module::Certificates);
+    $upcoming = $events->filter(fn ($e) => $e->date->isAfter(now()->subDay()))->sortBy('date');
+    $past = $events->reject(fn ($e) => $e->date->isAfter(now()->subDay()));
+    $firstName = \Illuminate\Support\Str::of(auth()->user()->name)->before(' ');
+@endphp
 
 <x-app-layout>
+    <x-slot name="title">{{ __('Home') }}</x-slot>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <div>
+            <h2>{{ __('Hi :name', ['name' => $firstName]) }}</h2>
+            <p class="mt-1 text-sm text-slate-500">{{ $org?->name }}</p>
+        </div>
+        @if ($events->isNotEmpty())
+            <a href="{{ route('organiser.events.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#0b1020] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1f2a4a]">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                {{ __('New event') }}
+            </a>
+        @endif
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <dl class="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-0">
+    <div class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+        @if ($events->isEmpty())
+            {{-- Empty state: one primary action --}}
+            <section class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">
+                <div class="grid items-center gap-8 p-8 sm:p-12 lg:grid-cols-[1.1fr_0.9fr]">
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wider text-[#c2410c]">{{ __('Let\'s get started') }}</p>
+                        <h3 class="mt-3 text-3xl font-extrabold tracking-tight">{{ __('Create your first event') }}</h3>
+                        <p class="mt-3 max-w-lg text-slate-600">{{ __('Five quick steps: the basics, a sport pack, a page design and your branding. Your event page goes live as soon as you publish.') }}</p>
+                        <a href="{{ route('organiser.events.create') }}" class="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#0b1020] px-6 py-3.5 font-semibold text-white hover:bg-[#1f2a4a]">
+                            {{ __('Create your first event') }} <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                    <ol class="space-y-3 text-sm">
+                        @foreach ([__('Basics: name, date, venue'), __('Sport pack and prices'), __('Pick a page design'), __('Logo, photo and colours'), __('Review and publish')] as $i => $step)
+                            <li class="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-[#d9ff45] text-xs font-bold text-[#0b1020]">{{ $i + 1 }}</span>
+                                {{ $step }}
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </section>
+        @else
+            <dl class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 @foreach ([
                     __('Registrations') => number_format($totals['registrations']),
                     __('Paid') => number_format($totals['paid']),
-                    __('Paid total') => $inr($totals['paid_total_paise']),
+                    __('Collected') => $inr($totals['paid_total_paise']),
                     __('Checked in') => number_format($totals['checked_in']),
                 ] as $label => $value)
-                    <div class="p-4 sm:p-6 bg-white shadow sm:rounded-lg">
-                        <dt class="text-sm text-gray-600">{{ $label }}</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-gray-900">{{ $value }}</dd>
+                    <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+                        <dt class="text-sm text-slate-500">{{ $label }}</dt>
+                        <dd class="mt-2 text-2xl font-bold tracking-tight">{{ $value }}</dd>
                     </div>
                 @endforeach
             </dl>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <header class="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                        <h2 class="text-lg font-medium text-gray-900">
-                            {{ __('My events') }}
-                        </h2>
-
-                        <p class="mt-1 text-sm text-gray-600">
-                            {{ __('Registrations, payments and check-ins for every event in your organisation.') }}
-                        </p>
-                    </div>
-
-                    <a href="{{ route('dashboard.participants') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ __('View all participants') }}
-                    </a>
-                </header>
-
-                @if ($events->isEmpty())
-                    <p class="mt-6 text-sm text-gray-600">
-                        {{ __('No events yet.') }}
-                    </p>
+            <section>
+                <div class="flex items-end justify-between gap-4">
+                    <h3 class="text-lg font-bold">{{ __('Upcoming') }}</h3>
+                    <a href="{{ route('dashboard.participants') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">{{ __('All participants') }} →</a>
+                </div>
+                @if ($upcoming->isEmpty())
+                    <p class="mt-4 rounded-2xl bg-white p-6 text-sm text-slate-600 ring-1 ring-slate-200/70">{{ __('No upcoming events. Create one when you are ready.') }}</p>
                 @else
-                    <div class="relative mt-6 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead>
-                                <tr class="text-left text-gray-600">
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Event') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Date') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Registrations') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Paid') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Paid total') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Checked in') }}</th>
-                                    <th scope="col" class="py-2"><span class="sr-only">{{ __('Reports') }}</span></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 text-gray-900">
-                                @foreach ($events as $event)
-                                    <tr>
-                                        <td class="py-3 pe-4">
-                                            <div class="font-medium">{{ $event->name }}</div>
-                                            <div class="text-gray-600">{{ $event->venue }}</div>
-                                        </td>
-                                        <td class="py-3 pe-4 whitespace-nowrap">{{ $event->date->format('d M Y') }}</td>
-                                        <td class="py-3 pe-4 text-right">{{ number_format($event->registrations_count) }}</td>
-                                        <td class="py-3 pe-4 text-right">{{ number_format($event->paid_count) }}</td>
-                                        <td class="py-3 pe-4 text-right whitespace-nowrap">{{ $inr((int) $event->paid_total_paise) }}</td>
-                                        <td class="py-3 pe-4 text-right">{{ number_format($event->checked_in_count) }}</td>
-                                        <td class="py-3 text-right">
-                                            <div class="flex flex-wrap justify-end gap-x-4 gap-y-1 whitespace-nowrap">
-                                                <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                    {{ __('Participants') }}
-                                                </a>
-                                                {{-- Stream E pages; shown once routes/reports.php is loaded. --}}
-                                                @if (Route::has('reports.race-sheet'))
-                                                    <a href="{{ route('reports.race-sheet', $event) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                        {{ __('Race sheet') }}
-                                                    </a>
-                                                    <a href="{{ route('reports.certificates', $event) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                        {{ __('Certificates') }}
-                                                    </a>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                        @foreach ($upcoming as $event)
+                            @php($colours = $event->colours ?? [])
+                            <article class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70">
+                                <div class="h-2" style="background: linear-gradient(90deg, {{ $colours['primary'] ?? '#d9ff45' }}, {{ $colours['secondary'] ?? '#ff6e61' }})"></div>
+                                <div class="p-5">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div class="min-w-0">
+                                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ $event->date->timezone('Asia/Kolkata')->format('D j M Y') }}</p>
+                                            <h4 class="mt-1 truncate text-lg font-bold">{{ $event->name }}</h4>
+                                            <p class="truncate text-sm text-slate-500">{{ $event->venue }}</p>
+                                        </div>
+                                        <span @class([
+                                            'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold',
+                                            'bg-green-100 text-green-800' => $event->status === 'published',
+                                            'bg-slate-100 text-slate-600' => $event->status !== 'published',
+                                        ])>{{ __(ucfirst($event->status)) }}</span>
+                                    </div>
+                                    <dl class="mt-5 grid grid-cols-3 gap-2 text-center">
+                                        <div class="rounded-xl bg-slate-50 py-2"><dt class="text-xs text-slate-500">{{ __('Entries') }}</dt><dd class="font-bold">{{ number_format($event->registrations_count) }}</dd></div>
+                                        <div class="rounded-xl bg-slate-50 py-2"><dt class="text-xs text-slate-500">{{ __('Paid') }}</dt><dd class="font-bold">{{ number_format($event->paid_count) }}</dd></div>
+                                        <div class="rounded-xl bg-slate-50 py-2"><dt class="text-xs text-slate-500">{{ __('Collected') }}</dt><dd class="font-bold">{{ $inr((int) $event->paid_total_paise) }}</dd></div>
+                                    </dl>
+                                    <div class="mt-5 flex flex-wrap gap-2 text-sm">
+                                        @if ($event->status === 'published' && $org)
+                                            <a href="{{ route('landing.show', [$org->slug, $event->slug]) }}" target="_blank" class="rounded-lg bg-[#0b1020] px-3 py-1.5 font-medium text-white hover:bg-[#1f2a4a]">{{ __('View page') }} ↗</a>
+                                        @endif
+                                        <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Participants') }}</a>
+                                        <a href="{{ route('organiser.events.edit', $event) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Edit') }}</a>
+                                        @if ($raceSheets)
+                                            <a href="{{ route('reports.race-sheet', $event) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Race sheet') }}</a>
+                                        @endif
+                                        @if ($certificates)
+                                            <a href="{{ route('reports.certificates', $event) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Certificates') }}</a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
                     </div>
                 @endif
-            </div>
-        </div>
+            </section>
+
+            @if ($past->isNotEmpty())
+                <section>
+                    <h3 class="text-lg font-bold">{{ __('Past events') }}</h3>
+                    <ul class="mt-4 divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70">
+                        @foreach ($past as $event)
+                            <li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                                <div class="min-w-0">
+                                    <p class="truncate font-semibold">{{ $event->name }}</p>
+                                    <p class="text-sm text-slate-500">{{ $event->date->timezone('Asia/Kolkata')->format('j M Y') }} · {{ number_format($event->paid_count) }} {{ __('paid') }} · {{ number_format($event->checked_in_count) }} {{ __('checked in') }}</p>
+                                </div>
+                                <div class="flex gap-2 text-sm">
+                                    <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Participants') }}</a>
+                                    @if ($certificates)
+                                        <a href="{{ route('reports.certificates', $event) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Certificates') }}</a>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+        @endif
     </div>
 </x-app-layout>

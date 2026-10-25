@@ -1,9 +1,15 @@
 # Generic pack: minimum defaults for any other event.
 sport: generic
 label: Generic event
+template: clean
 fields:
   - { key: age, label: Age, type: number, required: false }
   - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: false }
 certificate:
   template: minimal
   orientation: landscape
+faq:
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.
+  - q: Can I transfer my entry?
+    a: Contact the organiser; transfers are at their discretion.

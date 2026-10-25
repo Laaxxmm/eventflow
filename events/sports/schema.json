@@ -17,6 +17,9 @@
       "type": "string",
       "minLength": 1
     },
+    "template": {
+      "$ref": "event.json#/definitions/landingTemplate"
+    },
     "distances": {
       "type": "array",
       "items": {
@@ -63,6 +66,12 @@
     },
     "certificate": {
       "$ref": "event.json#/definitions/certificate"
+    },
+    "faq": {
+      "type": "array",
+      "items": {
+        "$ref": "event.json#/definitions/faqItem"
+      }
     }
   }
 }

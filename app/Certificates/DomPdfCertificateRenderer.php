@@ -50,7 +50,39 @@ final class DomPdfCertificateRenderer implements CertificateRenderer
             'venue' => $event->venue,
             'orgName' => $event->org?->name,
             'passNo' => $r->pass_no,
+            // Placeholders added for the designed gallery (BIB = a "bib" answer if the event collects one).
+            'bib' => (string) ($r->answers['bib'] ?? $r->pass_no),
+            'time' => filled($t = $r->answers['finish_time'] ?? $r->answers['time'] ?? null) ? (string) $t : null,
+            'sport' => $event->sport instanceof \BackedEnum ? $event->sport->value : $event->sport,
+            'category' => $r->answers['age_band'] ?? null,
+            'logo' => $this->logoDataUri($event),
+            'layout' => config("eventflow.certificates.upload_layout.{$settings->orientation}"),
         ])->render();
+    }
+
+    /** The event's logo (public disk path or URL in branding.logo) as a data URI, if it can be read. */
+    private function logoDataUri(Event $event): ?string
+    {
+        $path = $event->config['branding']['logo'] ?? null;
+        if (! is_string($path) || $path === '' || preg_match('#^https?://#', $path)) {
+            return null;
+        }
+
+        $disk = Storage::disk('public');
+        if (! $disk->exists($path)) {
+            return null;
+        }
+
+        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            default => null, // DomPDF cannot draw WebP; the certificate shows the org name instead
+        };
+        if ($mime === null) {
+            return null;
+        }
+
+        return 'data:'.$mime.';base64,'.base64_encode($disk->get($path));
     }
 
     /**

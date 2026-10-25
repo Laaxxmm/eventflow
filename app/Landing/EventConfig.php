@@ -32,7 +32,11 @@ final readonly class EventConfig
         public ?Certificate $certificate = null,
         public Sport $sport = Sport::Generic,
         public ?RaceSheetConfig $raceSheet = null,
+        public string $template = self::DEFAULT_TEMPLATE,
     ) {}
+
+    /** Landing template used when the event and its sport pack set none (or an unknown key). */
+    public const DEFAULT_TEMPLATE = 'aurora';
 
     /**
      * @param  array<string, mixed>  $data  Decoded YAML/JSON matching events/schema.json,
@@ -55,6 +59,9 @@ final readonly class EventConfig
             certificate: isset($data['certificate']) ? new Certificate(...$data['certificate']) : null,
             sport: Sport::from($data['sport'] ?? Sport::Generic->value),
             raceSheet: isset($data['race_sheet']) ? RaceSheetConfig::fromArray($data['race_sheet']) : null,
+            template: array_key_exists((string) ($data['template'] ?? ''), (array) config('eventflow.landing_templates'))
+                ? $data['template']
+                : self::DEFAULT_TEMPLATE,
         );
     }
 }

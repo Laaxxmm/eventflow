@@ -1,6 +1,7 @@
 # Skating pack defaults. Events inherit any top-level key they omit.
 sport: skating
 label: Roller skating
+template: festival
 distances:
   - { code: 1LAP, label: 1 Lap (rink) }
   - { code: 500M, label: 500 m }
@@ -26,5 +27,12 @@ race_sheet:
   group_by: [distance, age_band, gender, skate_type]
   seeding: registration_order
 certificate:
-  template: classic
+  template: glide
   orientation: landscape
+faq:
+  - q: Which skates are allowed?
+    a: Quad, inline and tenacity skates, as chosen in the form. Helmets and knee pads are compulsory.
+  - q: When are heat sheets published?
+    a: Heats are generated after registration closes and shown at the venue.
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.

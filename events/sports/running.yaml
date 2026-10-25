@@ -1,6 +1,7 @@
 # Running pack defaults. Mass/wave start, so no race_sheet.
 sport: running
 label: Running
+template: aurora
 distances:
   - { code: 5K, label: 5K }
   - { code: 10K, label: 10K }
@@ -18,5 +19,12 @@ fields:
   - { key: emergency_contact_name, label: Emergency contact name, type: text, required: true }
   - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
 certificate:
-  template: classic
+  template: velocity
   orientation: landscape
+faq:
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.
+  - q: Is the race chip timed?
+    a: Yes. Your timing chip is on your bib; collect it at bib collection.
+  - q: Can I change my distance?
+    a: Contact the organiser before bib collection closes.

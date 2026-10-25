@@ -2,6 +2,7 @@
 
 use App\Entitlements\EnsureModuleEnabled;
 use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CertificateDesignController;
 use App\Http\Controllers\RaceSheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,8 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])
             Route::get('certificates', [CertificateController::class, 'index'])->name('certificates');
             Route::post('certificates', [CertificateController::class, 'store'])->name('certificates.generate');
             Route::get('certificates/download', [CertificateController::class, 'download'])->name('certificates.download');
+            Route::put('certificates/design', [CertificateDesignController::class, 'update'])->name('certificates.design');
+            Route::get('certificates/preview/{template}', [CertificateDesignController::class, 'preview'])->name('certificates.preview');
             Route::get('certificates/{registration}', [CertificateController::class, 'show'])->name('certificates.show');
         });
     });

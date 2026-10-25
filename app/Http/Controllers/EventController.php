@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\SportPackRepository;
-use App\Enums\Sport;
 use App\Landing\ConfigCompiler;
 use App\Landing\EventColumns;
 use App\Landing\EventConfig;
 use App\Landing\EventForm;
+use App\Landing\EventStatus;
+use App\Landing\EventWizard;
 use App\Landing\InvalidEventConfig;
+use App\Landing\LogoInspector;
 use App\Models\Event;
 use App\Models\Org;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -33,29 +37,65 @@ class EventController extends Controller
         ]);
     }
 
+    /** The 5-step create wizard (App\Landing\EventWizard). */
     public function create(Request $request, SportPackRepository $packs): View
     {
-        $sport = Sport::tryFrom((string) $request->query('sport')) ?? Sport::Generic;
-        $defaults = $packs->get($sport)->applyTo(['sport' => $sport->value]);
+        $org = $this->org($request);
 
-        return view('events.create', [
-            'org' => $this->org($request),
-            'input' => EventForm::toInput($defaults),
+        return view('events.wizard', [
+            'org' => $org,
+            'packs' => EventWizard::packs($packs),
+            'templates' => config('eventflow.landing_templates'),
+            'step' => (int) session('wizard_step', 1),
+            'contact' => config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email'),
         ]);
     }
 
+    /** Creates and (by default) publishes the event from the wizard, with logo/photo uploads. */
     public function store(Request $request): RedirectResponse
     {
         $org = $this->org($request);
-        $input = $request->validate(EventForm::rules());
+        $validator = Validator::make($request->all(), EventWizard::rules(), EventWizard::messages());
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput($request->except(['logo', 'hero']))
+                ->with('wizard_step', EventWizard::stepFor($validator->errors()->keys()));
+        }
+        $input = $validator->validated();
+
+        $logo = $request->file('logo')?->storePublicly("branding/{$org->id}", 'public');
+        $hero = $request->file('hero')?->storePublicly("branding/{$org->id}", 'public');
+        $logoCheck = $logo ? LogoInspector::inspect(Storage::disk('public')->path($logo)) : null;
+
         $slug = Event::uniqueSlug($org->id, $input['name']);
+        $authored = EventWizard::toConfig($input, $org->slug, $slug, $logo, $hero);
 
-        $authored = EventForm::toConfig($input, $org->slug, $slug);
-        $config = $this->compile($authored);
+        try {
+            $config = $this->compiler->compile($authored);
+        } catch (InvalidEventConfig $e) {
+            Storage::disk('public')->delete(array_filter([$logo, $hero]));
+            throw ValidationException::withMessages(EventForm::errorBag($e->errors));
+        }
 
-        $event = $org->events()->create(EventColumns::from($authored, $config) + ['status' => $input['status']]);
+        $status = $input['publish'] ? EventStatus::Published : EventStatus::Draft;
+        $event = $org->events()->create(EventColumns::from($authored, $config) + ['status' => $status]);
 
-        return redirect()->route('organiser.events.edit', $event)->with('status', 'event-created');
+        return redirect()->route('organiser.events.published', $event)->with([
+            'logo_dark' => (bool) ($logoCheck['dark'] ?? false),
+            'logo_opaque' => $logoCheck !== null && ! $logoCheck['transparent'],
+        ]);
+    }
+
+    /** "Your page is live" after the wizard: link, share and next steps. */
+    public function published(Request $request, Event $event): View
+    {
+        $org = $this->org($request, $event);
+
+        return view('events.published', [
+            'org' => $org,
+            'event' => $event,
+            'url' => route('landing.show', [$org->slug, $event->slug]),
+            'template' => config("eventflow.landing_templates.{$event->template_id}"),
+        ]);
     }
 
     public function edit(Request $request, Event $event): View

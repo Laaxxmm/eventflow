@@ -21,6 +21,8 @@ final class EventColumns
             'slug' => $config->slug,
             'name' => $config->name,
             'sport' => $config->sport,
+            'template_id' => $config->template,
+            'certificate_template_id' => $config->certificate?->template,
             'date' => $config->date,
             'venue' => $config->venue,
             'price_paise' => min(array_map(fn (Distance $d) => $d->pricePaise(), $config->distances)),
