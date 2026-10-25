@@ -267,7 +267,7 @@
             <select id="certificate_template" name="certificate[template]" class="{{ $control }}">
                 <option value="">{{ __('No certificate') }}</option>
                 @foreach (config('eventflow.certificates.gallery') as $key => $template)
-                    <option value="{{ $key }}" @selected($v('certificate.template') === $key)>{{ __($template['label']) }}</option>
+                    <option value="{{ $key }}" @selected(filled($v('certificate.template')) && \App\Certificates\DomPdfCertificateRenderer::resolveTemplate((string) $v('certificate.template')) === $key)>{{ __($template['label']) }}</option>
                 @endforeach
                 <option value="upload" @selected($v('certificate.template') === 'upload')>{{ __('Uploaded A4 background') }}</option>
             </select>

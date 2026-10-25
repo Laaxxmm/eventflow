@@ -15,11 +15,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    @include('certificates.templates.partials.page')
+    @include('certificates.templates.partials.base')
     <style>
         .bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .stamp { position: absolute; text-align: center; color: #17213a; white-space: nowrap; }
-        .stamp.name { font-weight: bold; margin: 0; }
+        .stamp.name { font-family: 'EF Playfair', serif; font-weight: 700; margin: 0; }
         .logo { position: absolute; text-align: center; }
     </style>
 </head>
@@ -39,6 +39,9 @@
         @endif
         <div class="stamp" style="{{ $slot('date', 80) }}">{{ $date }}</div>
         <div class="stamp" style="{{ $slot('bib', 80) }}">{{ $bib }}</div>
+        @if (isset($layout['verify']))
+            @include('certificates.templates.partials.verify', ['box' => 'left: '.($layout['verify']['x'] - 15).'mm; top: '.($layout['verify']['y'] - $layout['verify']['size'] / 2).'mm; width: 30mm;', 'size' => $layout['verify']['size'], 'text' => '#17213a', 'plate' => true])
+        @endif
     </div>
 </body>
 </html>

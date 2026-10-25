@@ -1,5 +1,6 @@
 <?php
 
+use App\Certificates\CertificateServiceProvider;
 use App\Notifications\NotificationServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\PaymentServiceProvider;
@@ -12,4 +13,5 @@ return [
     NotificationServiceProvider::class,
     SaasServiceProvider::class,
     ViewServiceProvider::class,
+    CertificateServiceProvider::class,
 ];

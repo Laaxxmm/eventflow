@@ -47,7 +47,7 @@ it('maps the demo config onto EventConfig', function () {
         ->and($config->distances[0]->pricePaise())->toBe(59900)
         ->and($config->ageBands[0]->min)->toBe(12)
         ->and($config->fields[1]->options)->toContain('Female')
-        ->and($config->certificate?->template)->toBe('classic');
+        ->and($config->certificate?->template)->toBe('heritage-gold');
 });
 
 it('declares the contract interfaces', function () {

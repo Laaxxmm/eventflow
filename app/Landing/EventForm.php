@@ -133,6 +133,12 @@ final class EventForm
             if ($certificate['template'] === 'upload' && isset($previous['certificate']['background'])) {
                 $certificate['background'] = $previous['certificate']['background'];
             }
+            // Design options are set on the certificates page; this form must not drop them.
+            foreach (['palette', 'credential', 'variant', 'signatories', 'stamp'] as $key) {
+                if (isset($previous['certificate'][$key])) {
+                    $certificate[$key] = $previous['certificate'][$key];
+                }
+            }
             $config['certificate'] = $certificate;
         }
 

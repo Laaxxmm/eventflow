@@ -4,6 +4,7 @@ use App\Certificates\BuildCertificateZip;
 use App\Certificates\CertificateBatch;
 use App\Certificates\DomPdfCertificateRenderer;
 use App\Contracts\CertificateRenderer;
+use App\Models\IssuedCertificate;
 use App\Payments\PaymentStatus;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -16,34 +17,44 @@ beforeEach(function () {
     $this->templates = app(DomPdfCertificateRenderer::class);
 });
 
-test('the certificate shows name, distance, event and date from the YAML template', function () {
+test('the certificate shows name, distance, event, date and its EF-CERT number', function () {
     $r = ReportFixtures::entrant($this->event, '1000M', 11, 'Girl', ['participant_name' => 'Meera Iyer', 'checkedIn' => true]);
 
     $html = $this->templates->html($r);
+    $certNo = IssuedCertificate::for($r)->cert_no;
 
-    expect($html)->toContain('certificate--podium')   // certificate.template: podium
+    expect($html)->toContain('certificate--stadium-strip')   // fixture YAML: stadium-strip
         ->toContain('Meera Iyer')
-        ->toContain('1000 m')                          // distance label, not the code
+        ->toContain('1000 m')                                 // distance label, not the code
         ->toContain('Fixture Skating Open')
         ->toContain('07 February 2027')
-        ->toContain($r->pass_no);
+        ->toContain($certNo)
+        ->and($certNo)->toMatch('/^EF-CERT-[2-9A-HJ-NP-Z]{8}$/');
 });
 
-test('rendering stores an A4 PDF per runner', function () {
+test('rendering stores an A4 PDF per runner under its certificate number', function () {
     $r = ReportFixtures::entrant($this->event, '500M', 9, 'Boy', ['checkedIn' => true]);
 
     $file = app(CertificateRenderer::class)->render($r);
+    $certificate = IssuedCertificate::for($r);
 
-    expect($file->pdfPath)->toBe("certificates/{$this->event->id}/{$r->pass_no}.pdf")
-        ->and(substr(Storage::disk('local')->get($file->pdfPath), 0, 4))->toBe('%PDF');
+    expect($file->pdfPath)->toBe("certificates/{$this->event->id}/{$certificate->cert_no}.pdf")
+        ->and(substr(Storage::disk('local')->get($file->pdfPath), 0, 4))->toBe('%PDF')
+        ->and($certificate->issued_at)->not->toBeNull()
+        ->and($certificate->template)->toBe('stadium-strip');
 });
 
-test('unknown templates fall back to classic, and unsupported orientations to the template default', function () {
-    $this->event->update(['config' => ReportFixtures::config(['certificate' => ['template' => 'neon']])]);
-    expect($this->templates->settings($this->event)->template)->toBe('classic');
+test('unknown templates fall back to heritage-gold, old keys map to their successor, unsupported orientations to the template default', function () {
+    $this->event->update(['config' => ReportFixtures::config(['certificate' => ['template' => 'retro']])]);
+    expect($this->templates->settings($this->event)->template)->toBe('heritage-gold');
 
-    $this->event->update(['config' => ReportFixtures::config(['certificate' => ['template' => 'podium', 'orientation' => 'portrait']])]);
-    expect($this->templates->settings($this->event)->orientation)->toBe('landscape'); // podium is landscape-only
+    foreach (['classic' => 'heritage-gold', 'podium' => 'stadium-strip', 'velocity' => 'stadium-strip', 'minimal' => 'modern-minimal', 'glide' => 'academic-seal'] as $old => $new) {
+        $this->event->update(['config' => ReportFixtures::config(['certificate' => ['template' => $old]])]);
+        expect($this->templates->settings($this->event)->template)->toBe($new);
+    }
+
+    $this->event->update(['config' => ReportFixtures::config(['certificate' => ['template' => 'stadium-strip', 'orientation' => 'portrait']])]);
+    expect($this->templates->settings($this->event)->orientation)->toBe('landscape'); // stadium-strip is landscape-only
 });
 
 test('an uploaded A4 background is embedded behind the text', function () {
@@ -132,9 +143,8 @@ test('a single certificate downloads for a checked-in runner only', function () 
     $in = ReportFixtures::entrant($this->event, '500M', 9, 'Boy', ['checkedIn' => true]);
     $out = ReportFixtures::entrant($this->event, '500M', 9, 'Boy');
 
-    $this->actingAs($this->owner)->get(route('reports.certificates.show', [$this->event, $in]))
-        ->assertOk()
-        ->assertDownload("{$in->pass_no}-certificate.pdf");
+    $response = $this->actingAs($this->owner)->get(route('reports.certificates.show', [$this->event, $in]));
+    $response->assertOk()->assertDownload(IssuedCertificate::for($in)->cert_no.'.pdf');
 
     $this->actingAs($this->owner)->get(route('reports.certificates.show', [$this->event, $out]))->assertNotFound();
 });
@@ -143,24 +153,23 @@ test('the ZIP cannot be downloaded before it is ready', function () {
     $this->actingAs($this->owner)->get(route('reports.certificates.download', $this->event))->assertNotFound();
 });
 
-test('light brand colours are not used for text on white', function () {
+test('light brand colours fill panels but never carry text on white', function () {
     $this->event->org->update(['colours' => ['primary' => '#d9ff45', 'secondary' => '#ff6e61']]); // prototype lime/coral
     $r = ReportFixtures::entrant($this->event, '500M', 9, 'Boy', ['checkedIn' => true]);
+    $palette = $this->templates->data($r, 'EF-CERT-TEST0000')->palette;
 
-    $html = $this->templates->html($r);
-
-    expect($html)->toContain('background: #d9ff45')                 // brand colour kept for the band
-        ->toContain('.name { color: #17213a; }')                    // name falls back to ink
-        ->toContain('.band .title { color: #17213a;')               // dark text on the light band
-        ->and(DomPdfCertificateRenderer::contrast('#17213a', '#ffffff'))->toBeGreaterThan(4.5)
-        ->and(DomPdfCertificateRenderer::contrast('#d9ff45', '#ffffff'))->toBeLessThan(4.5);
+    expect($palette->accentFill)->toBe('#d9ff45')                                           // the panel keeps the brand colour
+        ->and(DomPdfCertificateRenderer::contrast($palette->accent, '#ffffff'))->toBeGreaterThanOrEqual(4.5) // text version is darkened
+        ->and(DomPdfCertificateRenderer::contrast($palette->accent2, '#ffffff'))->toBeGreaterThanOrEqual(4.5)
+        ->and($palette->onAccent)->toBe('#141a2a')                                           // dark text on the lime panel
+        ->and($this->templates->html($r))->toContain('.kicker { font-size: 10pt; letter-spacing: 4pt; color: '.$palette->accent.';');
 });
 
 test('a certificate the event does not configure comes from its sport pack', function () {
-    // The generic pack's default is "minimal"; without the pack it would fall back to "classic".
+    // The generic pack's default is "modern-minimal"; without the pack it would fall back to "heritage-gold".
     $config = ReportFixtures::config(['sport' => 'generic']);
     unset($config['certificate']);
     $this->event->update(['sport' => 'generic', 'config' => $config]);
 
-    expect($this->templates->settings($this->event->fresh())->template)->toBe('minimal');
+    expect($this->templates->settings($this->event->fresh())->template)->toBe('modern-minimal');
 });

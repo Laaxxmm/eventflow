@@ -170,8 +170,9 @@ Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
 - **Race sheets are config.** `race_sheet: {heat_size, group_by, seeding}`;
   `heat_size` presets 6/8/10, any N in 2..64. Heats never mix `group_by` groups.
   No `race_sheet` means a mass start.
-- **Certificates.** `certificate.template` is a gallery key (`classic`, `podium`,
-  `minimal`) or `upload` with a `background` at exactly A4 300 dpi
+- **Certificates.** `certificate.template` is a gallery key (`heritage-gold`,
+  `modern-minimal`, `midnight-elite`, `stadium-strip`, `academic-seal`; see
+  [Certificates](#certificates-1)) or `upload` with a `background` at exactly A4 300 dpi
   (3508x2480 landscape, 2480x3508 portrait). Custom layouts are not built in-app:
   organisers contact Indefine (`CUSTOM_TEMPLATE_CONTACT`).
 
@@ -262,16 +263,9 @@ through the org scope; volunteers are sent to check-in.
   the page offers **Download ZIP** when it is ready. A second click while a batch
   runs does nothing. Needs a queue worker (`queue` service in Sail).
 - `App\Certificates\DomPdfCertificateRenderer` implements `CertificateRenderer`.
-  The template comes from the event's YAML `certificate` block:
-  `template: classic|podium|minimal|velocity|glide` (`resources/views/certificates/templates`; see "UX templates")
-  or `upload` with `background:` (a file on the certificates disk, printed full
-  page under the text). Unknown keys fall back to `classic`; an orientation the
-  template doesn't offer falls back to its first. Each certificate shows the
-  name, the distance label, the event and its date; files land at
-  `certificates/{event_id}/{pass_no}.pdf`.
-- Brand colours are used for text only at 4.5:1 contrast against white, so a
-  light primary (the prototype's lime) still prints readable certificates.
-- One runner: `/dashboard/events/{event}/certificates/{registration}`.
+  Templates, palettes, issuing and verification are documented in the
+  [Certificates](#certificates-1) section at the end of this README.
+- One runner: `/dashboard/events/{event}/certificates/{registration}` (issues on first download).
 
 ### Race sheets
 
@@ -567,41 +561,9 @@ layouts are not built in-app; every picker links to **Contact Indefine**
   a dark logo triggers: "Dark logo — pick a light template (Aurora/Clean) or a light hero
   background so it stays classy." (`App\Landing\LogoInspector`, also checked client-side).
 
-### Certificate templates (5 + upload)
+### Certificate templates
 
-| ID | Look | Orientations | Sport pack default |
-| --- | --- | --- | --- |
-| `classic` | Cream paper, gold double border, laurel, seal | landscape, portrait | — |
-| `podium` | Brand band, gold medal on ribbon, stat strip | landscape | — |
-| `minimal` | Editorial, hairline frame, large name | landscape, portrait | generic |
-| `velocity` | Speed stripes, chequered finish line | landscape | running, cycling |
-| `glide` | Ice-blue rink arcs, star badge | landscape, portrait | skating |
-
-- Views: `resources/views/certificates/templates/<id>.blade.php` (DomPDF, A4, CSS 2.1 and
-  absolute positioning). Vector motifs (medal, laurel, seal, stripes, checkers, rink) come from
-  `App\View\CertificateArt` as SVG data URIs. Picker thumbnails:
-  `public/images/certificates/<id>-<orientation>.png`.
-- Placeholders available to every template: `$participant`, `$bib` (registration answer `bib`,
-  else the pass number), `$eventName`, `$distance`, `$category` (age band), `$time` (answer
-  `finish_time`/`time`, optional), `$date`, `$logo` (event logo as a data URI, PNG/JPG only),
-  `$orgName`, `$venue`, `$colours`, `$orientation`, `$sport`.
-- Organisers choose on `/dashboard/events/{event}/certificates` (PDF preview per template at
-  `.../certificates/preview/{id}?orientation=portrait`).
-- **Upload your own**: a full-bleed PNG/JPG at exactly **3508 × 2480 px** (landscape) or
-  **2480 × 3508 px** (portrait), A4 at 300 dpi (`eventflow.certificates.px`). Any other size is
-  rejected with the expected and actual size. Text is stamped at
-  `eventflow.certificates.upload_layout.<orientation>` — mm from the top-left corner, `x` is
-  the horizontal centre, `y` the vertical centre:
-
-  | Slot | Landscape (x, y, pt) | Portrait (x, y, pt) |
-  | --- | --- | --- |
-  | logo | 148.5, 30, 18 mm high | 105, 40, 20 mm high |
-  | name | 148.5, 92, 30 | 105, 140, 28 |
-  | event | 148.5, 118, 14 | 105, 168, 14 |
-  | distance (+ category) | 148.5, 128, 12 | 105, 178, 12 |
-  | time (optional) | 148.5, 138, 12 | 105, 188, 12 |
-  | date | 74, 178, 10 | 55, 262, 10 |
-  | bib | 223, 178, 10 | 155, 262, 10 |
+Replaced by the premium gallery: see [Certificates](#certificates-1).
 
 ### Adding a 6th template
 
@@ -609,10 +571,135 @@ layouts are not built in-app; every picker links to **Contact Indefine**
    include `landings.partials.register` and `landings.partials.logo`), register it in
    `config/eventflow.php` → `landing_templates` with `tone`, and add `<id>` to the wizard test
    expectations. Check `/organiser/templates/<id>/preview` at 390 px and 1280 px.
-2. Certificate: add `resources/views/certificates/templates/<id>.blade.php` with class
-   `certificate certificate--<id>`, register it in `eventflow.certificates.gallery` with its
-   orientations, render a thumbnail into `public/images/certificates/<id>-landscape.png`
-   (560 px wide, e.g. `pdftoppm -singlefile -scale-to 560 -png`), and add it to the
-   `gallery` dataset in `tests/Feature/Reports/CertificateDesignTest.php`.
+2. Certificate: the gallery is a fixed, curated set of five; a custom design is a
+   "Contact Indefine" request. Adding one for Indefine is described in
+   [Certificates](#certificates-1).
 3. Optionally make it a sport pack default (`template:` / `certificate:` in
    `events/sports/<sport>.yaml`).
+
+## Certificates
+
+Premium, print-ready A4 certificates for every checked-in participant, rendered with
+DomPDF (the repo's PDF stack; there is no Chromium in the production image). Each one
+carries a unique **EF-CERT-XXXXXXXX** number and a QR code that opens a public verify page.
+
+| Heritage Gold | Modern Minimal |
+| --- | --- |
+| ![Heritage Gold](docs/screenshots/certificates/heritage-gold.jpg) | ![Modern Minimal](docs/screenshots/certificates/modern-minimal.jpg) |
+| **Midnight Elite** | **Stadium Strip** |
+| ![Midnight Elite](docs/screenshots/certificates/midnight-elite.jpg) | ![Stadium Strip](docs/screenshots/certificates/stadium-strip.jpg) |
+| **Academic Seal** | **Midnight Elite, print-safe variant** |
+| ![Academic Seal](docs/screenshots/certificates/academic-seal.jpg) | ![Midnight Elite print](docs/screenshots/certificates/midnight-elite-print.jpg) |
+
+Portrait: [Heritage Gold](docs/screenshots/certificates/heritage-gold-portrait.jpg) ·
+[Academic Seal](docs/screenshots/certificates/academic-seal-portrait.jpg).
+
+### Gallery
+
+| ID | Look | Orientations | Sport pack default |
+| --- | --- | --- | --- |
+| `heritage-gold` | Ivory paper, metallic foil frame, laurel crest, Cormorant name, medallion seal | landscape, portrait | skating |
+| `modern-minimal` | Asymmetric: accent bar, bold Montserrat name, facts grid, fine rings | landscape, portrait | generic |
+| `midnight-elite` | Navy field, brand glow, gold line work, light type; `variant: print` = ivory field | landscape | cycling |
+| `stadium-strip` | Diagonal brand panel with distance, time and rank; uppercase name | landscape | running |
+| `academic-seal` | Guilloché watermark and wave band, Cinzel credential, medallion seal | landscape, portrait | — |
+
+Old keys (`classic`, `podium`, `minimal`, `velocity`, `glide`) are deprecated aliases
+(`eventflow.certificates.aliases`), so saved events keep working. Unknown keys render
+`heritage-gold`. Custom designs: **Contact Indefine** (`CUSTOM_TEMPLATE_CONTACT`); there is no
+half-built sixth template. `upload` (organiser's own A4 artwork) is unchanged, see below.
+
+### Event YAML
+
+```yaml
+certificate:
+  template: midnight-elite      # gallery key, or upload
+  orientation: landscape        # portrait where the template offers it
+  palette: brand                # brand | gold | slate | ink (default: brand if set, else gold)
+  credential: completion        # completion | participation | merit
+  variant: print                # midnight-elite only: ivory field for office printers
+  stamp: true                   # round organiser stamp / seal
+  signatories:                  # two slots; an empty name prints a blank line
+    - { name: Arjun Mehta, role: Race Director }
+    - { role: Chief Guest }
+```
+
+Organisers set all of this on `/dashboard/events/{event}/certificates` (gallery with
+thumbnails, **Download sample** per template, colours, credential line, signatures, stamp,
+print variant). The event editor keeps these options when it saves.
+
+### What is printed
+
+Participant name, event name, date, venue/city, distance, category (age band or a `category`
+answer), BIB (`bib` answer), finish time (`finish_time`/`time` answer), rank (`rank`/`position`
+answer), organiser logo (`branding.logo`, PNG/JPG; otherwise the organiser name or initials),
+credential line, two signature slots, optional stamp, EF-CERT number and verify QR. Optional
+fields are left out when empty.
+
+### Colours
+
+`App\Certificates\Palette`: `brand` uses the event (or org) colours for panels and bars and a
+darkened version for text, so text is always 4.5:1 on light paper (a lime brand still prints
+legibly). `gold`, `slate` and `ink` are neutral sets that look finished without any brand colours.
+Foil rules are gold (silver for `slate`).
+
+### Issuing, re-issuing, verification
+
+- Table `certificates` (`App\Models\IssuedCertificate`): one row per registration with
+  `cert_no`, `template`, `fingerprint`, `pdf_path`, `issued_at`.
+- `DomPdfCertificateRenderer::issue()` stores `certificates/{event_id}/{cert_no}.pdf` on
+  `CERTIFICATE_DISK` and reuses it until anything printed on it changes. The fingerprint is a
+  hash of the rendered HTML, so a new template, palette, name or logo re-renders the file under
+  the same number.
+- Queue: `IssueCertificate` (one participant; **Issue / Re-issue** on the page),
+  `ReissueEventCertificates` (queued when an event's design, branding, name, date or venue
+  changes), `BuildCertificateZip` (all checked-in participants). A participant rename queues
+  a re-issue. Hooks: `App\Certificates\CertificateServiceProvider`.
+- Public verify page: `/certificates/verify/{EF-CERT-…}` (rate limited) shows the recipient,
+  event, organiser and issue date. Numbers that were reserved but never issued return 404.
+
+### Files
+
+- Templates: `resources/views/certificates/templates/{heritage-gold,modern-minimal,midnight-elite,stadium-strip,academic-seal,upload}.blade.php`,
+  shared `partials/{base,signature,verify}.blade.php`.
+- Fonts (SIL OFL, licences alongside): `resources/certificates/fonts` (Playfair Display,
+  Cormorant Garamond, Cinzel, Inter, Montserrat). DomPDF embeds subsets and caches metrics in
+  `storage/fonts` (must be writable).
+- Art: `App\Certificates\CertificateArt` bakes paper grain, glows and metallic foil into
+  small JPEG/PNG bitmaps with GD (DomPDF has no CSS gradients) and draws laurels, guilloché
+  rosettes, medallions, stamps and line work as SVG with pre-mixed colours.
+- Thumbnails: `resources/certificates/thumbnails/<id>.png` (served at
+  `/certificate-templates/<id>.png`). Regenerate after a design change: download the sample
+  PDF with the gold palette and run `pdftoppm -singlefile -scale-to 640 -png sample.pdf <id>`.
+
+### Upload your own artwork
+
+A full-bleed PNG/JPG at exactly **3508 × 2480 px** (landscape) or **2480 × 3508 px**
+(portrait), A4 at 300 dpi (`eventflow.certificates.px`). Any other size is rejected with the
+expected and actual size. Text is stamped at `eventflow.certificates.upload_layout.<orientation>`,
+in mm from the top-left corner (`x` = horizontal centre, `y` = vertical centre):
+
+| Slot | Landscape (x, y, size) | Portrait (x, y, size) |
+| --- | --- | --- |
+| logo | 148.5, 30, 18 mm high | 105, 40, 20 mm high |
+| name | 148.5, 92, 30 pt | 105, 140, 28 pt |
+| event | 148.5, 118, 14 pt | 105, 168, 14 pt |
+| distance (+ category) | 148.5, 128, 12 pt | 105, 178, 12 pt |
+| time (optional) | 148.5, 138, 12 pt | 105, 188, 12 pt |
+| date | 74, 178, 10 pt | 55, 262, 10 pt |
+| bib | 223, 178, 10 pt | 155, 262, 10 pt |
+| verify QR + EF-CERT number | 272, 180, 14 mm | 185, 268, 14 mm |
+
+### DomPDF limits (designed around)
+
+CSS 2.1 only: absolute positioning, tables for alignment, no flexbox, gradients, transforms or
+SVG opacity. No WebP images (WebP logos fall back to the organiser name). `midnight-elite`
+prints best on professional printers; use `variant: print` for office printers.
+
+### Adding a template (Indefine)
+
+Add `resources/views/certificates/templates/<id>.blade.php` (include
+`certificates.templates.partials.base`, class `certificate certificate--<id>`, read only `$c`,
+`$p` and `$art`), register it in `eventflow.certificates.gallery`, add a thumbnail, and add
+the key to the `premium templates` and `gallery` datasets in
+`tests/Feature/Reports/CertificateDesignTest.php`.
