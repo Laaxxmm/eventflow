@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Enums\Module;
+use App\Models\Tenancy\BelongsToOrg;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SeasonPass extends Model
 {
+    use BelongsToOrg;
+
     protected $fillable = [
         'org_id', 'plan', 'starts_on', 'ends_on', 'status', 'modules', 'max_events',
         'max_registrations', 'amount_paise', 'gateway', 'gateway_order_id', 'gateway_payment_id',
@@ -24,10 +26,5 @@ class SeasonPass extends Model
             'max_registrations' => 'integer',
             'amount_paise' => 'integer',
         ];
-    }
-
-    public function org(): BelongsTo
-    {
-        return $this->belongsTo(Org::class);
     }
 }

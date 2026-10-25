@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Role;
+use App\Models\Tenancy\BelongsToOrg;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use BelongsToOrg, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,11 +48,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
         ];
     }
 
-    public function org(): BelongsTo
+    public function hasRole(Role ...$roles): bool
     {
-        return $this->belongsTo(Org::class);
+        return in_array($this->role, $roles, true);
+    }
+
+    public function isVolunteer(): bool
+    {
+        return $this->role === Role::Volunteer;
     }
 }
