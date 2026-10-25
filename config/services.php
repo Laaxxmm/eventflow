@@ -28,6 +28,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Participant notifications. Org credentials (Meta token, phone number id) are
+    // stored encrypted per org in notification_settings, not here.
+    'whatsapp' => [
+        'meta' => [
+            'graph_url' => env('WHATSAPP_META_GRAPH_URL', 'https://graph.facebook.com'),
+            'version' => env('WHATSAPP_META_GRAPH_VERSION', 'v21.0'),
+        ],
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
