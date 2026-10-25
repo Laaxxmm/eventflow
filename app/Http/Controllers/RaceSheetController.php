@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Registration;
 use App\RaceSheets\HeatRaceSheetBuilder;
 use App\RaceSheets\RaceSheet;
+use App\RaceSheets\ResolvedConfig;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -65,7 +66,7 @@ class RaceSheetController extends Controller
      */
     private function data(Event $event): array
     {
-        $isStartList = ! is_array($event->config['race_sheet'] ?? null);
+        $isStartList = ! is_array(ResolvedConfig::for($event)['race_sheet'] ?? null);
         $sheet = $this->builder->buildOrStartList($event);
 
         $ids = collect($sheet->heats)->flatMap(fn ($heat) => $heat->registrationIds)->all();
