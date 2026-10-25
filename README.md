@@ -179,6 +179,14 @@ Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
 Demos: `events/demo/example-marathon.yaml` (running, no heats) and
 `events/demo/example-skating.yaml` (skating pack, heats of 6, uploaded certificate).
 
+### Release smoke (integrator)
+
+Before a tag, the integrator runs the end-to-end checklist and records results in
+[docs/SMOKE.md](docs/SMOKE.md). `docs/smoke/local-e2e.py` drives a local stack
+(`php artisan serve`, `queue:work`, Mailpit) through signup, registration rules,
+signed webhooks for both gateways, the pass email, QR check-in, and dashboard vs CSV.
+Sandbox checkout, Brevo and the phone scan are still run by hand on staging.
+
 ## Stream D: passes and check-in
 
 When `RegistrationPaid` fires, the queued listener `App\Listeners\SendPass` builds the participant pass and queues `App\Mail\PassMail` (PNG + PDF attached).
