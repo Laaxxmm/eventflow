@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -14,8 +16,14 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-class NewPasswordController extends Controller
+class NewPasswordController extends Controller implements HasMiddleware
 {
+    /** 5 attempts per minute per IP (RateLimiter 'auth'). */
+    public static function middleware(): array
+    {
+        return [new Middleware('throttle:auth', only: ['store'])];
+    }
+
     /**
      * Display the password reset view.
      */
