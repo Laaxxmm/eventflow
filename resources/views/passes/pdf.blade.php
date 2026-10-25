@@ -5,9 +5,9 @@
     <style>
         body { font-family: DejaVu Sans, sans-serif; color: #17213a; margin: 0; }
         .pass { border: 1px solid #e4e9f2; }
-        .strip { background: {{ $colours['primary'] }}; color: {{ $colours['accent'] }}; padding: 12px 18px; font-size: 11px; letter-spacing: 1px; }
+        .strip { background: {{ $colours['primary'] }}; color: {{ $colours['onPrimary'] }}; padding: 12px 18px; font-size: 11px; letter-spacing: 1px; }
         .pad { padding: 18px 20px; }
-        .org { color: {{ $colours['secondary'] }}; font-size: 12px; font-weight: bold; }
+        .org { color: {{ $colours['secondaryText'] }}; font-size: 12px; font-weight: bold; }
         .event { font-size: 22px; font-weight: bold; margin: 6px 0; }
         .muted { color: #79849a; font-size: 11px; }
         .label { color: #8791a5; font-size: 9px; letter-spacing: 1px; }

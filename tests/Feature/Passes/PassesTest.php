@@ -9,6 +9,7 @@ use App\Models\Org;
 use App\Models\Registration;
 use App\Models\SeasonPass;
 use App\Models\User;
+use App\Passes\DomPdfPassGenerator;
 use App\Passes\SignedPassQr;
 use App\Payments\PaymentStatus;
 use Illuminate\Events\CallQueuedListener;
@@ -164,4 +165,24 @@ it('blocks check-in without a Season Pass that includes it, or when switched off
     SeasonPass::withoutGlobalScopes()->where('org_id', $org->id)->update(['status' => 'expired']);
     $this->app->forgetScopedInstances();
     $this->actingAs($volunteer->fresh())->get('/checkin')->assertForbidden(); // no active pass
+});
+
+it('keeps pass text readable on light brand colours', function () {
+    [$org, $event] = passOrg();
+    $generator = app(DomPdfPassGenerator::class);
+
+    // Default navy strip with lime text, purple org name on white: brand colours kept.
+    $default = $generator->colours(paidRegistration($event));
+    expect($default['onPrimary'])->toBe('#d3f36b')
+        ->and($default['secondaryText'])->toBe('#5148d9');
+
+    // The prototype's lime strip and coral org name: lime-on-lime and coral-on-white fall back to ink.
+    $org->update(['colours' => ['primary' => '#d9ff45', 'secondary' => '#ff6e61', 'accent' => '#d3f36b']]);
+    $event->update(['colours' => null]);
+    $light = $generator->colours(paidRegistration($event->fresh())->load('event.org'));
+
+    expect($light['primary'])->toBe('#d9ff45')                 // the strip keeps the brand colour
+        ->and($light['onPrimary'])->toBe('#111a31')
+        ->and($light['secondaryText'])->toBe('#111a31')
+        ->and(DomPdfPassGenerator::contrast($light['onPrimary'], $light['primary']))->toBeGreaterThanOrEqual(4.5);
 });
