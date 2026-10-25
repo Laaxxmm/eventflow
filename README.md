@@ -300,8 +300,8 @@ a skating event YAML and an A4 background PNG).
 - **Enforcing a module on a route:**
   `->middleware(App\Entitlements\EnsureModuleEnabled::class.':checkin')`
   after `auth`; it checks the signed-in user's org and answers 403 with a
-  pointer to Org Settings. Race sheets and certificates use it; check-in
-  (stream D) should add `:checkin` to `routes/checkin.php`.
+  pointer to Org Settings. Race sheets, certificates and check-in
+  (`routes/checkin.php`, `:checkin`) use it.
 - **Org Settings** (`/dashboard/settings`, owners only): shows the active pass
   and lets the owner switch optional modules off and on. Modules outside the
   pass are greyed out and can't be switched on. Stored in `orgs.modules`.

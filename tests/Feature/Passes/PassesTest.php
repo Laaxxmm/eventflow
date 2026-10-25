@@ -1,11 +1,13 @@
 <?php
 
+use App\Enums\Module;
 use App\Events\RegistrationPaid;
 use App\Listeners\SendPass;
 use App\Mail\PassMail;
 use App\Models\Event;
 use App\Models\Org;
 use App\Models\Registration;
+use App\Models\SeasonPass;
 use App\Models\User;
 use App\Passes\SignedPassQr;
 use App\Payments\PaymentStatus;
@@ -25,6 +27,16 @@ function passOrg(): array
         'date' => now()->addMonth(),
         'venue' => 'Kanteerava Stadium',
         'colours' => ['secondary' => '#5148d9'],
+    ]);
+
+    // Check-in is an optional module: the org needs a Season Pass that includes it.
+    SeasonPass::withoutGlobalScopes()->create([
+        'org_id' => $org->id,
+        'plan' => 'Test season',
+        'starts_on' => now()->subDay()->toDateString(),
+        'ends_on' => now()->addYear()->toDateString(),
+        'status' => 'active',
+        'modules' => Module::cases(),
     ]);
 
     return [$org, $event];
@@ -133,4 +145,23 @@ it('accepts a manual pass number when the volunteer cannot scan', function () {
         ->assertRedirect(route('checkin.index'));
 
     expect($registration->fresh()->checked_in_at)->not->toBeNull();
+});
+
+it('blocks check-in without a Season Pass that includes it, or when switched off', function () {
+    [$org, $event] = passOrg();
+    $volunteer = User::factory()->create(['role' => 'volunteer', 'org_id' => $org->id]);
+    $registration = paidRegistration($event);
+
+    $this->actingAs($volunteer)->get('/checkin')->assertOk();
+
+    // Each request gets a fresh user, as in production (the org relation is cached per model).
+    $org->update(['modules' => ['checkin' => false]]); // switched off in Org Settings
+    $this->actingAs($volunteer->fresh())->get('/checkin')->assertForbidden();
+    $this->actingAs($volunteer->fresh())->post('/checkin', ['pass_no' => $registration->pass_no])->assertForbidden();
+    expect($registration->fresh()->checked_in_at)->toBeNull();
+
+    $org->update(['modules' => null]);
+    SeasonPass::withoutGlobalScopes()->where('org_id', $org->id)->update(['status' => 'expired']);
+    $this->app->forgetScopedInstances();
+    $this->actingAs($volunteer->fresh())->get('/checkin')->assertForbidden(); // no active pass
 });
