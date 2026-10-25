@@ -27,3 +27,4 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // --- Other streams: add one require line each below -----------------------
+require __DIR__.'/reports.php';

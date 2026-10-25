@@ -1,0 +1,26 @@
+# Test fixture: a small skating event (events/schema.json shape, pack defaults applied).
+org: fixture-skaters
+slug: fixture-skating-open
+name: Fixture Skating Open
+sport: skating
+date: "2027-02-07T07:00:00+05:30"
+venue: Nehru Indoor Stadium, Chennai
+branding: { primary: "#1e40af", secondary: "#f59e0b" }
+hero: { title: Fixture Skating Open }
+distances:
+  - { code: 500M, label: 500 m, price_inr: 500, capacity: 100 }
+  - { code: 1000M, label: 1000 m, price_inr: 600, capacity: 100 }
+age_bands:
+  - { label: 8-10, min: 8, max: 9 }
+  - { label: 10-12, min: 10, max: 11 }
+  - { label: 12-14, min: 12, max: 13 }
+fields:
+  - { key: age, label: Age, type: number, required: true }
+  - { key: gender, label: Gender, type: select, required: true, options: [Boy, Girl] }
+race_sheet:
+  heat_size: 4
+  group_by: [distance, age_band, gender]
+  seeding: registration_order
+certificate:
+  template: podium
+  orientation: landscape

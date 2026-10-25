@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Certificates\DomPdfCertificateRenderer;
+use App\Contracts\CertificateRenderer;
 use App\Contracts\PassGenerator;
+use App\Contracts\RaceSheetBuilder;
 use App\Enums\Role;
 use App\Models\User;
 use App\Passes\DomPdfPassGenerator;
+use App\RaceSheets\HeatRaceSheetBuilder;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(PassGenerator::class, DomPdfPassGenerator::class);
+
+        // Stream E: certificates and race sheets.
+        $this->app->singleton(CertificateRenderer::class, DomPdfCertificateRenderer::class);
+        $this->app->singleton(RaceSheetBuilder::class, HeatRaceSheetBuilder::class);
     }
 
     /**
