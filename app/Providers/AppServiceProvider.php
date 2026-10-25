@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\PassGenerator;
+use App\Passes\DomPdfPassGenerator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(PassGenerator::class, DomPdfPassGenerator::class);
     }
 
     /**
@@ -19,6 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->loadRoutesFrom(base_path('routes/checkin.php'));
     }
 }
