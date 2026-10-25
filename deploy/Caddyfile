@@ -1,0 +1,30 @@
+# HTTPS for EventFlow. Certificates come from Let's Encrypt automatically:
+# point an A/AAAA record for $APP_DOMAIN at this VPS before starting.
+{
+	email {$ACME_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	# Staging: Mailpit UI (protect it with MAILPIT_UI_AUTH in deploy/.env).
+	handle /mailpit* {
+		reverse_proxy mailpit:8025
+	}
+
+	handle {
+		reverse_proxy app:8080
+	}
+}
+
+# Later: one subdomain per org (demo-runners.$APP_DOMAIN). Wildcard certificates
+# need the DNS challenge, so Caddy must be built with your DNS provider's module
+# (e.g. xcaddy build --with github.com/caddy-dns/cloudflare) and a DNS API token:
+#
+# *.{$APP_DOMAIN} {
+# 	tls {
+# 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+# 	}
+# 	encode zstd gzip
+# 	reverse_proxy app:8080
+# }
