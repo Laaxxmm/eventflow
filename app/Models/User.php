@@ -49,7 +49,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'is_platform_admin' => 'boolean',
         ];
+    }
+
+    /** Indefine staff (platform console). Never mass assignable. */
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->is_platform_admin;
     }
 
     public function hasRole(Role ...$roles): bool

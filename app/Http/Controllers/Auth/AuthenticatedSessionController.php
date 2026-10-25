@@ -40,6 +40,10 @@ class AuthenticatedSessionController extends Controller implements HasMiddleware
             return redirect('/checkin');
         }
 
+        if ($request->user()->isPlatformAdmin()) {
+            return redirect()->intended(route('platform.orgs.index', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

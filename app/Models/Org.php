@@ -13,13 +13,19 @@ class Org extends Model
     /** @use HasFactory<OrgFactory> */
     use HasFactory;
 
-    protected $fillable = ['slug', 'name', 'phone', 'colours', 'payment_provider', 'modules'];
+    protected $fillable = [
+        'slug', 'name', 'phone', 'colours', 'payment_provider', 'modules',
+        'plan', 'addons', 'subscription_status', 'trial_ends_at', 'suspended_at',
+    ];
 
     protected function casts(): array
     {
         return [
             'colours' => 'array',
             'modules' => 'array',
+            'addons' => 'array',
+            'trial_ends_at' => 'immutable_datetime',
+            'suspended_at' => 'immutable_datetime',
         ];
     }
 
@@ -35,6 +41,11 @@ class Org extends Model
         }
 
         return $slug;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 
     public function users(): HasMany
