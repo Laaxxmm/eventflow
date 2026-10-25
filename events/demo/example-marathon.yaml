@@ -1,0 +1,46 @@
+# Demo event config. Validated against events/schema.json in tests/Feature/ContractsTest.php.
+org: demo-runners
+slug: bengaluru-city-marathon-2027
+name: Bengaluru City Marathon 2027
+date: "2027-01-17T05:30:00+05:30"
+venue: Sree Kanteerava Stadium, Bengaluru
+
+branding:
+  primary: "#d9ff45"
+  secondary: "#ff6e61"
+  logo: branding/demo-runners/logo.png
+
+hero:
+  title: Run the Garden City
+  subtitle: 5K, 10K, Half and Full Marathon. Chip timed.
+  image: branding/demo-runners/hero.jpg
+
+distances:
+  - { code: 5K, label: 5K Fun Run, price_inr: 599, capacity: 1500 }
+  - { code: 10K, label: 10K Run, price_inr: 899, capacity: 1200 }
+  - { code: HM, label: Half Marathon (21.1K), price_inr: 1499, capacity: 800 }
+  - { code: FM, label: Full Marathon (42.2K), price_inr: 1999, capacity: 500 }
+
+age_bands:
+  - { label: Junior, min: 12, max: 17 }
+  - { label: Open, min: 18, max: 39 }
+  - { label: Veteran, min: 40, max: 59 }
+  - { label: Senior, min: 60, max: 99 }
+
+fields:
+  - { key: age, label: Age, type: number, required: true }
+  - { key: gender, label: Gender, type: select, required: true, options: [Male, Female, Other] }
+  - { key: city, label: City, type: text, required: false }
+  - { key: emergency_contact_name, label: Emergency contact name, type: text, required: true }
+  - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
+  - { key: tshirt_size, label: T-shirt size, type: select, required: true, options: [XS, S, M, L, XL, XXL] }
+  - { key: blood_group, label: Blood group, type: select, required: false, options: [A+, A-, B+, B-, O+, O-, AB+, AB-] }
+
+faq:
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.
+  - q: Can I change my distance?
+    a: Contact the organiser before bib collection closes.
+
+certificate:
+  template: certificates/default
