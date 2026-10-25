@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Payments;
+
+use App\Contracts\PaymentGateway;
+use App\Models\Registration;
+use App\Payments\Dto\PaymentEvent;
+use App\Payments\Dto\PaymentOrder;
+use App\Payments\Dto\RefundResult;
+use App\Payments\PaymentStatus;
+use Cashfree\Cashfree;
+use Cashfree\Model\CreateOrderRequest;
+use Cashfree\Model\CustomerDetails;
+use Cashfree\Model\OrderMeta;
+use Illuminate\Http\Request;
+
+class CashfreeGateway implements PaymentGateway
+{
+    private Cashfree $cashfree;
+    private string $appId;
+    private string $secretKey;
+    private string $env;
+    private string $webhookSecret;
+
+    public function __construct()
+    {
+        $cfg = config('eventflow.payment.providers.cashfree');
+        $this->appId = $cfg['app_id'] ?? '';
+        $this->secretKey = $cfg['secret_key'] ?? '';
+        $this->env = $cfg['env'] ?? 'sandbox';
+        $this->webhookSecret = $cfg['webhook_secret'] ?? '';
+
+        $this->cashfree = new Cashfree(
+            $this->env === 'production' ? Cashfree::PRODUCTION : Cashfree::SANDBOX,
+            $this->appId,
+            $this->secretKey
+        );
+    }
+
+    public function createOrder(Registration $r): PaymentOrder
+    {
+        $customer = new CustomerDetails();
+        $customer->setCustomerId('reg_'.$r->id);
+        $customer->setCustomerName($r->participant_name);
+        $customer->setCustomerEmail($r->email);
+        $customer->setCustomerPhone($r->phone);
+
+        $meta = new OrderMeta();
+        $meta->setReturnUrl(url("/pay/return/{$r->id}"));
+        $meta->setNotifyUrl(url('/webhooks/cashfree'));
+
+        $request = new CreateOrderRequest();
+        $request->setOrderAmount($r->amount_paise / 100);
+        $request->setOrderCurrency('INR');
+        $request->setCustomerDetails($customer);
+        $request->setOrderMeta($meta);
+        $request->setOrderNote('Registration '.$r->pass_no);
+
+        $response = $this->cashfree->PGCreateOrder($request);
+        $order = $response[0] ?? $response;
+
+        $orderId = $order->getOrderId() ?? $order['order_id'] ?? '';
+        $paymentSessionId = $order->getPaymentSessionId() ?? $order['payment_session_id'] ?? '';
+
+        return new PaymentOrder(
+            provider: 'cashfree',
+            orderId: $orderId,
+            amountPaise: $r->amount_paise,
+            currency: 'INR',
+            checkout: [
+                'payment_session_id' => $paymentSessionId,
+                'order_id' => $orderId,
+                'env' => $this->env,
+            ],
+        );
+    }
+
+    public function verifyWebhook(Request $req): bool
+    {
+        $signature = $req->header('x-webhook-signature') ?? $req->header('X-Webhook-Signature');
+        $timestamp = $req->header('x-webhook-timestamp') ?? $req->header('X-Webhook-Timestamp');
+        if (!$signature || !$timestamp) {
+            return false;
+        }
+
+        $payload = $req->getContent();
+        $signedPayload = $timestamp.$payload;
+        $expected = base64_encode(hash_hmac('sha256', $signedPayload, $this->webhookSecret, true));
+
+        return hash_equals($expected, $signature);
+    }
+
+    public function parseEvent(Request $req): PaymentEvent
+    {
+        $data = $req->json()->all();
+        $type = $data['type'] ?? $data['event_type'] ?? 'unknown';
+        $order = $data['data']['order'] ?? $data['order'] ?? [];
+        $payment = $data['data']['payment'] ?? $data['payment'] ?? [];
+
+        $orderId = $order['order_id'] ?? '';
+        $paymentId = $payment['cf_payment_id'] ?? $payment['payment_id'] ?? null;
+        $amount = isset($payment['payment_amount']) ? (int) ($payment['payment_amount'] * 100) : null;
+
+        $status = match (true) {
+            str_contains($type, 'SUCCESS') || ($payment['payment_status'] ?? '') === 'SUCCESS' => PaymentStatus::Paid,
+            str_contains($type, 'FAILED') => PaymentStatus::Failed,
+            default => PaymentStatus::Pending,
+        };
+
+        return new PaymentEvent(
+            provider: 'cashfree',
+            eventId: $data['event_id'] ?? ($paymentId ?? uniqid('cf_')),
+            type: $type,
+            orderId: $orderId,
+            status: $status,
+            paymentId: $paymentId,
+            amountPaise: $amount,
+            payload: $data,
+        );
+    }
+
+    public function fetchStatus(string $orderId): PaymentStatus
+    {
+        try {
+            $response = $this->cashfree->PGFetchOrder($orderId);
+            $order = $response[0] ?? $response;
+            $status = $order->getOrderStatus() ?? $order['order_status'] ?? 'ACTIVE';
+
+            return match (strtoupper($status)) {
+                'PAID' => PaymentStatus::Paid,
+                'EXPIRED', 'TERMINATED' => PaymentStatus::Failed,
+                default => PaymentStatus::Pending,
+            };
+        } catch (\Throwable $e) {
+            return PaymentStatus::Pending;
+        }
+    }
+
+    public function refund(string $paymentId, int $amountPaise): RefundResult
+    {
+        return new RefundResult(
+            provider: 'cashfree',
+            success: false,
+            paymentId: $paymentId,
+            amountPaise: $amountPaise,
+            message: 'Refund not yet implemented for Cashfree in this session',
+        );
+    }
+}
