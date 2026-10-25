@@ -2,14 +2,18 @@
 
 namespace App\Providers;
 
+use App\Certificates\DomPdfCertificateRenderer;
+use App\Contracts\CertificateRenderer;
 use App\Contracts\LandingSource;
 use App\Contracts\PassGenerator;
+use App\Contracts\RaceSheetBuilder;
 use App\Contracts\SportPackRepository;
 use App\Enums\Role;
 use App\Landing\DatabaseLandingSource;
 use App\Landing\YamlSportPackRepository;
 use App\Models\User;
 use App\Passes\DomPdfPassGenerator;
+use App\RaceSheets\HeatRaceSheetBuilder;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
         // Stream C: landings are served from events.config (YAML reaches it via events:sync).
         $this->app->singleton(SportPackRepository::class, YamlSportPackRepository::class);
         $this->app->bind(LandingSource::class, DatabaseLandingSource::class);
+
+        // Stream E: certificates and race sheets.
+        $this->app->singleton(CertificateRenderer::class, DomPdfCertificateRenderer::class);
+        $this->app->singleton(RaceSheetBuilder::class, HeatRaceSheetBuilder::class);
     }
 
     /**

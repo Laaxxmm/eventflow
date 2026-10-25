@@ -176,3 +176,46 @@ Rules:
   is required last in `routes/web.php`.
 
 Tests: `tests/Feature/Events` (schema failure, capacity full, age out of band, sync safety, CRUD).
+
+## Stream E: certificates and race sheets (Session 5)
+
+Organiser-only (owner and staff, gate `view-dashboard`) pages under
+`/dashboard/events/{event}/…` (`routes/reports.php`). Other orgs' events are 404
+through the org scope; volunteers are sent to check-in.
+
+### Certificates
+
+- `/dashboard/events/{event}/certificates`: one click on **Generate
+  certificates** queues `App\Certificates\BuildCertificateZip`, which renders an
+  A4 PDF for every **checked-in, paid** runner and stores one ZIP. Progress
+  (queued, running, ready, failed) is kept in the cache (`CertificateBatch`);
+  the page offers **Download ZIP** when it is ready. A second click while a batch
+  runs does nothing. Needs a queue worker (`queue` service in Sail).
+- `App\Certificates\DomPdfCertificateRenderer` implements `CertificateRenderer`.
+  The template comes from the event's YAML `certificate` block:
+  `template: classic|podium|minimal` (`resources/views/certificates/templates`)
+  or `upload` with `background:` (a file on the certificates disk, printed full
+  page under the text). Unknown keys fall back to `classic`; an orientation the
+  template doesn't offer falls back to its first. Each certificate shows the
+  name, the distance label, the event and its date; files land at
+  `certificates/{event_id}/{pass_no}.pdf`.
+- Brand colours are used for text only at 4.5:1 contrast against white, so a
+  light primary (the prototype's lime) still prints readable certificates.
+- One runner: `/dashboard/events/{event}/certificates/{registration}`.
+
+### Race sheets
+
+- `/dashboard/events/{event}/race-sheet` (page), `/race-sheet/csv`,
+  `/race-sheet/pdf` (A4, with blank Time and Place columns for officials).
+- `App\RaceSheets\HeatRaceSheetBuilder` implements `RaceSheetBuilder`: paid
+  entrants grouped by `race_sheet.group_by` (default distance, age band,
+  gender; any form field key works), in the config's distance and age band
+  order, split **evenly** into heats of at most `heat_size` (9 with size 8 → 5 +
+  4). `seeding: random` is seeded by the event id, so reprints match.
+- Age band comes from the `age` answer and the event's `age_bands`; missing
+  answers group as "Unspecified".
+- Events without `race_sheet` (mass start) get start lists: same grouping, one
+  list per group.
+
+Tests: `tests/Feature/Reports` (fixtures in `tests/Feature/Reports/fixtures`:
+a skating event YAML and an A4 background PNG).
