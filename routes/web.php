@@ -28,6 +28,7 @@ require __DIR__.'/auth.php';
 
 // --- Other streams: add one require line each below -----------------------
 require __DIR__.'/reports.php';
+require __DIR__.'/settings.php';
 
 // Stream C last: /{org} and /{org}/{slug} are catch-alls.
 require __DIR__.'/events.php';
