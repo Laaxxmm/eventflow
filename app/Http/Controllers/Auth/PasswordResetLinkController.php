@@ -5,12 +5,20 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-class PasswordResetLinkController extends Controller
+class PasswordResetLinkController extends Controller implements HasMiddleware
 {
+    /** 5 attempts per minute per IP (RateLimiter 'auth'). */
+    public static function middleware(): array
+    {
+        return [new Middleware('throttle:auth', only: ['store'])];
+    }
+
     /**
      * Display the password reset link request view.
      */
