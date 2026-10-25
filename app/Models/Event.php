@@ -17,7 +17,7 @@ class Event extends Model
     use BelongsToOrg, HasFactory;
 
     protected $fillable = [
-        'org_id', 'slug', 'name', 'sport', 'description', 'date', 'venue', 'price_paise', 'capacity',
+        'org_id', 'slug', 'name', 'sport', 'template_id', 'certificate_template_id', 'description', 'date', 'venue', 'price_paise', 'capacity',
         'distances', 'min_age', 'max_age', 'colours', 'form_fields', 'status', 'config',
     ];
 

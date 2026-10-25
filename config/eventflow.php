@@ -63,6 +63,19 @@ return [
         'optional' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
     ],
 
+    /*
+     * Event landing templates (resources/views/landings/templates/<key>.blade.php).
+     * Each is a different layout, not a recolour. `tone` drives the dark-logo hint.
+     * Custom layouts are not built in-app: organisers are pointed to Indefine.
+     */
+    'landing_templates' => [
+        'aurora' => ['label' => 'Aurora', 'tone' => 'light', 'description' => 'Light and athletic: airy hero, soft gradients, photo card.'],
+        'midnight' => ['label' => 'Midnight', 'tone' => 'dark', 'description' => 'Race night: full-bleed dark hero, high contrast, lane-style distances.'],
+        'clean' => ['label' => 'Clean', 'tone' => 'light', 'description' => 'Editorial minimal: one column, big type, lots of white space.'],
+        'festival' => ['label' => 'Festival', 'tone' => 'light', 'description' => 'Bold colour blocks and big tiles. Energetic, still tidy.'],
+        'heritage' => ['label' => 'Heritage', 'tone' => 'light', 'description' => 'Classic meet: crest, serif headings, order of events.'],
+    ],
+
     'race_sheets' => [
         'heat_size_presets' => [6, 8, 10], // any N in 2..64 is also accepted
         'default_heat_size' => 8,
@@ -80,11 +93,36 @@ return [
         'upload_max_kb' => 8192,
         'disk' => env('CERTIFICATE_DISK', 'local'),
 
-        // Built-in template gallery (views under resources/views/certificates/<key>).
+        // Built-in template gallery (views under resources/views/certificates/templates/<key>).
         'gallery' => [
-            'classic' => ['label' => 'Classic', 'orientations' => ['landscape', 'portrait']],
-            'podium' => ['label' => 'Podium', 'orientations' => ['landscape']],
-            'minimal' => ['label' => 'Minimal', 'orientations' => ['landscape', 'portrait']],
+            'classic' => ['label' => 'Classic', 'description' => 'Double border, laurel wreath and serif type. Formal meets.', 'orientations' => ['landscape', 'portrait']],
+            'podium' => ['label' => 'Podium', 'description' => 'Gold medal on a ribbon, bold name banner.', 'orientations' => ['landscape']],
+            'minimal' => ['label' => 'Minimal', 'description' => 'Editorial: big name, thin rules, lots of air.', 'orientations' => ['landscape', 'portrait']],
+            'velocity' => ['label' => 'Velocity', 'description' => 'Diagonal speed stripes and a finish-line band. Running and cycling.', 'orientations' => ['landscape']],
+            'glide' => ['label' => 'Glide', 'description' => 'Rink arcs and a star badge. Skating.', 'orientations' => ['landscape', 'portrait']],
+        ],
+
+        // Where text is stamped on an uploaded A4 background, in mm from the top-left
+        // corner of the page (x = horizontal centre of the text). Documented in the README.
+        'upload_layout' => [
+            'landscape' => [
+                'name' => ['x' => 148.5, 'y' => 92, 'size' => 30],
+                'event' => ['x' => 148.5, 'y' => 118, 'size' => 14],
+                'distance' => ['x' => 148.5, 'y' => 128, 'size' => 12],
+                'time' => ['x' => 148.5, 'y' => 138, 'size' => 12],
+                'date' => ['x' => 74, 'y' => 178, 'size' => 10],
+                'bib' => ['x' => 223, 'y' => 178, 'size' => 10],
+                'logo' => ['x' => 148.5, 'y' => 30, 'height' => 18],
+            ],
+            'portrait' => [
+                'name' => ['x' => 105, 'y' => 140, 'size' => 28],
+                'event' => ['x' => 105, 'y' => 168, 'size' => 14],
+                'distance' => ['x' => 105, 'y' => 178, 'size' => 12],
+                'time' => ['x' => 105, 'y' => 188, 'size' => 12],
+                'date' => ['x' => 55, 'y' => 262, 'size' => 10],
+                'bib' => ['x' => 155, 'y' => 262, 'size' => 10],
+                'logo' => ['x' => 105, 'y' => 40, 'height' => 20],
+            ],
         ],
 
         // Custom layouts are not built in-app: organisers are pointed to Indefine.

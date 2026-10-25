@@ -1,6 +1,7 @@
 # Skating pack defaults. Events inherit any top-level key they omit.
 sport: skating
 label: Roller skating
+template: festival
 distances:
   - { code: 1LAP, label: 1 Lap (rink) }
   - { code: 500M, label: 500 m }
@@ -26,5 +27,5 @@ race_sheet:
   group_by: [distance, age_band, gender, skate_type]
   seeding: registration_order
 certificate:
-  template: classic
+  template: glide
   orientation: landscape
