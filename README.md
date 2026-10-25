@@ -125,3 +125,51 @@ QUEUE_CONNECTION=database
 ```
 
 Tests: `php artisan test --filter=PassesTest`.
+
+## Stream C: events, YAML landings & registration (Session 3)
+
+Event YAML → database → branded landing → Pending registration → `/pay/{registration}`.
+
+```bash
+php artisan events:validate            # every event YAML under events/ (exits 1 on any error)
+php artisan events:validate events/demo/example-marathon.yaml
+php artisan events:sync                # upsert by org + slug into events.config (creates the org if missing)
+php artisan events:sync --dry-run
+php artisan events:sync --prune        # remove events of synced orgs that no YAML declares
+```
+
+Then open `/demo-runners` (org page) and `/demo-runners/bengaluru-city-marathon-2027` (landing).
+
+| Piece | What it does |
+|---|---|
+| `App\Landing\YamlLandingSource` | `LandingSource` over `events/**/*.yaml` (sport packs skipped). Used by the commands. |
+| `App\Landing\DatabaseLandingSource` | `LandingSource` bound in the container: published events from `events.config`. |
+| `App\Landing\ConfigCompiler` | Applies the sport pack (`SportPack::applyTo`), pins dates without an offset to IST, validates with `App\Support\EventSchema` (the shared validator; no second one), returns `EventConfig`. |
+| `App\Landing\YamlSportPackRepository` | `SportPackRepository` over `events/sports/<sport>.yaml`. |
+| `App\Landing\RegistrationForm` | Builds the form and its server rules from `fields`, `distances`, `age_bands`. |
+| `App\Landing\Capacity` | Places taken per distance: paid + pending younger than 30 min. |
+| `App\Landing\EventForm` | Organiser setup screen (port of the prototype's `create-event.php`) ⇄ config shape. |
+
+Rules:
+
+- **Sync never deletes an event with registrations.** `--prune` closes those instead, and is skipped if
+  any file failed. A sync (or editor save) that drops a distance with registrations is refused.
+  `--prune` treats every event of a synced org as YAML-managed, so don't mix it with organiser-made
+  events in the same org.
+- **Registration form:** name, email, mobile, distance are always asked. When the event has `age_bands`
+  or an `age` field, a date of birth is asked instead of age: age is computed **on race day** (IST) and
+  must fall in a band; `answers` stores `dob`, `age`, `age_band` plus each configured field.
+- **Capacity** is checked inside a transaction that locks the event row. Closed once the start time passes.
+- **Hand-off:** a successful POST creates a `Pending` registration (`EF-` pass number, `amount_paise` from
+  the distance) and redirects to a signed review page (`/r/{registration}/review`, 24 h) whose button
+  POSTs to `payments.create` (`/pay/{registration}`).
+- **Season Pass:** when an `Entitlements` implementation is bound, registration needs `Module::Registration`.
+- **Organiser CRUD** at `/organiser/events` (auth + verified, scoped to `users.org_id`, volunteers 403).
+  It writes `distances`, `age_bands` and `fields` explicitly; sport packs only prefill a new event.
+  Slugs are generated from the name, unique per org, and fixed after creation.
+- **Theme:** `branding.primary` / `secondary` become `--brand-*` CSS variables, with readable text colours
+  computed from luminance. Logo/hero paths are served from the `public` disk; absolute URLs pass through.
+- `/{org}` never matches reserved app paths (`login`, `dashboard`, `pay`, `organiser`, …); `routes/events.php`
+  is required last in `routes/web.php`.
+
+Tests: `tests/Feature/Events` (schema failure, capacity full, age out of band, sync safety, CRUD).
