@@ -40,7 +40,7 @@ class PaymentController extends Controller
                     'status' => PaymentStatus::Paid,
                     'paid_at' => now(),
                 ]);
-                event(new \App\Events\RegistrationPaid($registration));
+                event(new \App\Events\RegistrationPaid($registration->id));
             }
         }
 

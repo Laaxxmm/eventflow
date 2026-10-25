@@ -58,7 +58,7 @@ class WebhookController extends Controller
                         'processed_at' => now(),
                     ]);
 
-                    event(new RegistrationPaid($registration));
+                    event(new RegistrationPaid($registration->id));
                 }
             });
         } else {

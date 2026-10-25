@@ -36,7 +36,7 @@ class ReconcilePayments extends Command
                         'status' => PaymentStatus::Paid,
                         'paid_at' => now(),
                     ]);
-                    event(new RegistrationPaid($registration));
+                    event(new RegistrationPaid($registration->id));
                     $updated++;
                 }
             } catch (\Throwable $e) {
