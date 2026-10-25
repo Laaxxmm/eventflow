@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Sport;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,13 +10,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Event extends Model
 {
     protected $fillable = [
-        'org_id', 'slug', 'name', 'description', 'date', 'venue', 'price_paise', 'capacity',
+        'org_id', 'slug', 'name', 'sport', 'description', 'date', 'venue', 'price_paise', 'capacity',
         'distances', 'min_age', 'max_age', 'colours', 'form_fields', 'status', 'config',
     ];
 
     protected function casts(): array
     {
         return [
+            'sport' => Sport::class,
             'date' => 'immutable_datetime',
             'price_paise' => 'integer',
             'capacity' => 'integer',

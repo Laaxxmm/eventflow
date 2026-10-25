@@ -1,0 +1,22 @@
+# Running pack defaults. Mass/wave start, so no race_sheet.
+sport: running
+label: Running
+distances:
+  - { code: 5K, label: 5K }
+  - { code: 10K, label: 10K }
+  - { code: HM, label: Half Marathon (21.1K) }
+  - { code: FM, label: Full Marathon (42.2K) }
+age_bands:
+  - { label: Junior, min: 12, max: 17 }
+  - { label: Open, min: 18, max: 39 }
+  - { label: Veteran, min: 40, max: 59 }
+  - { label: Senior, min: 60, max: 99 }
+fields:
+  - { key: age, label: Age, type: number, required: true }
+  - { key: gender, label: Gender, type: select, required: true, options: [Male, Female, Other] }
+  - { key: tshirt_size, label: T-shirt size, type: select, required: true, options: [XS, S, M, L, XL, XXL] }
+  - { key: emergency_contact_name, label: Emergency contact name, type: text, required: true }
+  - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
+certificate:
+  template: classic
+  orientation: landscape

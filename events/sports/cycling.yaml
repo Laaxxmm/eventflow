@@ -1,0 +1,21 @@
+# Cycling pack defaults. Mass start, so no race_sheet; add one per event for criteriums.
+sport: cycling
+label: Cycling
+distances:
+  - { code: 25K, label: 25 km ride }
+  - { code: 50K, label: 50 km ride }
+  - { code: 100K, label: 100 km (century) }
+age_bands:
+  - { label: Junior, min: 14, max: 17 }
+  - { label: Open, min: 18, max: 39 }
+  - { label: Masters, min: 40, max: 99 }
+fields:
+  - { key: age, label: Age, type: number, required: true }
+  - { key: gender, label: Gender, type: select, required: true, options: [Male, Female, Other] }
+  - { key: bike_type, label: Bike type, type: select, required: true, options: [Road, MTB, Hybrid, Other] }
+  - { key: helmet, label: I will wear a helmet throughout the ride, type: checkbox, required: true, options: ["Yes"] }
+  - { key: emergency_contact_name, label: Emergency contact name, type: text, required: true }
+  - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
+certificate:
+  template: classic
+  orientation: landscape

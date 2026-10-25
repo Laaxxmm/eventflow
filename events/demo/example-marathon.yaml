@@ -2,6 +2,7 @@
 org: demo-runners
 slug: bengaluru-city-marathon-2027
 name: Bengaluru City Marathon 2027
+sport: running
 date: "2027-01-17T05:30:00+05:30"
 venue: Sree Kanteerava Stadium, Bengaluru
 
@@ -43,4 +44,5 @@ faq:
     a: Contact the organiser before bib collection closes.
 
 certificate:
-  template: certificates/default
+  template: classic
+  orientation: landscape

@@ -1,0 +1,37 @@
+# Demo skating event: inherits age_bands and fields from events/sports/skating.yaml,
+# overrides distances (priced) and race_sheet (heats of 6), uploads its own A4 certificate.
+org: demo-skaters
+slug: chennai-open-skating-2027
+name: Chennai Open Speed Skating Championship 2027
+sport: skating
+date: "2027-02-07T07:00:00+05:30"
+venue: Nehru Indoor Stadium, Chennai
+
+branding:
+  primary: "#1e40af"
+  secondary: "#f59e0b"
+  logo: branding/demo-skaters/logo.png
+
+hero:
+  title: Chennai Open 2027
+  subtitle: Rink and road races for every age group. Quad, inline and tenacity.
+  image: branding/demo-skaters/hero.jpg
+
+distances:
+  - { code: 1LAP, label: 1 Lap (rink), price_inr: 400, capacity: 300 }
+  - { code: 500M, label: 500 m, price_inr: 500, capacity: 300 }
+  - { code: 1000M, label: 1000 m, price_inr: 600, capacity: 200 }
+
+race_sheet:
+  heat_size: 6
+  group_by: [distance, age_band, gender, skate_type]
+  seeding: random
+
+faq:
+  - q: When are heat sheets published?
+    a: Heats are generated after registration closes and shown at the venue.
+
+certificate:
+  template: upload
+  background: certificates/demo-skaters/chennai-open-2027.png
+  orientation: landscape
