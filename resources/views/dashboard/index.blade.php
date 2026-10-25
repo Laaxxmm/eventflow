@@ -55,7 +55,7 @@
                                     <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Paid') }}</th>
                                     <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Paid total') }}</th>
                                     <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Checked in') }}</th>
-                                    <th scope="col" class="py-2"><span class="sr-only">{{ __('Participants') }}</span></th>
+                                    <th scope="col" class="py-2"><span class="sr-only">{{ __('Reports') }}</span></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 text-gray-900">
@@ -71,9 +71,20 @@
                                         <td class="py-3 pe-4 text-right whitespace-nowrap">{{ $inr((int) $event->paid_total_paise) }}</td>
                                         <td class="py-3 pe-4 text-right">{{ number_format($event->checked_in_count) }}</td>
                                         <td class="py-3 text-right">
-                                            <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                {{ __('Participants') }}
-                                            </a>
+                                            <div class="flex flex-wrap justify-end gap-x-4 gap-y-1 whitespace-nowrap">
+                                                <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    {{ __('Participants') }}
+                                                </a>
+                                                {{-- Stream E pages; shown once routes/reports.php is loaded. --}}
+                                                @if (Route::has('reports.race-sheet'))
+                                                    <a href="{{ route('reports.race-sheet', $event) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                        {{ __('Race sheet') }}
+                                                    </a>
+                                                    <a href="{{ route('reports.certificates', $event) }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                        {{ __('Certificates') }}
+                                                    </a>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

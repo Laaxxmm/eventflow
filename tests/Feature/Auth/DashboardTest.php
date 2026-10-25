@@ -5,6 +5,7 @@ use App\Models\Org;
 use App\Models\Registration;
 use App\Models\User;
 use App\Payments\PaymentStatus;
+use Illuminate\Support\Facades\Route;
 
 beforeEach(function () {
     $this->org = Org::factory()->create();
@@ -58,4 +59,18 @@ test('CSV export has a header, one row per participant and custom answers', func
         ->and($rows)->toHaveCount(6)
         ->and($rows[1][1])->toBe("'=HYPERLINK(\"http://evil\")") // newest first, formula neutralised
         ->and($rows[1])->toContain('M', 'Female');
+});
+
+test('each event links to its race sheet and certificates', function () {
+    // Stream E's routes (routes/reports.php); stand-ins until it is merged.
+    if (! Route::has('reports.race-sheet')) {
+        Route::get('/dashboard/events/{event}/race-sheet', fn () => '')->name('reports.race-sheet');
+        Route::get('/dashboard/events/{event}/certificates', fn () => '')->name('reports.certificates');
+        app('router')->getRoutes()->refreshNameLookups();
+    }
+
+    $this->actingAs($this->owner)->get('/dashboard')
+        ->assertOk()
+        ->assertSee(route('reports.race-sheet', $this->event), false)
+        ->assertSee(route('reports.certificates', $this->event), false);
 });

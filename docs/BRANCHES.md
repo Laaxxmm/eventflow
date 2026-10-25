@@ -5,10 +5,10 @@
 | `main` | all | Always green. Only PRs merge here (Session 1 bootstrap commit excepted). |
 | `feat/a-<short>` | 1 | Foundation & contracts |
 | `feat/b-<short>` | 2 | Payments (gateways, webhooks, checkout) |
-| `feat/c-<short>` | 3 | Landing pages & registration form |
-| `feat/d-<short>` | 4 | Passes (PNG/PDF, QR) & email |
-| `feat/e-<short>` | 5 | Organiser auth & dashboard |
-| `feat/f-<short>` | 6 | Check-in, race sheets & ops (CI, Docker) |
+| `feat/c-<short>` | 3 | Events, YAML landings & registration |
+| `feat/d-<short>` | 4 | Passes (PNG/PDF, QR), email & check-in |
+| `feat/e-<short>` | 5 | Certificates & race sheets |
+| `feat/f-<short>` | 6 | Ops (CI, Docker) |
 
 ## Workflow
 
