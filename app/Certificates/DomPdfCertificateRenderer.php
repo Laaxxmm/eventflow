@@ -6,6 +6,7 @@ use App\Contracts\CertificateRenderer;
 use App\Landing\Certificate;
 use App\Models\Event;
 use App\Models\Registration;
+use App\RaceSheets\ResolvedConfig;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -58,7 +59,8 @@ final class DomPdfCertificateRenderer implements CertificateRenderer
      */
     public function settings(Event $event): Certificate
     {
-        $data = is_array($event->config['certificate'] ?? null) ? $event->config['certificate'] : [];
+        $certificate = ResolvedConfig::for($event)['certificate'] ?? null;
+        $data = is_array($certificate) ? $certificate : [];
         $gallery = (array) config('eventflow.certificates.gallery', []);
 
         $template = (string) ($data['template'] ?? 'classic');
@@ -96,7 +98,7 @@ final class DomPdfCertificateRenderer implements CertificateRenderer
 
     private function distanceLabel(Event $event, ?string $code): string
     {
-        foreach ($event->config['distances'] ?? $event->distances ?? [] as $distance) {
+        foreach (ResolvedConfig::for($event)['distances'] ?? $event->distances ?? [] as $distance) {
             if (($distance['code'] ?? null) === $code) {
                 return (string) ($distance['label'] ?? $code);
             }

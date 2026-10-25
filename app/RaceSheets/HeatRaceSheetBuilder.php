@@ -27,7 +27,7 @@ final class HeatRaceSheetBuilder implements RaceSheetBuilder
 
     public function build(Event $event): RaceSheet
     {
-        $config = $event->config['race_sheet'] ?? null;
+        $config = ResolvedConfig::for($event)['race_sheet'] ?? null;
 
         if (! is_array($config)) {
             throw new DomainException("Event {$event->id} has no race_sheet config.");
@@ -47,7 +47,7 @@ final class HeatRaceSheetBuilder implements RaceSheetBuilder
 
     public function buildOrStartList(Event $event): RaceSheet
     {
-        return is_array($event->config['race_sheet'] ?? null) ? $this->build($event) : $this->startList($event);
+        return is_array(ResolvedConfig::for($event)['race_sheet'] ?? null) ? $this->build($event) : $this->startList($event);
     }
 
     public function buildWith(Event $event, RaceSheetConfig $config): RaceSheet
@@ -179,12 +179,12 @@ final class HeatRaceSheetBuilder implements RaceSheetBuilder
     /** @return list<array{code: string, label: string}> */
     private function distances(Event $event): array
     {
-        return array_values($event->config['distances'] ?? $event->distances ?? []);
+        return array_values(ResolvedConfig::for($event)['distances'] ?? $event->distances ?? []);
     }
 
     /** @return list<array{label: string, min: int, max: int}> */
     private function ageBands(Event $event): array
     {
-        return array_values($event->config['age_bands'] ?? []);
+        return array_values(ResolvedConfig::for($event)['age_bands'] ?? []);
     }
 }

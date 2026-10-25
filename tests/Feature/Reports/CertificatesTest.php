@@ -155,3 +155,12 @@ test('light brand colours are not used for text on white', function () {
         ->and(DomPdfCertificateRenderer::contrast('#17213a', '#ffffff'))->toBeGreaterThan(4.5)
         ->and(DomPdfCertificateRenderer::contrast('#d9ff45', '#ffffff'))->toBeLessThan(4.5);
 });
+
+test('a certificate the event does not configure comes from its sport pack', function () {
+    // The generic pack's default is "minimal"; without the pack it would fall back to "classic".
+    $config = ReportFixtures::config(['sport' => 'generic']);
+    unset($config['certificate']);
+    $this->event->update(['sport' => 'generic', 'config' => $config]);
+
+    expect($this->templates->settings($this->event->fresh())->template)->toBe('minimal');
+});
