@@ -29,3 +29,10 @@ race_sheet:
 certificate:
   template: glide
   orientation: landscape
+faq:
+  - q: Which skates are allowed?
+    a: Quad, inline and tenacity skates, as chosen in the form. Helmets and knee pads are compulsory.
+  - q: When are heat sheets published?
+    a: Heats are generated after registration closes and shown at the venue.
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.

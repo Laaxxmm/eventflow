@@ -38,6 +38,7 @@ final class EventForm
         return [
             'name' => ['required', 'string', 'max:160'],
             'sport' => ['required', 'string'],
+            'template' => ['nullable', 'in:'.implode(',', array_keys(config('eventflow.landing_templates')))],
             'date' => ['required', 'date_format:Y-m-d\TH:i'],
             'venue' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:'.implode(',', EventStatus::ALL)],
@@ -89,6 +90,7 @@ final class EventForm
             'slug' => $slug,
             'name' => $input['name'],
             'sport' => $input['sport'],
+            'template' => ($input['template'] ?? null) ?: ($previous['template'] ?? null),
             'date' => CarbonImmutable::createFromFormat('Y-m-d\TH:i', $input['date'], ConfigCompiler::TIMEZONE)->toIso8601String(),
             'venue' => $input['venue'],
             'branding' => array_filter([
@@ -105,6 +107,10 @@ final class EventForm
             'age_bands' => self::ageBands($input['age_bands'] ?? []),
             'fields' => self::fields($input['show'] ?? [], $input['custom'] ?? []),
         ];
+
+        if ($config['template'] === null) {
+            unset($config['template']); // the sport pack's default applies
+        }
 
         if ($faq = self::faq($input['faq'] ?? [])) {
             $config['faq'] = $faq;
@@ -163,6 +169,7 @@ final class EventForm
         return [
             'name' => $config['name'] ?? '',
             'sport' => $config['sport'] ?? 'generic',
+            'template' => $config['template'] ?? EventConfig::DEFAULT_TEMPLATE,
             'date' => isset($config['date'])
                 ? CarbonImmutable::parse(ConfigCompiler::withOffset($config['date']))->setTimezone(ConfigCompiler::TIMEZONE)->format('Y-m-d\TH:i')
                 : '',

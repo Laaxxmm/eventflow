@@ -22,7 +22,9 @@
             <p class="mt-8 text-xs font-semibold uppercase tracking-[0.35em] text-[#2b2416]/60">{{ $page->orgName }} {{ __('presents') }}</p>
             <h1 class="ef-serif mx-auto mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-6xl">{{ $page->config->name }}</h1>
             <div class="mt-6">{!! $rule !!}</div>
-            <p class="ef-serif mt-6 text-xl italic">{{ $page->config->hero->title }}</p>
+            @if ($page->config->hero->title !== $page->config->name)
+                <p class="ef-serif mt-6 text-xl italic">{{ $page->config->hero->title }}</p>
+            @endif
             @if ($page->config->hero->subtitle)
                 <p class="mx-auto mt-3 max-w-2xl text-[#2b2416]/70">{{ $page->config->hero->subtitle }}</p>
             @endif

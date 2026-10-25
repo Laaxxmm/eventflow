@@ -53,6 +53,16 @@
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+            <x-input-label for="template" :value="__('Page design')" />
+            <select id="template" name="template" class="{{ $control }}">
+                @foreach (config('eventflow.landing_templates') as $key => $tpl)
+                    <option value="{{ $key }}" @selected($v('template') === $key)>{{ $tpl['label'] }} — {{ $tpl['description'] }}</option>
+                @endforeach
+            </select>
+            <p class="mt-1 text-xs text-gray-500">{{ __('Need a custom template? Contact Indefine:') }} {{ config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email') }}</p>
+            <x-input-error class="mt-2" :messages="$errors->get('template')" />
+        </div>
         <div>
             <x-input-label for="branding_primary" :value="__('Primary colour')" />
             <x-text-input id="branding_primary" name="branding[primary]" type="color" class="mt-1 block h-10 w-24" :value="$v('branding.primary')" required />

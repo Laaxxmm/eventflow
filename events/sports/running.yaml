@@ -21,3 +21,10 @@ fields:
 certificate:
   template: velocity
   orientation: landscape
+faq:
+  - q: When will I get my pass?
+    a: Your EF- pass (PNG + PDF) is emailed as soon as payment is confirmed.
+  - q: Is the race chip timed?
+    a: Yes. Your timing chip is on your bib; collect it at bib collection.
+  - q: Can I change my distance?
+    a: Contact the organiser before bib collection closes.

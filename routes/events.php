@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('organiser')->name('organiser.')->group(function () {
     Route::resource('events', EventController::class)->except('show');
     Route::get('templates/{template}/preview', TemplatePreviewController::class)->name('templates.preview');
+    Route::get('events/{event}/published', [EventController::class, 'published'])->name('events.published');
 });
 
 Route::get('/r/{registration}/review', [RegistrationController::class, 'review'])

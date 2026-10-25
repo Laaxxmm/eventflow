@@ -9,14 +9,14 @@ use App\RaceSheets\RaceSheetConfig;
  * Sport pack defaults (events/sports/<sport>.yaml).
  *
  * Merge rule: an event config inherits each top-level key it does not set
- * (template, distances, age_bands, fields, race_sheet, certificate). Keys the event sets
+ * (template, distances, age_bands, fields, race_sheet, certificate, faq). Keys the event sets
  * replace the pack's value entirely; lists are never merged item by item.
  * Pack distances carry no price, so an event that inherits them fails
  * events/schema.json until the organiser prices each distance.
  */
 final readonly class SportPack
 {
-    public const INHERITED_KEYS = ['template', 'distances', 'age_bands', 'fields', 'race_sheet', 'certificate'];
+    public const INHERITED_KEYS = ['template', 'distances', 'age_bands', 'fields', 'race_sheet', 'certificate', 'faq'];
 
     /**
      * @param  array<string, mixed>  $defaults  Partial event config (keys in INHERITED_KEYS)
