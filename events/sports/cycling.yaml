@@ -18,7 +18,7 @@ fields:
   - { key: emergency_contact_name, label: Emergency contact name, type: text, required: true }
   - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: true }
 certificate:
-  template: velocity
+  template: midnight-elite
   orientation: landscape
 faq:
   - q: Is a helmet compulsory?

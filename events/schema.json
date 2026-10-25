@@ -298,7 +298,7 @@
         "template": {
           "type": "string",
           "pattern": "^([a-z0-9]+(-[a-z0-9]+)*|upload)$",
-          "description": "Gallery key from config('eventflow.certificates.gallery'), or \"upload\". Custom layouts: contact Indefine."
+          "description": "Gallery key from config('eventflow.certificates.gallery'): heritage-gold, modern-minimal, midnight-elite, stadium-strip, academic-seal, or \"upload\". Old keys classic/podium/minimal/velocity/glide are deprecated aliases. Custom layouts: contact Indefine."
         },
         "background": {
           "type": [
@@ -312,6 +312,35 @@
             "portrait",
             "landscape"
           ]
+        },
+        "palette": {
+          "enum": ["brand", "gold", "slate", "ink"],
+          "description": "Colour scheme: the event's brand colours, or a neutral gold / slate / ink set (default: brand if set, else gold)"
+        },
+        "credential": {
+          "enum": ["completion", "participation", "merit"],
+          "description": "Credential line: Certificate of Completion / Participation / Merit"
+        },
+        "variant": {
+          "enum": ["screen", "print"],
+          "description": "midnight-elite only: print swaps the dark field for ivory so it prints well on office printers"
+        },
+        "signatories": {
+          "type": "array",
+          "maxItems": 2,
+          "description": "Two signature slots, e.g. Race Director and Chief Guest",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": ["string", "null"], "maxLength": 80 },
+              "role": { "type": ["string", "null"], "maxLength": 60 }
+            }
+          }
+        },
+        "stamp": {
+          "type": "boolean",
+          "description": "Print the round organiser stamp"
         }
       },
       "anyOf": [

@@ -72,7 +72,7 @@ it('requires a background for uploaded certificates and gallery keys otherwise',
 
     $event['certificate'] = ['template' => 'classic'];
     expect(EventSchema::errors($event))->toBe([])
-        ->and(config('eventflow.certificates.gallery'))->toHaveKey('classic');
+        ->and(config('eventflow.certificates.gallery'))->toHaveKey('heritage-gold');
 });
 
 it('fixes certificate size at A4 300 dpi', function () {

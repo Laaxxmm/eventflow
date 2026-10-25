@@ -3,6 +3,7 @@
 use App\Entitlements\EnsureModuleEnabled;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CertificateDesignController;
+use App\Http\Controllers\CertificateVerifyController;
 use App\Http\Controllers\RaceSheetController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,16 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])
             Route::put('certificates/design', [CertificateDesignController::class, 'update'])->name('certificates.design');
             Route::get('certificates/preview/{template}', [CertificateDesignController::class, 'preview'])->name('certificates.preview');
             Route::get('certificates/{registration}', [CertificateController::class, 'show'])->name('certificates.show');
+            Route::post('certificates/{registration}/reissue', [CertificateController::class, 'reissue'])->name('certificates.reissue');
         });
     });
+
+Route::get('certificate-templates/{template}.png', [CertificateDesignController::class, 'thumbnail'])
+    ->middleware(['auth', 'verified', 'can:view-dashboard'])
+    ->name('certificates.thumbnail');
+
+// Public: the QR on every certificate points here.
+Route::get('certificates/verify/{certNo}', CertificateVerifyController::class)
+    ->middleware('throttle:60,1')
+    ->where('certNo', 'EF-CERT-[A-Za-z0-9]{8}')
+    ->name('certificates.verify');

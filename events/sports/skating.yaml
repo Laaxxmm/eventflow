@@ -27,7 +27,7 @@ race_sheet:
   group_by: [distance, age_band, gender, skate_type]
   seeding: registration_order
 certificate:
-  template: glide
+  template: heritage-gold
   orientation: landscape
 faq:
   - q: Which skates are allowed?

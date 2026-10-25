@@ -57,7 +57,7 @@ function eventInput(array $overrides = []): array
         'show' => ['gender' => '1', 'tshirt_size' => '1', 'city' => '0'],
         'custom' => [['key' => '', 'label' => 'Running club', 'type' => 'select', 'required' => '1', 'options' => 'None, Striders, Pacers']],
         'faq' => [['q' => 'Parking?', 'a' => 'Yes, at the gate.']],
-        'certificate' => ['template' => 'classic', 'orientation' => 'landscape'],
+        'certificate' => ['template' => 'heritage-gold', 'orientation' => 'landscape'],
         'race_sheet' => ['heat_size' => '', 'group_by' => '', 'seeding' => 'registration_order'],
     ], $overrides);
 }
@@ -97,7 +97,7 @@ it('publishes the event with its template from the wizard, leaving the rest to t
     expect($event->slug)->toBe('monsoon-10k')
         ->and($event->status)->toBe('published')
         ->and($event->template_id)->toBe('midnight')
-        ->and($event->certificate_template_id)->toBe('velocity') // running pack
+        ->and($event->certificate_template_id)->toBe('stadium-strip') // running pack
         ->and($event->config)->toMatchArray([
             'org' => 'city-runners',
             'template' => 'midnight',

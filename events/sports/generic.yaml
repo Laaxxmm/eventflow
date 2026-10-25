@@ -6,7 +6,7 @@ fields:
   - { key: age, label: Age, type: number, required: false }
   - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: false }
 certificate:
-  template: minimal
+  template: modern-minimal
   orientation: landscape
 faq:
   - q: When will I get my pass?

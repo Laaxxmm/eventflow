@@ -22,5 +22,5 @@ race_sheet:
   group_by: [distance, age_band, gender]
   seeding: registration_order
 certificate:
-  template: podium
+  template: stadium-strip
   orientation: landscape

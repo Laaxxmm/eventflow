@@ -93,13 +93,44 @@ return [
         'upload_max_kb' => 8192,
         'disk' => env('CERTIFICATE_DISK', 'local'),
 
-        // Built-in template gallery (views under resources/views/certificates/templates/<key>).
+        // Premium gallery (resources/views/certificates/templates/<key>.blade.php, DomPDF).
+        // Thumbnails: resources/certificates/thumbnails/<key>.png. Custom designs: contact Indefine.
         'gallery' => [
-            'classic' => ['label' => 'Classic', 'description' => 'Double border, laurel wreath and serif type. Formal meets.', 'orientations' => ['landscape', 'portrait']],
-            'podium' => ['label' => 'Podium', 'description' => 'Gold medal on a ribbon, bold name banner.', 'orientations' => ['landscape']],
-            'minimal' => ['label' => 'Minimal', 'description' => 'Editorial: big name, thin rules, lots of air.', 'orientations' => ['landscape', 'portrait']],
-            'velocity' => ['label' => 'Velocity', 'description' => 'Diagonal speed stripes and a finish-line band. Running and cycling.', 'orientations' => ['landscape']],
-            'glide' => ['label' => 'Glide', 'description' => 'Rink arcs and a star badge. Skating.', 'orientations' => ['landscape', 'portrait']],
+            'heritage-gold' => ['label' => 'Heritage Gold', 'description' => 'Classic medal feel: gold foil frame, crest, serif name.', 'orientations' => ['landscape', 'portrait']],
+            'modern-minimal' => ['label' => 'Modern Minimal', 'description' => 'Asymmetric, bold sans name, accent bar, lots of air.', 'orientations' => ['landscape', 'portrait']],
+            'midnight-elite' => ['label' => 'Midnight Elite', 'description' => 'Deep navy field, light type, fine gold line work. Print-safe light variant.', 'orientations' => ['landscape']],
+            'stadium-strip' => ['label' => 'Stadium Strip', 'description' => 'Diagonal colour panel with distance and result. Sport energy.', 'orientations' => ['landscape']],
+            'academic-seal' => ['label' => 'Academic Seal', 'description' => 'Guilloché medallion seal, formal. Clinics and workshops.', 'orientations' => ['landscape', 'portrait']],
+        ],
+
+        // Deprecated template keys (Session UX gallery) still found in saved events and packs.
+        'aliases' => [
+            'classic' => 'heritage-gold',
+            'podium' => 'stadium-strip',
+            'velocity' => 'stadium-strip',
+            'minimal' => 'modern-minimal',
+            'glide' => 'academic-seal',
+        ],
+
+        // Neutral schemes that look expensive without organiser colours. `brand` uses
+        // the event's primary/secondary with gold foil.
+        'palettes' => [
+            'brand' => ['label' => 'Event colours'],
+            'gold' => ['label' => 'Gold', 'accent' => '#9a7425', 'accent2' => '#1f2a44', 'ink' => '#1c2333', 'foil' => 'gold'],
+            'slate' => ['label' => 'Slate', 'accent' => '#475569', 'accent2' => '#0f172a', 'ink' => '#0f172a', 'foil' => 'silver'],
+            'ink' => ['label' => 'Ink', 'accent' => '#1e3a5f', 'accent2' => '#0b1220', 'ink' => '#0b1220', 'foil' => 'gold'],
+        ],
+
+        'credentials' => [
+            'completion' => 'Certificate of Completion',
+            'participation' => 'Certificate of Participation',
+            'merit' => 'Certificate of Merit',
+        ],
+
+        // Signature slots printed when the event names none.
+        'default_signatories' => [
+            ['name' => null, 'role' => 'Race Director'],
+            ['name' => null, 'role' => 'Chief Guest'],
         ],
 
         // Where text is stamped on an uploaded A4 background, in mm from the top-left
@@ -113,6 +144,7 @@ return [
                 'date' => ['x' => 74, 'y' => 178, 'size' => 10],
                 'bib' => ['x' => 223, 'y' => 178, 'size' => 10],
                 'logo' => ['x' => 148.5, 'y' => 30, 'height' => 18],
+                'verify' => ['x' => 272, 'y' => 180, 'size' => 14], // QR + EF-CERT number
             ],
             'portrait' => [
                 'name' => ['x' => 105, 'y' => 140, 'size' => 28],
@@ -122,6 +154,7 @@ return [
                 'date' => ['x' => 55, 'y' => 262, 'size' => 10],
                 'bib' => ['x' => 155, 'y' => 262, 'size' => 10],
                 'logo' => ['x' => 105, 'y' => 40, 'height' => 20],
+                'verify' => ['x' => 185, 'y' => 268, 'size' => 14],
             ],
         ],
 
