@@ -263,7 +263,7 @@ through the org scope; volunteers are sent to check-in.
   runs does nothing. Needs a queue worker (`queue` service in Sail).
 - `App\Certificates\DomPdfCertificateRenderer` implements `CertificateRenderer`.
   The template comes from the event's YAML `certificate` block:
-  `template: classic|podium|minimal` (`resources/views/certificates/templates`)
+  `template: classic|podium|minimal|velocity|glide` (`resources/views/certificates/templates`; see "UX templates")
   or `upload` with `background:` (a file on the certificates disk, printed full
   page under the text). Unknown keys fall back to `classic`; an orientation the
   template doesn't offer falls back to its first. Each certificate shows the
@@ -537,3 +537,82 @@ values. Never commit a real password; set production ones only in the server's `
 
 Tests: `tests/Feature/Marketing` (marketing pages, signup with plan/add-ons, login, platform admin 403,
 suspension, seeder).
+
+## UX templates
+
+Organisers never write YAML: **New event** is a 5-step wizard (Basics → Sport pack → Template →
+Branding & media → Review & publish). Publishing makes `/{org}/{slug}` live immediately. Custom
+layouts are not built in-app; every picker links to **Contact Indefine**
+(`CUSTOM_TEMPLATE_CONTACT`, falling back to the plans contact email).
+
+### Landing templates (5)
+
+| ID | Look | Tone |
+| --- | --- | --- |
+| `aurora` | Light and athletic: airy hero, soft gradients, photo card | light |
+| `midnight` | Race night: full-bleed dark hero, lane-style distances | dark |
+| `clean` | Editorial minimal: one column, big type | light |
+| `festival` | Bold colour blocks and tiles | light |
+| `heritage` | Classic meet: crest, serif headings, order of events | light |
+
+- Views: `resources/views/landings/templates/<id>.blade.php`, sharing
+  `resources/views/landings/layout.blade.php` and `landings/partials/{register,logo}.blade.php`.
+  Every template gets one `App\View\LandingPage` (`$page`) view model.
+- Registry: `config('eventflow.landing_templates')` (label, `tone`, description). Stored in
+  the event YAML as top-level `template:` and denormalised to `events.template_id`.
+  Unknown IDs render `aurora`.
+- Live preview with sample data: `/organiser/templates/{id}/preview?primary=%23...&secondary=%23...`
+  (used by the wizard's picker iframes).
+- Logos sit in fixed slots (header / crest). Upload helper text asks for a transparent PNG;
+  a dark logo triggers: "Dark logo — pick a light template (Aurora/Clean) or a light hero
+  background so it stays classy." (`App\Landing\LogoInspector`, also checked client-side).
+
+### Certificate templates (5 + upload)
+
+| ID | Look | Orientations | Sport pack default |
+| --- | --- | --- | --- |
+| `classic` | Cream paper, gold double border, laurel, seal | landscape, portrait | — |
+| `podium` | Brand band, gold medal on ribbon, stat strip | landscape | — |
+| `minimal` | Editorial, hairline frame, large name | landscape, portrait | generic |
+| `velocity` | Speed stripes, chequered finish line | landscape | running, cycling |
+| `glide` | Ice-blue rink arcs, star badge | landscape, portrait | skating |
+
+- Views: `resources/views/certificates/templates/<id>.blade.php` (DomPDF, A4, CSS 2.1 and
+  absolute positioning). Vector motifs (medal, laurel, seal, stripes, checkers, rink) come from
+  `App\View\CertificateArt` as SVG data URIs. Picker thumbnails:
+  `public/images/certificates/<id>-<orientation>.png`.
+- Placeholders available to every template: `$participant`, `$bib` (registration answer `bib`,
+  else the pass number), `$eventName`, `$distance`, `$category` (age band), `$time` (answer
+  `finish_time`/`time`, optional), `$date`, `$logo` (event logo as a data URI, PNG/JPG only),
+  `$orgName`, `$venue`, `$colours`, `$orientation`, `$sport`.
+- Organisers choose on `/dashboard/events/{event}/certificates` (PDF preview per template at
+  `.../certificates/preview/{id}?orientation=portrait`).
+- **Upload your own**: a full-bleed PNG/JPG at exactly **3508 × 2480 px** (landscape) or
+  **2480 × 3508 px** (portrait), A4 at 300 dpi (`eventflow.certificates.px`). Any other size is
+  rejected with the expected and actual size. Text is stamped at
+  `eventflow.certificates.upload_layout.<orientation>` — mm from the top-left corner, `x` is
+  the horizontal centre, `y` the vertical centre:
+
+  | Slot | Landscape (x, y, pt) | Portrait (x, y, pt) |
+  | --- | --- | --- |
+  | logo | 148.5, 30, 18 mm high | 105, 40, 20 mm high |
+  | name | 148.5, 92, 30 | 105, 140, 28 |
+  | event | 148.5, 118, 14 | 105, 168, 14 |
+  | distance (+ category) | 148.5, 128, 12 | 105, 178, 12 |
+  | time (optional) | 148.5, 138, 12 | 105, 188, 12 |
+  | date | 74, 178, 10 | 55, 262, 10 |
+  | bib | 223, 178, 10 | 155, 262, 10 |
+
+### Adding a 6th template
+
+1. Landing: add `resources/views/landings/templates/<id>.blade.php` (`@extends('landings.layout')`,
+   include `landings.partials.register` and `landings.partials.logo`), register it in
+   `config/eventflow.php` → `landing_templates` with `tone`, and add `<id>` to the wizard test
+   expectations. Check `/organiser/templates/<id>/preview` at 390 px and 1280 px.
+2. Certificate: add `resources/views/certificates/templates/<id>.blade.php` with class
+   `certificate certificate--<id>`, register it in `eventflow.certificates.gallery` with its
+   orientations, render a thumbnail into `public/images/certificates/<id>-landscape.png`
+   (560 px wide, e.g. `pdftoppm -singlefile -scale-to 560 -png`), and add it to the
+   `gallery` dataset in `tests/Feature/Reports/CertificateDesignTest.php`.
+3. Optionally make it a sport pack default (`template:` / `certificate:` in
+   `events/sports/<sport>.yaml`).

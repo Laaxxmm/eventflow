@@ -25,7 +25,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased @yield('body-class', 'bg-white text-gray-900')" style="{{ $page->theme->style() }}">
+    <body data-template="{{ $page->config->template }}" class="font-sans antialiased @yield('body-class', 'bg-white text-gray-900')" style="{{ $page->theme->style() }}">
         @if ($page->preview)
             <div class="sticky top-0 z-50 bg-gray-900 px-4 py-2 text-center text-xs font-semibold text-white">
                 {{ __(':template template preview · sample content', ['template' => config("eventflow.landing_templates.{$page->config->template}.label")]) }}
