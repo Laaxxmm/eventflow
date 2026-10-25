@@ -31,7 +31,7 @@ test('signup creates an org with a slug and makes the organiser its owner', func
     $response = $this->post('/register', signupPayload());
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('account.plan', ['welcome' => 1], absolute: false));
 
     $org = Org::sole();
     $user = User::sole();

@@ -6,6 +6,40 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
+        <!-- Plan (free trial; billing is not connected yet) -->
+        <fieldset class="mb-6">
+            <legend class="block font-medium text-sm text-gray-700">{{ __('Plan') }}</legend>
+            <div class="mt-2 space-y-2">
+                @foreach ($plans as $key => $plan)
+                    <label class="flex items-start gap-3 rounded-md border border-gray-300 p-3 cursor-pointer has-[:checked]:border-indigo-500 has-[:checked]:ring-1 has-[:checked]:ring-indigo-500">
+                        <input type="radio" name="plan" value="{{ $key }}" class="mt-1 text-indigo-600 focus:ring-indigo-500" @checked(old('plan', $selectedPlan) === $key)>
+                        <span class="flex-1 text-sm">
+                            <span class="block font-semibold text-gray-900">{{ $plan['name'] }}</span>
+                            <span class="block text-gray-600">{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }} {{ __('/ season + :pct% on paid registrations', ['pct' => rtrim(rtrim(number_format($plan['participant_fee_percent'], 1), '0'), '.')]) }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <x-input-error :messages="$errors->get('plan')" class="mt-2" />
+
+            <p class="mt-4 text-sm font-medium text-gray-700">{{ __('Add-ons (optional)') }}</p>
+            <div class="mt-2 space-y-1">
+                @foreach ($addons as $key => $addon)
+                    <label class="flex items-center gap-2 text-sm text-gray-700">
+                        <input type="checkbox" name="addons[]" value="{{ $key }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(in_array($key, old('addons', $selectedAddons), true))>
+                        <span class="flex-1">{{ __($addon['name']) }}</span>
+                        <span class="text-gray-500">+{{ \App\Saas\Plans::inr($addon['season_inr']) }}</span>
+                    </label>
+                @endforeach
+            </div>
+            <x-input-error :messages="$errors->get('addons.*')" class="mt-2" />
+
+            <p class="mt-3 text-xs text-gray-500">
+                {{ __(':days-day free trial, no card needed. Billing connects when Cashfree/Razorpay SaaS subscription is live.', ['days' => config('plans.trial_days')]) }}
+                <a href="{{ route('pricing') }}" class="underline">{{ __('Compare plans') }}</a>
+            </p>
+        </fieldset>
+
         <!-- Organization -->
         <div>
             <x-input-label for="organization_name" :value="__('Organization name')" />
