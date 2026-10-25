@@ -11,12 +11,11 @@ only through a Session 1 PR.
 | 2 | Payments | `feat/b-` | `app/Payments/**` (except the Session 1 files above), `app/Http/Controllers/PaymentController.php`, `app/Http/Controllers/WebhookController.php`, `app/Console/Commands/ReconcilePayments.php`, `app/Providers/PaymentServiceProvider.php`, `routes/payments.php`, `resources/views/payments/**`, `tests/Feature/Payments/**`. Dispatches `RegistrationPaid`. |
 | 3 | Events, YAML landings & registration | `feat/c-` | `app/Landing/**` (except Session 1 files; implements `LandingSource` and `SportPackRepository`), `app/Http/Controllers/EventController.php`, `app/Http/Controllers/PublicEventController.php`, `app/Http/Controllers/RegistrationController.php`, `app/Console/Commands/EventsSync.php`, `app/Console/Commands/EventsValidate.php`, `routes/events.php` (required last: catch-all routes), `resources/views/events/**`, `resources/views/landing/**`, `tests/Feature/Events/**` |
 | 4 | Passes, email & check-in | `feat/d-` | `app/Passes/**` (except `PassFiles.php`), `app/Listeners/**`, `app/Mail/**`, `app/Http/Controllers/CheckinController.php`, `routes/checkin.php`, `resources/views/passes/**`, `resources/views/mail/**`, `resources/views/checkin/**`, `resources/js/checkin.js`, `tests/Feature/Passes/**`. Listens to `RegistrationPaid`. Local QR only. |
-| 5 | Certificates & race sheets | `feat/e-` | `app/Certificates/**` (except `CertificateFile.php`; implements `CertificateRenderer`), `app/RaceSheets/**` (except the Session 1 DTOs; implements `RaceSheetBuilder`), `app/Http/Controllers/CertificateController.php`, `app/Http/Controllers/RaceSheetController.php`, `routes/reports.php`, `resources/views/certificates/**`, `resources/views/racesheets/**`, `tests/Feature/Reports/**` |
-| 6 | Ops | `feat/f-` | `.github/workflows/**`, `docker/**` |
+| 5 | Certificates, race sheets, entitlements & org settings | `feat/e-` | `app/Entitlements/**` (implements `Entitlements`: Season Pass + module toggles), `app/Http/Controllers/OrgSettingsController.php`, `routes/settings.php`, `resources/views/settings/**`, `tests/Feature/Entitlements/**`, `tests/Feature/Settings/**`, `app/Certificates/**` (except `CertificateFile.php`; implements `CertificateRenderer`), `app/RaceSheets/**` (except the Session 1 DTOs; implements `RaceSheetBuilder`), `app/Http/Controllers/CertificateController.php`, `app/Http/Controllers/RaceSheetController.php`, `routes/reports.php`, `resources/views/certificates/**`, `resources/views/racesheets/**`, `tests/Feature/Reports/**` |
+| 6 | Ops | `feat/f-` | `.github/workflows/**`, `docker/**`, `deploy/**`, `Dockerfile`, `.dockerignore`, `tests/Smoke/**` |
 
-**Not assigned yet:** the `Entitlements` implementation and Org Settings module
-toggles (`app/Entitlements/**`, `resources/views/settings/**`), and Breeze's
-`resources/views/layouts/**` and `resources/views/components/**`.
+**Not assigned yet:** Breeze's `resources/views/layouts/**` and
+`resources/views/components/**`.
 
 ## Shared files (append-only, small PRs)
 
