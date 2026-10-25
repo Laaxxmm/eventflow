@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Module;
 use App\Enums\Role;
 use App\Events\RegistrationPaid;
 use App\Mail\CheckInConfirmedMail;
@@ -10,6 +11,7 @@ use App\Mail\TestMail;
 use App\Models\Event;
 use App\Models\Org;
 use App\Models\Registration;
+use App\Models\SeasonPass;
 use App\Models\User;
 use App\Notifications\Jobs\SendWhatsAppTemplate;
 use App\Notifications\NotificationDelivery;
@@ -44,6 +46,17 @@ function notifiedRegistration(array $attributes = []): Registration
     Artisan::call('events:sync', ['paths' => [base_path('events/demo/example-marathon.yaml')]]);
     $event = Event::withoutGlobalScopes()->where('slug', 'bengaluru-city-marathon-2027')->sole();
     User::factory()->create(['org_id' => $event->org_id, 'role' => Role::Owner, 'email' => 'owner@runners.test']);
+
+    // Notification add-ons are optional modules: they need an active Season Pass
+    // that includes them (covers today and the event date, for the reminder tests).
+    SeasonPass::withoutGlobalScopes()->create([
+        'org_id' => $event->org_id,
+        'plan' => 'Test season',
+        'starts_on' => '2026-01-01',
+        'ends_on' => '2028-12-31',
+        'status' => 'active',
+        'modules' => Module::cases(),
+    ]);
 
     return Registration::factory()->for($event)->paid()->create([
         'org_id' => $event->org_id,

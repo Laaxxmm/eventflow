@@ -293,8 +293,8 @@ a skating event YAML and an A4 background PNG).
 ### Season Pass and Org Settings
 
 - `App\Entitlements\SeasonPassEntitlements` implements `Entitlements`: core
-  modules (registration, payments, passes) are always on; check-in, race sheets
-  and certificates need an active pass (status `active`, today within its dates
+  modules (registration, payments, passes) are always on; check-in, race sheets,
+  certificates, email branding and SMS/WhatsApp need an active pass (status `active`, today within its dates
   in IST, the latest-ending one wins) that includes them, and must not be
   switched off in Org Settings.
 - **Enforcing a module on a route:**
@@ -305,6 +305,8 @@ a skating event YAML and an A4 background PNG).
 - **Org Settings** (`/dashboard/settings`, owners only): shows the active pass
   and lets the owner switch optional modules off and on. Modules outside the
   pass are greyed out and can't be switched on. Stored in `orgs.modules`.
+  Links to the notification settings (`/dashboard/settings/notifications`),
+  whose add-ons go through the same `Entitlements` binding.
 - **Granting a pass** (Indefine staff, until passes can be bought online):
   `php artisan season-pass:grant {org-slug} --plan="Season 2027" [--from=YYYY-MM-DD] [--until=YYYY-MM-DD] [--module=checkin --module=certificates] [--amount=25000]`.
   Defaults: today, 365 days, every optional module.

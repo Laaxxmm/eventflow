@@ -31,7 +31,8 @@ test('the owner sees the pass and the module toggles', function () {
         ->assertSee('Season 2027')
         ->assertSee('Always on')
         ->assertSee('Race sheets')
-        ->assertSee('not in your Season Pass');
+        ->assertSee('not in your Season Pass')
+        ->assertSee(route('settings.notifications.show'), false);
 });
 
 test('without a pass the page says what still works', function () {
@@ -49,7 +50,7 @@ test('the owner can switch an included module off and on again', function () {
         ->assertRedirect(route('settings.edit'))
         ->assertSessionHas('status', 'modules-updated');
 
-    expect($this->org->fresh()->modules)->toBe(['checkin' => true, 'race_sheets' => true, 'certificates' => false])
+    expect($this->org->fresh()->modules)->toMatchArray(['checkin' => true, 'race_sheets' => true, 'certificates' => false])
         ->and(app(Entitlements::class)->enabled($this->org->fresh(), Module::Certificates))->toBeFalse();
 
     $this->actingAs($this->owner)

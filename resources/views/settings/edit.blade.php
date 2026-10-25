@@ -56,6 +56,13 @@
                         <p class="mt-1 text-sm text-gray-600">
                             {{ __('Switch off the modules your events don\'t use. Only modules in your Season Pass can be switched on.') }}
                         </p>
+
+                        @if (Route::has('settings.notifications.show'))
+                            <p class="mt-2 text-sm text-gray-600">
+                                <a href="{{ route('settings.notifications.show') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{{ __('Notification settings') }}</a>
+                                {{ __('(email sender, custom SMTP, WhatsApp)') }}
+                            </p>
+                        @endif
                     </header>
 
                     <form method="post" action="{{ route('settings.modules.update') }}" class="mt-6 space-y-6">

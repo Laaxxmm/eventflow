@@ -41,6 +41,8 @@ final class EnsureModuleEnabled
             Module::CheckIn => __('Check-in'),
             Module::RaceSheets => __('Race sheets'),
             Module::Certificates => __('Certificates'),
+            Module::EmailBranding => __('Email branding'),
+            Module::SmsWhatsapp => __('SMS and WhatsApp'),
         };
     }
 }
