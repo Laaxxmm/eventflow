@@ -111,6 +111,9 @@ return [
         'admin_password' => env('PLATFORM_ADMIN_PASSWORD'),
         'organiser_email' => 'organiser@eventflow.local',
         'organiser_password' => env('DEMO_ORGANISER_PASSWORD'),
+        // owner@demo.test / volunteer@demo.test (Database\Seeders\DemoSeeder). "password" locally;
+        // production (e.g. a public Railway preview) must set DEMO_PASSWORD.
+        'demo_password' => env('DEMO_PASSWORD', 'password'),
     ],
 
 ];

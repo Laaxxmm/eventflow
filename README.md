@@ -356,6 +356,34 @@ Run it again to update. `deploy/deploy.sh --build` builds the image on the VPS i
 - **Useful commands:** `docker compose -f deploy/compose.prod.yml logs -f app queue`,
   `... exec app php artisan tinker`, `... exec app php artisan events:sync`.
 
+### Railway (one-service preview)
+
+The same image runs on [Railway](https://railway.com) as a single service:
+`CONTAINER_ROLE=all` starts nginx + php-fpm, the queue worker and the scheduler in one
+container, so they share one volume (Railway volumes cannot be shared between services).
+`railway.json` sets the Dockerfile build and the `/up` health check.
+
+1. **New Project → Deploy from GitHub repo** → `Laaxxmm/eventflow` (branch `main`).
+   Railway builds the `Dockerfile` (about 3 minutes).
+2. **+ New → Database → MySQL** in the same project. Keep its name `MySQL`.
+3. EventFlow service → **Settings → Networking → Generate Domain** (target port `8080`).
+4. EventFlow service → **Variables → Raw Editor**: paste
+   [`deploy/railway.env.example`](deploy/railway.env.example) and replace every `CHANGE_ME`
+   (`APP_KEY`: `openssl rand -base64 32`, prefixed with `base64:`;
+   `PASS_SIGNING_KEY`: `openssl rand -hex 32`; three demo passwords of your choice).
+5. EventFlow service → right-click → **Attach volume**, mount path `/var/www/html/storage`
+   (uploads, passes and certificates survive redeploys).
+6. **Deploy**. On boot the container migrates, seeds the demo org once (`SEED_DEMO=1`, only
+   into an empty database) and syncs `events/**/*.yaml`. Open the generated domain:
+   `/` (marketing), `/demo-runners/bengaluru-city-marathon-2027` (event page), and log in as
+   `owner@demo.test` with your `DEMO_PASSWORD`.
+
+Notes: every push to `main` redeploys. Emails go to the deploy logs (`MAIL_MAILER=log`);
+set SMTP variables for real mail. Payments need sandbox keys for the checkout to open.
+Railway's edge is trusted for client IPs and HTTPS in `docker/nginx/nginx.conf`. For a real
+launch prefer the VPS stack above (backups, Mailpit, separate worker); remove `SEED_DEMO`
+and the demo accounts there.
+
 ### Backups and the restore test
 
 The `backup` service (`docker/backup`) dumps MySQL with `mysqldump --single-transaction`, archives

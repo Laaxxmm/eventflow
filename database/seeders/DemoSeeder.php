@@ -11,10 +11,12 @@ use App\Models\SeasonPass;
 use App\Models\User;
 use App\Sports\SportPack;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Local demo data. Log in as owner@demo.test or volunteer@demo.test, password "password".
+ * Local demo data. Log in as owner@demo.test or volunteer@demo.test with DEMO_PASSWORD
+ * ("password" by default; production refuses the default).
  * The demo org has an active Season Pass with every module.
  */
 class DemoSeeder extends Seeder
@@ -40,12 +42,17 @@ class DemoSeeder extends Seeder
             'modules' => Module::cases(),
         ]);
 
+        $password = (string) config('plans.demo.demo_password');
+        if (app()->isProduction() && in_array($password, ['', 'password'], true)) {
+            throw new RuntimeException('Set DEMO_PASSWORD to a real password before seeding demo data in production.');
+        }
+
         foreach ([['owner@demo.test', 'Demo Owner', Role::Owner], ['volunteer@demo.test', 'Demo Volunteer', Role::Volunteer]] as [$email, $name, $role]) {
             User::withoutGlobalScopes()->updateOrCreate(['email' => $email], [
                 'org_id' => $org->id,
                 'role' => $role,
                 'name' => $name,
-                'password' => 'password',
+                'password' => $password,
                 'email_verified_at' => now(),
             ]);
         }
