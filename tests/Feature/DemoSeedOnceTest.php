@@ -36,3 +36,25 @@ it('refuses the default demo password in production', function () {
 
     app(DemoSeeder::class)->run(); // db:seed would prompt for confirmation in production
 })->throws(RuntimeException::class, 'DEMO_PASSWORD');
+
+it('re-applies demo passwords from the environment on later boots', function () {
+    $this->artisan('demo:seed-once')->assertSuccessful();
+    config(['plans.demo.demo_password' => 'Rotated-Demo-Pass-1', 'plans.demo.admin_password' => 'Rotated-Admin-Pass-1']);
+
+    $this->artisan('demo:seed-once')->expectsOutputToContain('owner@demo.test: password updated')->assertSuccessful();
+
+    $hash = fn ($email) => User::withoutGlobalScopes()->where('email', $email)->value('password');
+    expect(Hash::check('Rotated-Demo-Pass-1', $hash('owner@demo.test')))->toBeTrue()
+        ->and(Hash::check('Rotated-Demo-Pass-1', $hash('volunteer@demo.test')))->toBeTrue()
+        ->and(Hash::check('Rotated-Admin-Pass-1', $hash('admin@eventflow.local')))->toBeTrue();
+});
+
+it('keeps the CHANGE_ME placeholder out of deployed demo logins', function () {
+    $this->artisan('demo:seed-once')->assertSuccessful();
+    app()->detectEnvironment(fn () => 'staging');
+    config(['plans.demo.demo_password' => 'CHANGE_ME']);
+
+    $this->artisan('demo:seed-once')->expectsOutputToContain('CHANGE_ME placeholder')->assertSuccessful();
+
+    expect(Hash::check('CHANGE_ME', User::withoutGlobalScopes()->where('email', 'owner@demo.test')->value('password')))->toBeFalse();
+});

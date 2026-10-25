@@ -378,6 +378,23 @@ container, so they share one volume (Railway volumes cannot be shared between se
    `/` (marketing), `/demo-runners/bengaluru-city-marathon-2027` (event page), and log in as
    `owner@demo.test` with your `DEMO_PASSWORD`.
 
+**Speed.** The app renders pages in about 5–25 ms; a slow preview is the network path.
+- Put **both** services (EventFlow and MySQL) in the region nearest your users: each
+  service → **Settings → Deploy → Region** → *Southeast Asia (Singapore)* for India. From a
+  US region every request costs ~250 ms per round trip, and a first page load takes several.
+- `DB_HOST` must be `${{MySQL.MYSQLHOST}}` (the private `*.railway.internal` host), not the
+  public TCP proxy (`*.proxy.rlwy.net`), or every query crosses the internet.
+- `SESSION_DRIVER=file` / `CACHE_STORE=file` (in `railway.env.example`) skip two database
+  round trips per request; they need the volume on `storage/`.
+- Turn off **App Sleeping** (Settings → Deploy) so the first visit doesn't wait for a cold start.
+- Every response carries `Server-Timing: app;dur=…` (browser DevTools → Network → Timing).
+  If that is small but the request is slow, the time is spent in the network or the host.
+
+**Secrets.** The container logs a `WARNING` for every variable still set to `CHANGE_ME`.
+Demo logins refuse the placeholder, and each deploy re-applies `DEMO_PASSWORD`,
+`PLATFORM_ADMIN_PASSWORD` and `DEMO_ORGANISER_PASSWORD` to the demo accounts, so changing a
+variable and redeploying is enough to rotate them.
+
 Notes: every push to `main` redeploys. Emails go to the deploy logs (`MAIL_MAILER=log`);
 set SMTP variables for real mail. Payments need sandbox keys for the checkout to open.
 Railway's edge is trusted for client IPs and HTTPS in `docker/nginx/nginx.conf`. For a real
