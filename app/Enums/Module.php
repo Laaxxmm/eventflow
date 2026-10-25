@@ -17,4 +17,6 @@ enum Module: string
     case CheckIn = 'checkin';
     case RaceSheets = 'race_sheets';
     case Certificates = 'certificates';
+    case EmailBranding = 'email_branding'; // custom SMTP sender for org email
+    case SmsWhatsapp = 'sms_whatsapp'; // WhatsApp notifications (paid add-on)
 }

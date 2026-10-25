@@ -159,7 +159,8 @@ Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
 - **Season Pass, not per-event invoices.** A `season_passes` row (dates, status,
   included `modules`) grants an org a season. Core modules (registration,
   payments, passes) are always on, so an org can take entries before buying a
-  season. Optional modules (check-in, race sheets, certificates) need an active
+  season. Optional modules (check-in, race sheets, certificates, email
+  branding, SMS/WhatsApp) need an active
   pass that includes them, and owners can switch them off in Org Settings
   (`orgs.modules`).
 - **Sport packs.** `events.sport` / YAML `sport:` picks `events/sports/<sport>.yaml`.
@@ -399,3 +400,80 @@ $c up -d
   stubbed. `php artisan test tests/Smoke`.
 - `staging.sh <url>`: read-only HTTP checks for a deployed site (health, org page, landing form,
   login, built assets, unsigned webhook rejected, HTTP→HTTPS redirect). Safe against production.
+
+## Notifications: branded email, pass PDF, WhatsApp
+
+Owner-only settings at **`/dashboard/settings/notifications`** (Org Settings → Notifications).
+
+### What is sent, and when
+
+| Message | Trigger | Channels |
+|---|---|---|
+| Registration confirmed (pass PDF + PNG attached, EF- number, payment receipt, QR note) | `RegistrationPaid` (webhook, payment return or reconcile), after the pass is generated | Email; WhatsApp when on |
+| Event reminder | `notifications:send-reminders`, hourly via the scheduler, for events starting in the next 24 h (once per registration; org can switch off) | Email; WhatsApp when on and a reminder template is set |
+| Check-in confirmed | Registration `checked_in_at` set (off by default; org switch) | Email |
+
+Paid events never email before payment succeeds: nothing is sent while a registration is `pending`.
+There is no free-registration path yet (every registration goes through `/pay`); one that dispatches
+`RegistrationPaid` gets the same messages.
+
+Every email is a queued `App\Mail\BrandedMail` (5 tries over about 40 minutes). WhatsApp is a queued
+`SendWhatsAppTemplate` job. Outcomes are logged in `notification_deliveries` and shown under
+**Delivery status** on the settings page. The pass link in emails and WhatsApp is a signed URL
+(`/passes/{id}/pass.pdf`, valid 120 days) that generates the PDF on first open if needed.
+
+### Email: platform sender (default)
+
+The platform mailer from `MAIL_*` sends for every org: from `MAIL_FROM_ADDRESS` with the organiser's
+name (or the **Sender name** setting), reply-to the organiser (setting, else the org owner's email).
+
+1. **Brevo:** Brevo → SMTP & API → SMTP: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`,
+   `MAIL_USERNAME=<SMTP login>`, `MAIL_PASSWORD=<SMTP key>`.
+   **SES:** create SMTP credentials in the SES console: `MAIL_HOST=email-smtp.<region>.amazonaws.com`,
+   `MAIL_PORT=587`, `MAIL_USERNAME`/`MAIL_PASSWORD` = the SES SMTP user. (No AWS SDK needed.)
+2. Verify the sending domain of `MAIL_FROM_ADDRESS` with the provider (SPF + DKIM records; ask Indefine ops).
+3. Run a queue worker (`queue` service in Sail and in `deploy/compose.prod.yml`) and the scheduler.
+4. Settings page → **Send test** sends through the platform mailer.
+
+Locally everything lands in Mailpit (`MAIL_HOST=mailpit MAIL_PORT=1025`, UI on :8025).
+
+**Previews:** the settings page links to **Registration confirmed**, **Event reminder** and
+**Check-in confirmed**, rendered with the org's latest registration and event branding. Emails use
+the event's `branding` colours (header = secondary, accent and button = primary, text colour chosen
+for contrast), its logo (`branding.logo` on the public disk or an absolute URL), and include a plain-text part.
+
+### Email: custom SMTP (add-on `email_branding`)
+
+For organisers who want mail from their own mailbox or domain. Enter host, port, encryption
+(STARTTLS/SSL/none), username, password, from-email and from-name, then **Send test**. Their server
+is used only after a test succeeds; changing the server details requires a new test. The password is
+stored with Laravel's `encrypted` cast (needs a stable `APP_KEY`). Without the add-on in the Season
+Pass the section says to contact Indefine.
+
+### WhatsApp (add-on `sms_whatsapp`)
+
+Provider: **Meta WhatsApp Cloud API** (`App\Services\WhatsApp\MetaCloudGateway`), behind the
+`App\Services\WhatsApp\WhatsAppGateway` interface so Interakt, Wati or AiSensy adapters can be added
+in `WhatsAppGatewayFactory`. Each org uses its own WhatsApp Business number:
+
+1. Meta Business Manager → WhatsApp → add the phone number; copy its **Phone number ID**.
+2. Create a System User with `whatsapp_business_messaging` and generate a permanent **access token**.
+3. In WhatsApp Manager, get two templates approved (category Utility):
+   - confirmation: header **Document**; body with `{{1}}` name, `{{2}}` event, `{{3}}` pass number, `{{4}}` date.
+     Example body: *Hi {{1}}, you're registered for {{2}}. Pass {{3}}. See you on {{4}}. Show the QR on the attached pass at check-in.*
+   - reminder (optional): body `{{1}}` name, `{{2}}` event, `{{3}}` date, `{{4}}` venue.
+4. Settings page → WhatsApp: paste the ID, token and template names, set the language code, save,
+   then **Send test** (sends Meta's built-in `hello_world`), and switch it on.
+
+The token is stored encrypted. With the add-on off, the toggle off, or setup incomplete, no WhatsApp
+call is made and the page shows the setup checklist; email still goes out. WhatsApp errors are
+retried and logged; they never affect the registration or its email. Numbers are normalised to
+`91XXXXXXXXXX` for 10-digit Indian mobiles.
+
+### Season Pass modules
+
+`Module::EmailBranding` (`email_branding`) and `Module::SmsWhatsapp` (`sms_whatsapp`) are optional
+modules. When an `App\Contracts\Entitlements` implementation is bound it decides; until then the org
+toggle in `orgs.modules` does (available unless set to `false`).
+
+Tests: `tests/Feature/Notifications`.

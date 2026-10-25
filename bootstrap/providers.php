@@ -1,8 +1,11 @@
 <?php
 
+use App\Notifications\NotificationServiceProvider;
 use App\Providers\AppServiceProvider;
+use App\Providers\PaymentServiceProvider;
 
 return [
     AppServiceProvider::class,
-    App\Providers\PaymentServiceProvider::class,
+    PaymentServiceProvider::class,
+    NotificationServiceProvider::class,
 ];

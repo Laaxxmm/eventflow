@@ -13,7 +13,8 @@ use App\Models\SeasonPass;
  *   passes) are always enabled, with or without a pass, so an org can take
  *   entries before buying a season.
  * - Optional modules (config('eventflow.modules.optional'): check-in, race
- *   sheets, certificates) are enabled only when ALL hold:
+ *   sheets, certificates, email branding, SMS/WhatsApp) are enabled only when
+ *   ALL hold:
  *    - the org has an active Season Pass (status active, today within
  *      starts_on..ends_on, Asia/Kolkata);
  *    - that pass includes the module (season_passes.modules), and

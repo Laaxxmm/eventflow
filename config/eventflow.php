@@ -60,7 +60,7 @@ return [
         // Always on, with or without a Season Pass; cannot be toggled off.
         'core' => ['registration', 'payments', 'passes'],
         // Need an active pass that includes them; toggled per org in Org Settings.
-        'optional' => ['checkin', 'race_sheets', 'certificates'],
+        'optional' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
     ],
 
     'race_sheets' => [
