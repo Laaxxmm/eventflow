@@ -158,9 +158,11 @@ Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
 
 - **Season Pass, not per-event invoices.** A `season_passes` row (dates, status,
   included `modules`) grants an org a season. Core modules (registration,
-  payments, passes) are on while a pass is active. Optional modules (check-in,
-  race sheets, certificates) are toggled in Org Settings (`orgs.modules`) and
-  only work when the pass includes them. With no active pass, every module is off.
+  payments, passes) are always on, so an org can take entries before buying a
+  season. Optional modules (check-in, race sheets, certificates, email
+  branding, SMS/WhatsApp) need an active
+  pass that includes them, and owners can switch them off in Org Settings
+  (`orgs.modules`).
 - **Sport packs.** `events.sport` / YAML `sport:` picks `events/sports/<sport>.yaml`.
   An event inherits each top-level key it omits (`distances`, `age_bands`, `fields`,
   `race_sheet`, `certificate`); keys it sets replace the pack's value entirely.

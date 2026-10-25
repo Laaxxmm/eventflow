@@ -2,10 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Module;
 use App\Enums\Role;
 use App\Models\Event;
 use App\Models\Org;
 use App\Models\Registration;
+use App\Models\SeasonPass;
 use App\Models\User;
 use App\Sports\SportPack;
 use Illuminate\Database\Seeder;
@@ -13,6 +15,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Local demo data. Log in as owner@demo.test or volunteer@demo.test, password "password".
+ * The demo org has an active Season Pass with every module.
  */
 class DemoSeeder extends Seeder
 {
@@ -26,6 +29,15 @@ class DemoSeeder extends Seeder
             'name' => 'Demo Runners',
             'phone' => '9800000000',
             'colours' => ['primary' => $config['branding']['primary'], 'secondary' => $config['branding']['secondary']],
+        ]);
+
+        // A season covering the demo event, with every module, so check-in, race
+        // sheets and certificates work in the demo.
+        SeasonPass::withoutGlobalScopes()->updateOrCreate(['org_id' => $org->id, 'plan' => 'Demo season'], [
+            'starts_on' => now('Asia/Kolkata')->toDateString(),
+            'ends_on' => now('Asia/Kolkata')->addYear()->toDateString(),
+            'status' => 'active',
+            'modules' => Module::cases(),
         ]);
 
         foreach ([['owner@demo.test', 'Demo Owner', Role::Owner], ['volunteer@demo.test', 'Demo Volunteer', Role::Volunteer]] as [$email, $name, $role]) {
