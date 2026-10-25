@@ -454,3 +454,61 @@ modules. When an `App\Contracts\Entitlements` implementation is bound it decides
 toggle in `orgs.modules` does (available unless set to `false`).
 
 Tests: `tests/Feature/Notifications`.
+
+## SaaS marketing & auth
+
+The site that sells EventFlow, separate from organisers' event pages:
+
+| URL | What |
+|---|---|
+| `/` | Marketing home: hero, how it works, features, pricing, FAQ (`resources/views/marketing`) |
+| `/pricing` | Plans, add-ons, comparison table; each self-serve plan card starts signup with that plan and add-ons |
+| `/register` (`/signup`) | Organiser signup: org name, name, email, password, **plan + add-ons** |
+| `/login`, `/forgot-password` | Breeze login and password reset |
+| `/app` | Goes to the right home: dashboard, check-in (volunteers) or `/platform` (Indefine) |
+| `/account/plan` | Organiser's plan, trial end and add-ons; shown right after signup |
+| `/platform/orgs` | Indefine platform console (platform admins only) |
+| `/{org}`, `/{org}/{event}` | Per-event landings (stream C), unchanged |
+
+### Plans
+
+Plans and add-ons are config, not Blade: **`config/plans.php`** (Season Pass per season in INR,
+percentage on paid registrations, limits, modules, features, add-on prices, trial length, sales
+email, brand line). Amounts there are placeholders until Indefine confirms them.
+
+Signup creates the user (owner), the org (`orgs.plan`, `orgs.addons`), and starts a **14-day free trial**
+(`subscription_status=trialing`, `trial_ends_at`). The trial is also stored as a zero-amount Season
+Pass with the plan's modules, and optional modules outside the plan are switched off in `orgs.modules`.
+No card is taken and nothing is charged: billing connects when Cashfree/Razorpay SaaS subscriptions
+are live (the organiser sees this on `/account/plan`). **Scale** is "contact Indefine" (mailto
+`SALES_CONTACT_EMAIL`). `BRAND_SHOW_INDEFINE=false` shows "EventFlow" without "by Indefine".
+
+### Platform admin (Indefine)
+
+`users.is_platform_admin` (never mass assignable, independent of org roles) and the `platform-admin`
+gate protect `/platform`. Admins see every organisation with plan, add-ons, trial/subscription
+status and counts, can filter by plan/status, **extend a trial**, and **suspend / reactivate** an org.
+Members of a suspended org are signed out on their next request. Read-only impersonation is not built.
+
+### Demo accounts (local/staging)
+
+```bash
+# .env (values from .env.example; local only)
+PLATFORM_ADMIN_PASSWORD=ChangeMe-EventFlow-Admin!
+DEMO_ORGANISER_PASSWORD=ChangeMe-EventFlow-Organiser!
+
+php artisan db:seed            # DemoSeeder + PlatformSeeder
+# or only the SaaS accounts:
+php artisan db:seed --class=PlatformSeeder
+```
+
+| Account | Email | Password |
+|---|---|---|
+| Demo platform admin | `admin@eventflow.local` | `PLATFORM_ADMIN_PASSWORD` |
+| Demo organiser (Starter trial, org `demo-organiser`) | `organiser@eventflow.local` | `DEMO_ORGANISER_PASSWORD` |
+
+The seeder refuses to run without these variables, and in production refuses the `.env.example`
+values. Never commit a real password; set production ones only in the server's `.env`.
+
+Tests: `tests/Feature/Marketing` (marketing pages, signup with plan/add-ons, login, platform admin 403,
+suspension, seeder).
