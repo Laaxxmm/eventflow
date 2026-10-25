@@ -60,7 +60,7 @@ return [
         // On whenever the active pass includes them; cannot be toggled off.
         'core' => ['registration', 'payments', 'passes'],
         // Toggled per org in Org Settings.
-        'optional' => ['checkin', 'race_sheets', 'certificates'],
+        'optional' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
     ],
 
     'race_sheets' => [
