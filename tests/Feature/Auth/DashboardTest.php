@@ -5,7 +5,7 @@ use App\Models\Org;
 use App\Models\Registration;
 use App\Models\User;
 use App\Payments\PaymentStatus;
-use Illuminate\Support\Facades\Route;
+use Tests\Feature\Reports\ReportFixtures;
 
 beforeEach(function () {
     $this->org = Org::factory()->create();
@@ -61,16 +61,20 @@ test('CSV export has a header, one row per participant and custom answers', func
         ->and($rows[1])->toContain('M', 'Female');
 });
 
-test('each event links to its race sheet and certificates', function () {
-    // Stream E's routes (routes/reports.php); stand-ins until it is merged.
-    if (! Route::has('reports.race-sheet')) {
-        Route::get('/dashboard/events/{event}/race-sheet', fn () => '')->name('reports.race-sheet');
-        Route::get('/dashboard/events/{event}/certificates', fn () => '')->name('reports.certificates');
-        app('router')->getRoutes()->refreshNameLookups();
-    }
+test('each event links to its race sheet and certificates when those modules are on', function () {
+    ReportFixtures::grantPass($this->org);
 
     $this->actingAs($this->owner)->get('/dashboard')
         ->assertOk()
         ->assertSee(route('reports.race-sheet', $this->event), false)
         ->assertSee(route('reports.certificates', $this->event), false);
+});
+
+test('race sheet and certificate links are hidden while the modules are off', function () {
+    // No Season Pass: optional modules are off (their routes answer 403).
+    $this->actingAs($this->owner)->get('/dashboard')
+        ->assertOk()
+        ->assertDontSee(route('reports.race-sheet', $this->event), false)
+        ->assertDontSee(route('reports.certificates', $this->event), false)
+        ->assertDontSee('Race sheets');
 });

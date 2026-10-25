@@ -1,100 +1,80 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+{{-- Organiser navigation. $nav from App\View\Composers\NavigationComposer. Parent has x-data="{ open }". --}}
+@php
+    $user = Auth::user();
+    $orgName = $user->org?->name ?? ($user->isPlatformAdmin() ? 'Indefine' : config('app.name'));
+@endphp
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
+{{-- Phone top bar --}}
+<div class="sticky top-0 z-30 flex h-14 items-center justify-between bg-[#0b1020] px-4 text-white lg:hidden">
+    <a href="{{ route('app') }}" class="text-lg font-extrabold tracking-tight">Event<span class="text-[#d9ff45]">Flow</span></a>
+    <button type="button" @click="open = true" class="rounded-lg p-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#d9ff45]" aria-label="{{ __('Open menu') }}">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+</div>
+
+{{-- Drawer backdrop (phones) --}}
+<div x-show="open" x-transition.opacity @click="open = false" class="fixed inset-0 z-40 bg-black/40 lg:hidden" style="display: none;"></div>
+
+<aside
+    :class="open ? 'translate-x-0' : '-translate-x-full'"
+    class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#0b1020] text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0"
+    aria-label="{{ __('Main') }}"
+>
+    <div class="flex items-center justify-between px-6 pt-6">
+        <a href="{{ route('app') }}" class="text-xl font-extrabold tracking-tight">Event<span class="text-[#d9ff45]">Flow</span></a>
+        <button type="button" @click="open = false" class="rounded-lg p-1.5 text-white/60 hover:bg-white/10 lg:hidden" aria-label="{{ __('Close menu') }}">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+    </div>
+    <p class="mt-1 truncate px-6 text-sm text-white/50">{{ $orgName }}</p>
+
+    @if ($user->org && Route::has('organiser.events.create') && $user->can('view-dashboard'))
+        <div class="px-4 pt-6">
+            <a href="{{ route('organiser.events.create') }}" class="flex items-center justify-center gap-2 rounded-xl bg-[#d9ff45] px-4 py-2.5 text-sm font-bold text-[#0b1020] hover:bg-white">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                {{ __('New event') }}
+            </a>
+        </div>
+    @endif
+
+    <nav class="mt-6 flex-1 space-y-6 overflow-y-auto px-3">
+        @foreach ($nav as $group)
+            <div>
+                @if ($group['label'])
+                    <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-white/40">{{ $group['label'] }}</p>
+                @endif
+                <ul class="space-y-1">
+                    @foreach ($group['items'] as $item)
+                        <li>
+                            <a href="{{ $item['href'] }}" @class([
+                                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
+                                'bg-white/10 text-white' => $item['active'],
+                                'text-white/70 hover:bg-white/5 hover:text-white' => ! $item['active'],
+                            ]) @if ($item['active']) aria-current="page" @endif>
+                                <svg class="h-5 w-5 shrink-0 {{ $item['active'] ? 'text-[#d9ff45]' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $item['icon'] }}"/></svg>
+                                {{ $item['label'] }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
+        @endforeach
+    </nav>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+    <div class="border-t border-white/10 p-4">
+        <div class="flex items-center gap-3 px-2">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold">{{ \Illuminate\Support\Str::of($user->name)->explode(' ')->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}</span>
+            <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold">{{ $user->name }}</p>
+                <p class="truncate text-xs text-white/50">{{ $user->email }}</p>
             </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+        </div>
+        <div class="mt-3 flex gap-2 text-sm">
+            <a href="{{ route('profile.edit') }}" class="flex-1 rounded-lg px-3 py-2 text-center text-white/70 hover:bg-white/5 hover:text-white">{{ __('Profile') }}</a>
+            <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                @csrf
+                <button type="submit" class="w-full rounded-lg px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white">{{ __('Log out') }}</button>
+            </form>
         </div>
     </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
+</aside>
