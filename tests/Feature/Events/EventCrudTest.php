@@ -102,7 +102,11 @@ it('scopes events to the organiser org and blocks volunteers', function () {
     $this->actingAs($stranger)->get("/organiser/events/{$event->id}/edit")->assertNotFound();
 
     $volunteer = User::factory()->create(['org_id' => $user->org_id, 'role' => 'volunteer']);
-    $this->actingAs($volunteer)->get('/organiser/events')->assertForbidden();
+    $this->actingAs($volunteer)->get('/organiser/events')->assertRedirect('/checkin');
+    $this->actingAs($volunteer)->post('/organiser/events', eventInput())->assertForbidden();
+
+    $staff = User::factory()->create(['org_id' => $user->org_id, 'role' => 'staff']);
+    $this->actingAs($staff)->get('/organiser/events')->assertOk();
 
     $this->post('/logout');
     $this->get('/organiser/events')->assertRedirect('/login');

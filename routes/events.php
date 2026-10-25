@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Route;
  * Required last from routes/web.php: /{org} and /{org}/{slug} are catch-alls.
  */
 
-Route::middleware(['auth', 'verified'])->prefix('organiser')->name('organiser.')->group(function () {
+Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('organiser')->name('organiser.')->group(function () {
     Route::resource('events', EventController::class)->except('show');
 });
 
 Route::get('/r/{registration}/review', [RegistrationController::class, 'review'])
+    ->whereNumber('registration')
     ->middleware('signed')
     ->name('registrations.review');
 
@@ -36,5 +37,5 @@ Route::get('/{org}/{slug}', [PublicEventController::class, 'show'])
 
 Route::post('/{org}/{slug}/register', [RegistrationController::class, 'store'])
     ->where(['org' => $org, 'slug' => $slug])
-    ->middleware('throttle:20,1')
+    ->middleware('throttle:registration')
     ->name('registrations.store');

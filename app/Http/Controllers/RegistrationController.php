@@ -11,6 +11,8 @@ use App\Landing\RegistrationForm;
 use App\Landing\Theme;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Models\Tenancy\CurrentOrg;
+use App\Models\Tenancy\OrgScope;
 use App\Payments\PaymentStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,6 +67,7 @@ class RegistrationController extends Controller
             }
 
             return Registration::create([
+                'org_id' => $event->org_id,
                 'event_id' => $event->id,
                 'pass_no' => Registration::newPassNo(),
                 'status' => PaymentStatus::Pending,
@@ -84,9 +87,11 @@ class RegistrationController extends Controller
         ));
     }
 
-    /** Signed summary page whose button POSTs to /pay/{registration}. */
-    public function review(Registration $registration): View
+    /** Signed summary page whose button POSTs to /pay/{registration}. The signature is the access check. */
+    public function review(int $registration): View
     {
+        $registration = Registration::withoutGlobalScope(OrgScope::class)->findOrFail($registration);
+        app(CurrentOrg::class)->set($registration->org_id);
         $event = $registration->event()->with('org')->firstOrFail();
         $config = $this->landing->load($event->org->slug, $event->slug);
 

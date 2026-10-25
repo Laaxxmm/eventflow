@@ -1,7 +1,9 @@
 <?php
 
 use App\Landing\Capacity;
+use App\Models\Org;
 use App\Models\Registration;
+use App\Models\User;
 use App\Payments\PaymentStatus;
 
 use function Tests\Feature\Events\registrationInput;
@@ -98,4 +100,25 @@ it('closes registration once the event has started', function () {
 
     $this->post(REGISTER, registrationInput())->assertSessionHasErrors('distance');
     expect(Registration::count())->toBe(0);
+});
+
+it('serves public pages as the event org even when another org is signed in', function () {
+    $event = syncMarathon();
+    $config = $event->config;
+    $config['distances'][3]['capacity'] = 1;
+    $event->update(['config' => $config]);
+    $this->post(REGISTER, registrationInput(['distance' => 'FM']));
+
+    $other = Org::create(['slug' => 'other-org', 'name' => 'Other']);
+    $this->actingAs(User::factory()->create(['org_id' => $other->id, 'role' => 'owner']));
+
+    $this->get('/demo-runners')->assertOk()->assertSee('Bengaluru City Marathon 2027');
+    $this->post(REGISTER, registrationInput(['distance' => 'FM', 'email' => 'b@example.com']))
+        ->assertSessionHasErrors(['distance' => 'Full Marathon (42.2K) is full.']);
+
+    $response = $this->post(REGISTER, registrationInput(['distance' => 'HM', 'email' => 'c@example.com']));
+    $this->get($response->headers->get('Location'))->assertOk()->assertSee('Half Marathon (21.1K)');
+
+    $registration = Registration::withoutGlobalScopes()->where('email', 'c@example.com')->sole();
+    expect($registration->org_id)->toBe($event->org_id);
 });

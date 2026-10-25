@@ -7,7 +7,6 @@ use App\Landing\DatabaseLandingSource;
 use App\Landing\EventStatus;
 use App\Landing\RegistrationForm;
 use App\Landing\Theme;
-use App\Models\Org;
 use Illuminate\View\View;
 
 class PublicEventController extends Controller
@@ -17,7 +16,7 @@ class PublicEventController extends Controller
     /** /{org}: the org's published events, soonest first. */
     public function org(string $org): View
     {
-        $org = Org::where('slug', $org)->firstOrFail();
+        $org = $this->landing->org($org);
 
         $events = $org->events()
             ->where('status', EventStatus::Published)

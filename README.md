@@ -159,12 +159,15 @@ Rules:
 - **Registration form:** name, email, mobile, distance are always asked. When the event has `age_bands`
   or an `age` field, a date of birth is asked instead of age: age is computed **on race day** (IST) and
   must fall in a band; `answers` stores `dob`, `age`, `age_band` plus each configured field.
+- **Tenancy:** public pages set `CurrentOrg` to the event's org, so a signed-in organiser of another org
+  sees the same landing, places and review page as anyone else.
 - **Capacity** is checked inside a transaction that locks the event row. Closed once the start time passes.
 - **Hand-off:** a successful POST creates a `Pending` registration (`EF-` pass number, `amount_paise` from
   the distance) and redirects to a signed review page (`/r/{registration}/review`, 24 h) whose button
   POSTs to `payments.create` (`/pay/{registration}`).
 - **Season Pass:** when an `Entitlements` implementation is bound, registration needs `Module::Registration`.
-- **Organiser CRUD** at `/organiser/events` (auth + verified, scoped to `users.org_id`, volunteers 403).
+- **Organiser CRUD** at `/organiser/events` (auth + verified + `can:view-dashboard`, so owners and staff;
+  events are org-scoped by `BelongsToOrg`).
   It writes `distances`, `age_bands` and `fields` explicitly; sport packs only prefill a new event.
   Slugs are generated from the name, unique per org, and fixed after creation.
 - **Theme:** `branding.primary` / `secondary` become `--brand-*` CSS variables, with readable text colours

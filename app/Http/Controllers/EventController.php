@@ -13,7 +13,6 @@ use App\Models\Event;
 use App\Models\Org;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -49,7 +48,7 @@ class EventController extends Controller
     {
         $org = $this->org($request);
         $input = $request->validate(EventForm::rules());
-        $slug = $this->uniqueSlug($org, $input['name']);
+        $slug = Event::uniqueSlug($org->id, $input['name']);
 
         $authored = EventForm::toConfig($input, $org->slug, $slug);
         $config = $this->compile($authored);
@@ -104,11 +103,11 @@ class EventController extends Controller
         return redirect()->route('organiser.events.index')->with('status', 'event-deleted');
     }
 
-    /** The signed-in organiser's org; staff of another org get a 404 for its events. */
+    /** The signed-in organiser's org (route model binding is already org-scoped). */
     private function org(Request $request, ?Event $event = null): Org
     {
         $user = $request->user();
-        abort_if($user->org_id === null || $user->role === 'volunteer', 403);
+        abort_if($user->org_id === null, 403);
 
         if ($event !== null) {
             abort_unless($event->org_id === $user->org_id, 404);
@@ -134,18 +133,5 @@ class EventController extends Controller
         } catch (InvalidEventConfig $e) {
             throw ValidationException::withMessages(EventForm::errorBag($e->errors));
         }
-    }
-
-    private function uniqueSlug(Org $org, string $name): string
-    {
-        $base = Str::limit(Str::slug($name), 70, '') ?: 'event';
-        $base = trim($base, '-');
-        $slug = $base;
-
-        for ($n = 2; $org->events()->where('slug', $slug)->exists(); $n++) {
-            $slug = "{$base}-{$n}";
-        }
-
-        return $slug;
     }
 }
