@@ -731,3 +731,29 @@ Add `resources/views/certificates/templates/<id>.blade.php` (include
 `$p` and `$art`), register it in `eventflow.certificates.gallery`, add a thumbnail, and add
 the key to the `premium templates` and `gallery` datasets in
 `tests/Feature/Reports/CertificateDesignTest.php`.
+
+## Payments: organiser gateways
+
+Organisers connect their **own** Cashfree or Razorpay account in **Settings → Payments**
+(`/dashboard/settings/payments`, owners only), so registration fees settle straight into their
+account. Orgs that don't connect one use the platform account from `.env`
+(`PAYMENT_PROVIDER`, `CASHFREE_*`, `RAZORPAY_*`).
+
+- **Keys** are stored on `orgs.payment_credentials` with Laravel's `encrypted:array` cast
+  (`APP_KEY`), hidden from serialisation, never shown again (the page shows `••••` + last 4),
+  and a blank secret field keeps the saved value.
+  - Cashfree: App ID, Secret key, mode (test = sandbox, live = production), optional webhook
+    secret (Cashfree signs webhooks with the secret key by default).
+  - Razorpay: Key ID (`rzp_test_…` / `rzp_live_…` sets the mode), Key secret, Webhook secret.
+- **Saving** a provider's keys makes it the org's gateway (`orgs.payment_provider`).
+  **Disconnect** removes the keys and falls back to the platform account.
+- **Test connection** makes one read-only API call with the saved keys (Razorpay: list one
+  order; Cashfree: fetch a non-existent order, where 404 means authenticated) and records
+  `verified_at`. Nothing is charged.
+- **Webhooks:** each org has its own URL, `/webhooks/{cashfree|razorpay}/{org-slug}`, shown on
+  the page with setup steps. The signature is checked with that org's secret, and the webhook
+  can only mark that org's registrations paid. The platform account keeps `/webhooks/{provider}`.
+- **Code:** `App\Payments\GatewayManager::for()` returns the org's gateway when it has complete
+  keys (`Org::ownPaymentKeys()`), otherwise the platform one; `forOrg()` and `platform()` are
+  used by the webhook controller. Reconciliation, the payment return page and refunds all go
+  through `for($registration)`, so they use the same account that created the order.

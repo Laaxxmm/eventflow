@@ -7,20 +7,25 @@ use App\Models\Registration;
 use App\Payments\Dto\PaymentEvent;
 use App\Payments\Dto\PaymentOrder;
 use App\Payments\Dto\RefundResult;
-use App\Payments\PaymentStatus;
 use Illuminate\Http\Request;
 use Razorpay\Api\Api;
 
 class RazorpayGateway implements PaymentGateway
 {
     private Api $api;
+
     private string $keyId;
+
     private string $keySecret;
+
     private string $webhookSecret;
 
-    public function __construct()
+    /**
+     * @param  array<string, mixed>|null  $cfg  An org's own keys (GatewayManager); null = platform keys from config
+     */
+    public function __construct(?array $cfg = null)
     {
-        $cfg = config('eventflow.payment.providers.razorpay');
+        $cfg ??= config('eventflow.payment.providers.razorpay');
         $this->keyId = $cfg['key_id'] ?? '';
         $this->keySecret = $cfg['key_secret'] ?? '';
         $this->webhookSecret = $cfg['webhook_secret'] ?? '';
@@ -63,7 +68,7 @@ class RazorpayGateway implements PaymentGateway
     public function verifyWebhook(Request $req): bool
     {
         $signature = $req->header('X-Razorpay-Signature');
-        if (!$signature) {
+        if (! $signature) {
             return false;
         }
         $payload = $req->getContent();
