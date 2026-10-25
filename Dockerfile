@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 #
 # Production image: nginx + php-fpm under supervisord (role "web"), or a queue
-# worker / scheduler from the same image (roles "queue", "scheduler").
+# worker / scheduler from the same image (roles "queue", "scheduler"), or all
+# three in one container (role "all", for Railway).
 # Build:  docker build -t eventflow .
 # Run:    see deploy/compose.prod.yml
 
@@ -51,6 +52,7 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-eventflow.ini
 COPY docker/php/fpm.conf /usr/local/etc/php-fpm.d/zz-eventflow.conf
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisor/web.conf /etc/supervisor/web.conf
+COPY docker/supervisor/all.conf /etc/supervisor/all.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 
 COPY --chown=www-data:www-data --from=vendor /var/www/html /var/www/html
@@ -69,7 +71,7 @@ ENV APP_ENV=production \
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD if [ "$CONTAINER_ROLE" = "web" ]; then wget -qO- http://127.0.0.1:8080/up >/dev/null; fi
+    CMD if [ "$CONTAINER_ROLE" = "web" ] || [ "$CONTAINER_ROLE" = "all" ]; then wget -qO- http://127.0.0.1:8080/up >/dev/null; fi
 
 ENTRYPOINT ["/sbin/tini", "--", "entrypoint"]
 CMD []
