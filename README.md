@@ -4,26 +4,94 @@ White-label event registration SaaS for Indian skating and running races:
 branded landing pages, paid registration (Cashfree or Razorpay), EF- passes
 (PNG + PDF with a locally generated QR), and QR check-in.
 
-Stack: Laravel 12, PHP 8.3, MySQL 8, Blade + Tailwind (Breeze), Pest, Laravel Sail.
+Stack: Laravel 12, PHP 8.3, MySQL 8, Blade + Tailwind (Breeze), Pest, Docker (Sail locally,
+nginx + php-fpm image behind Caddy in production).
 
-## Quick start
+## Quick start (local, about 5 minutes)
+
+Needs Docker and PHP 8.3 + Composer (or only Docker: see the note below).
 
 ```bash
+git clone https://github.com/Laaxxmm/eventflow.git && cd eventflow
 cp .env.example .env
 composer install
-./vendor/bin/sail up -d          # app, MySQL 8, Mailpit (:8025), queue worker
+./vendor/bin/sail up -d                  # app :80, MySQL 8.4, Mailpit :8025, queue worker
 ./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate --seed
+./vendor/bin/sail artisan migrate --seed # demo org, users and the marathon
+./vendor/bin/sail artisan events:sync    # every events/**/*.yaml -> events table
 ./vendor/bin/sail npm install && ./vendor/bin/sail npm run build
 ```
 
-Locally, set `MAIL_HOST=mailpit MAIL_PORT=1025` in `.env` to catch verification
-and reset emails in Mailpit. Demo logins (from `DemoSeeder`): `owner@demo.test`
-and `volunteer@demo.test`, password `password`.
+- App: http://localhost. Demo landing: http://localhost/demo-runners/bengaluru-city-marathon-2027
+- Logins: `owner@demo.test` (organiser) and `volunteer@demo.test` (check-in), password `password`.
+- Mail: set `MAIL_HOST=mailpit MAIL_PORT=1025` in `.env`, then read every email at http://localhost:8025.
+- No local PHP? Install dependencies with Docker first:
+  `docker run --rm -v "$PWD":/app -w /app composer:2 install --ignore-platform-reqs`.
+- Without Docker: point `DB_*` at a local MySQL 8, then `php artisan migrate --seed && composer dev`.
 
-Without Docker: point `DB_*` at a local MySQL 8, then `php artisan migrate --seed && composer dev`.
+## Tests
 
-Tests: `php artisan test` (in-memory SQLite). Style: `./vendor/bin/pint --test`.
+```bash
+php artisan test                    # unit + feature (in-memory SQLite; CI runs them on MySQL 8.4)
+php artisan test tests/Smoke        # end to end: register -> webhook -> pass mail -> check-in
+./vendor/bin/pint --test            # code style
+php artisan events:validate         # event YAML against events/schema.json
+```
+
+To run the suite on MySQL like CI: `DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_DATABASE=testing php artisan test`.
+
+## Environment keys
+
+`.env.example` (local) and [`deploy/env.example`](deploy/env.example) (staging/production) list every key.
+Never commit a filled-in `.env`.
+
+| Keys | What for |
+|---|---|
+| `APP_KEY`, `APP_URL` | `php artisan key:generate`; the public base URL (https in production). |
+| `DB_*` | MySQL 8. `DB_HOST=mysql` inside Docker. |
+| `PAYMENT_PROVIDER` | `cashfree` or `razorpay`: the default; an org's `payment_provider` overrides it. |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | Razorpay API keys and webhook secret. |
+| `CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, `CASHFREE_ENV`, `CASHFREE_WEBHOOK_SECRET` | Cashfree API keys, `sandbox` or `production`, webhook signing key. |
+| `MAIL_*` | Mailpit locally; Brevo SMTP or Amazon SES (SMTP) in production. Never Gmail SMTP. |
+| `PASS_SIGNING_KEY` | HMAC key for pass QR codes (`openssl rand -hex 32`). Rotating it invalidates every issued QR. |
+| `QUEUE_CONNECTION=database` | Pass PDFs and emails run on the queue worker. |
+| `RCLONE_CONFIG_BACKUP_*`, `BACKUP_*` | Production only: nightly backups (see Ops). |
+
+### Sandbox payment keys
+
+Use test keys everywhere except production. The webhook URL is `https://<your domain>/webhooks/<provider>`.
+Webhooks need a public URL, so test them on staging (or through a tunnel such as `cloudflared` locally).
+
+**Razorpay** (Test Mode)
+1. Dashboard → switch to **Test Mode** → Account & Settings → **API Keys** → Generate Test Key.
+   Copy the `rzp_test_…` key id and secret into `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
+2. Account & Settings → **Webhooks** → Add new webhook: URL `https://<domain>/webhooks/razorpay`,
+   a secret of your choice (copy it into `RAZORPAY_WEBHOOK_SECRET`), events `payment.captured`,
+   `payment.failed`, `order.paid`, `refund.processed`.
+3. Pay with Razorpay's documented test cards or test UPI IDs; nothing is charged.
+
+**Cashfree** (Sandbox)
+1. Merchant dashboard → switch to **Test/Sandbox** → Developers → **API Keys**.
+   Copy the App ID and Secret Key into `CASHFREE_APP_ID` and `CASHFREE_SECRET_KEY`; keep `CASHFREE_ENV=sandbox`.
+2. Developers → **Webhooks** → add `https://<domain>/webhooks/cashfree` for payment success/failure.
+   Cashfree signs webhooks with your secret key, so `CASHFREE_WEBHOOK_SECRET` is normally the same value.
+3. Pay with Cashfree's documented sandbox cards or UPI.
+
+Set `PAYMENT_PROVIDER` to pick the default. Both adapters implement `App\Contracts\PaymentGateway`;
+nothing in the app is tied to one provider.
+
+### Adding an event (YAML)
+
+1. Copy `events/demo/example-marathon.yaml` to `events/<org-slug>/<event-slug>.yaml`.
+2. Set `org` (the org's slug), `slug`, `name`, `date` (IST if no offset), `venue`, `branding` colours,
+   `hero`, and priced `distances`. Pick a `sport:` pack (`skating`, `cycling`, `running`, `generic`) to
+   inherit its age bands, form fields and race sheet; any key you set replaces the pack's.
+   The full shape is [`events/schema.json`](events/schema.json).
+3. `php artisan events:validate` (CI runs it too), then `php artisan events:sync`.
+4. Open `/<org-slug>/<event-slug>`. On staging/production, merge to main and redeploy:
+   `deploy/deploy.sh` runs `events:sync` after every deploy.
+
+Organisers can also create and edit events in the app at `/organiser/events` (same config shape).
 
 ## Parallel sessions
 
@@ -219,3 +287,93 @@ through the org scope; volunteers are sent to check-in.
 
 Tests: `tests/Feature/Reports` (fixtures in `tests/Feature/Reports/fixtures`:
 a skating event YAML and an A4 background PNG).
+
+## Ops: CI, Docker, staging and backups (Session 6)
+
+### CI (`.github/workflows/tests.yml`)
+
+| Job | What it checks |
+|---|---|
+| **Pint** | `pint --test` on every PHP file the PR (or push) adds or changes. The whole-repo run is report-only until older files are formatted. |
+| **PHP 8.3 / 8.4 · MySQL 8.4** | `composer install`, `events:validate`, `php artisan test`, then `php artisan test tests/Smoke`, all against a MySQL 8.4 service. |
+| **Docker image + staging stack** | Builds the production image and runs `deploy/deploy.sh --build` on the runner (Caddy on `https://localhost`), then the HTTP smoke check, a backup + restore test, and checks every service is up. |
+| **Publish image** | On `main`: pushes `ghcr.io/laaxxmm/eventflow:main` and `:<sha>`. |
+| **Deploy staging** | On `main`, when the repository variable `STAGING_HOST` is set: SSH in and run `deploy/deploy.sh` (secrets `STAGING_SSH_KEY`, `STAGING_USER`; optional variable `STAGING_APP_DIR`). |
+
+### Production image (`Dockerfile`, `docker/`)
+
+One image, three roles picked by `CONTAINER_ROLE`: `web` (nginx + php-fpm on :8080, runs migrations
+when `RUN_MIGRATIONS=1`), `queue` (`queue:work`: passes and mail) and `scheduler` (`schedule:work`:
+payment reconciliation). Code and built assets are baked in; config/routes/views are cached at start.
+`storage/` is a volume. nginx trusts `X-Forwarded-*` from the private Docker network, so Laravel sees
+HTTPS and client IPs behind Caddy.
+
+### Staging on one VPS (about 15 minutes)
+
+Any Ubuntu VPS with 2 GB RAM, Docker Engine + Compose plugin, ports 80/443 open.
+
+```bash
+# 1. DNS: an A record for staging.<your-domain> -> the VPS IP.
+# 2. On the VPS:
+git clone https://github.com/Laaxxmm/eventflow.git ~/eventflow && cd ~/eventflow
+cp deploy/env.example deploy/.env
+nano deploy/.env        # APP_DOMAIN, APP_URL, ACME_EMAIL, every CHANGE_ME, sandbox payment keys
+echo "$GHCR_TOKEN" | docker login ghcr.io -u <github-user> --password-stdin   # private image; or use --build
+deploy/deploy.sh        # pull, generate APP_KEY, start, migrate, events:sync, smoke check
+```
+
+`deploy/deploy.sh` refuses to run while `CHANGE_ME` values remain, waits for the app to report
+healthy, syncs event YAML and finishes with `tests/Smoke/staging.sh https://$APP_DOMAIN`.
+Run it again to update. `deploy/deploy.sh --build` builds the image on the VPS instead of pulling it.
+
+- **HTTPS:** Caddy gets and renews Let's Encrypt certificates for `APP_DOMAIN` automatically.
+  Per-org wildcard subdomains (`*.APP_DOMAIN`) are sketched in `deploy/Caddyfile`; they need the DNS
+  challenge (a Caddy build with your DNS provider's module and an API token).
+- **Staging mail:** `COMPOSE_PROFILES=staging` runs Mailpit; read every email at
+  `https://$APP_DOMAIN/mailpit/` (login from `MAILPIT_UI_AUTH`).
+- **Production mail:** Brevo (`MAIL_HOST=smtp-relay.brevo.com`, port 587, SMTP login + key) or SES
+  through its SMTP interface (`MAIL_HOST=email-smtp.<region>.amazonaws.com`, SES SMTP credentials).
+  Verify the sending domain (SPF/DKIM) with the provider first. Empty `COMPOSE_PROFILES` drops Mailpit.
+- **Useful commands:** `docker compose -f deploy/compose.prod.yml logs -f app queue`,
+  `... exec app php artisan tinker`, `... exec app php artisan events:sync`.
+
+### Backups and the restore test
+
+The `backup` service (`docker/backup`) dumps MySQL with `mysqldump --single-transaction`, archives
+`storage/app` (passes, uploaded certificate backgrounds) and copies both to S3-compatible storage
+with rclone every night at `BACKUP_AT` (UTC; default 21:00 = 02:30 IST). Objects older than
+`BACKUP_RETENTION_DAYS` are deleted. Configure the bucket with the `RCLONE_CONFIG_BACKUP_*` keys in
+`deploy/.env` (AWS S3, Cloudflare R2, Backblaze B2 and DigitalOcean Spaces all work).
+
+```bash
+c="docker compose -f deploy/compose.prod.yml"
+$c exec backup backup.sh                 # back up now
+$c exec backup restore-test.sh           # restore the newest dump into a scratch DB, check, drop it
+$c exec backup rclone lsf backup:<bucket>/eventflow/db    # list dumps
+```
+
+**Restore test (do it monthly, and after changing backup settings):** `restore-test.sh` downloads the
+newest dump, loads it into a throwaway `eventflow_restore_test` database, checks that the core tables
+exist (`migrations`, `orgs`, `users`, `events`, `registrations`, `payment_events`), prints restored vs
+live row counts, and drops the scratch database. Exit code 0 means the backup restores. CI runs the
+same backup + restore on every push.
+
+**Real restore (disaster recovery):**
+
+```bash
+c="docker compose -f deploy/compose.prod.yml"
+$c stop app queue scheduler
+$c exec backup bash -c 'rclone copyto "$BACKUP_DEST/db/<dump>.sql.gz" /tmp/db.sql.gz \
+  && zcat /tmp/db.sql.gz | MYSQL_PWD="$DB_PASSWORD" mysql -h mysql -u "$DB_USERNAME" "$DB_DATABASE"'
+# Files: download storage/storage-<stamp>.tar.gz and untar it into the storage volume (app/ inside).
+$c up -d
+```
+
+### Smoke tests (`tests/Smoke`)
+
+- `RegistrationFlowTest.php`: seeds the demo, registers on the landing, goes through checkout, posts
+  a signed Razorpay webhook (twice, to check idempotency), checks the pass email carries the PNG + PDF,
+  and checks a volunteer in by QR (twice, to check the duplicate scan). Only Razorpay's order API is
+  stubbed. `php artisan test tests/Smoke`.
+- `staging.sh <url>`: read-only HTTP checks for a deployed site (health, org page, landing form,
+  login, built assets, unsigned webhook rejected, HTTP→HTTPS redirect). Safe against production.

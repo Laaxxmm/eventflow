@@ -1,0 +1,122 @@
+# Production / staging stack for one VPS.
+#
+#   cp deploy/env.example deploy/.env    # fill it in
+#   deploy/deploy.sh                     # pull (or build) and start
+#
+# Caddy terminates HTTPS (Let's Encrypt) and proxies to the app container
+# (nginx + php-fpm). The same image runs the queue worker and the scheduler.
+# Staging adds Mailpit with: COMPOSE_PROFILES=staging (set in deploy/.env).
+name: eventflow
+
+x-app: &app
+  image: ${EVENTFLOW_IMAGE:-ghcr.io/laaxxmm/eventflow:main}
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - storage:/var/www/html/storage
+  networks:
+    - internal
+  depends_on:
+    mysql:
+      condition: service_healthy
+
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?set APP_DOMAIN in deploy/.env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal
+    depends_on:
+      - app
+
+  app:
+    <<: *app
+    environment:
+      CONTAINER_ROLE: web
+      RUN_MIGRATIONS: '1'
+
+  queue:
+    <<: *app
+    environment:
+      CONTAINER_ROLE: queue
+    depends_on:
+      app:
+        condition: service_healthy
+
+  scheduler:
+    <<: *app
+    environment:
+      CONTAINER_ROLE: scheduler
+    depends_on:
+      app:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-eventflow}
+      MYSQL_USER: ${DB_USERNAME:-eventflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in deploy/.env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in deploy/.env}
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - internal
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Nightly mysqldump + storage archive to S3-compatible object storage (rclone).
+  backup:
+    build:
+      context: ../docker/backup
+    image: eventflow-backup:local
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - storage:/storage:ro
+    networks:
+      - internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # Staging only: catch all outgoing mail; UI at https://$APP_DOMAIN/mailpit/
+  mailpit:
+    image: axllent/mailpit:v1.21
+    profiles: ['staging']
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: /mailpit/
+      MP_UI_AUTH: ${MAILPIT_UI_AUTH:-}
+      MP_MAX_MESSAGES: 5000
+    networks:
+      - internal
+
+volumes:
+  storage:
+  mysql:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
