@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 // --- Stream A: foundation (organiser dashboard) ---------------------------
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// SaaS marketing site (/, /pricing, /app) and the Indefine platform console (/platform).
+require __DIR__.'/marketing.php';
+require __DIR__.'/platform.php';
 
 Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
