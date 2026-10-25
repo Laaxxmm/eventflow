@@ -1,15 +1,22 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+// --- Stream A: foundation (organiser dashboard) ---------------------------
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('dashboard')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/participants', [DashboardController::class, 'participants'])->name('dashboard.participants');
+    Route::get('/participants/export', [DashboardController::class, 'export'])
+        ->middleware('can:export-participants')
+        ->name('dashboard.participants.export');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -18,3 +25,5 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// --- Other streams: add one require line each below -----------------------

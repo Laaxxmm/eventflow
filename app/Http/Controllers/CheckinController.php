@@ -111,8 +111,8 @@ class CheckinController extends Controller
 
     private function ensureVolunteer(Request $request): void
     {
-        $role = (string) $request->user()?->role;
-        abort_unless(in_array($role, ['volunteer', 'staff', 'owner'], true), 403);
+        // Owner, staff or volunteer of an org (Gate 'check-in', AppServiceProvider).
+        abort_unless($request->user()?->can('check-in'), 403);
     }
 
     private function fail(Request $request, string $message): JsonResponse|RedirectResponse

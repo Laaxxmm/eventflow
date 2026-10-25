@@ -6,11 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-class AuthenticatedSessionController extends Controller
+class AuthenticatedSessionController extends Controller implements HasMiddleware
 {
+    /** 5 attempts per minute per IP (RateLimiter 'auth'). */
+    public static function middleware(): array
+    {
+        return [new Middleware('throttle:auth', only: ['store'])];
+    }
+
     /**
      * Display the login view.
      */
@@ -27,6 +35,10 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        if ($request->user()->isVolunteer()) {
+            return redirect('/checkin');
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

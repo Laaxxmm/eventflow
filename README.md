@@ -11,13 +11,17 @@ Stack: Laravel 12, PHP 8.3, MySQL 8, Blade + Tailwind (Breeze), Pest, Laravel Sa
 ```bash
 cp .env.example .env
 composer install
-./vendor/bin/sail up -d          # app, MySQL 8, Mailpit
+./vendor/bin/sail up -d          # app, MySQL 8, Mailpit (:8025), queue worker
 ./vendor/bin/sail artisan key:generate
-./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan migrate --seed
 ./vendor/bin/sail npm install && ./vendor/bin/sail npm run build
 ```
 
-Without Docker: point `DB_*` at a local MySQL 8, then `php artisan migrate && composer dev`.
+Locally, set `MAIL_HOST=mailpit MAIL_PORT=1025` in `.env` to catch verification
+and reset emails in Mailpit. Demo logins (from `DemoSeeder`): `owner@demo.test`
+and `volunteer@demo.test`, password `password`.
+
+Without Docker: point `DB_*` at a local MySQL 8, then `php artisan migrate --seed && composer dev`.
 
 Tests: `php artisan test` (in-memory SQLite). Style: `./vendor/bin/pint --test`.
 
@@ -55,6 +59,32 @@ Event configs: `events/schema.json` (JSON Schema draft-07), demo in
 `events/demo/example-marathon.yaml`; `tests/Feature/ContractsTest.php` validates it.
 
 Mail: Brevo SMTP or SES only (Mailpit locally). Queue: `database`.
+
+### Accounts, roles and org scoping
+
+- **Signup** (`/register`, ported from the prototype: organisation name, work
+  email, optional phone, password) creates an `Org` with a unique slug
+  (`sunrise-sports-club`, then `-2`, ...) and makes the organiser its **owner**.
+  Email must be verified before the dashboard opens; password reset is Breeze's.
+- **Roles** (`users.role`, `App\Enums\Role`): `owner`, `staff`, `volunteer`.
+  Gates: `manage-org` (owner), `view-dashboard` and `export-participants`
+  (owner, staff), `check-in` (any org member). Volunteers are sent to `/checkin`
+  from every other page (`RestrictVolunteers`); stream F provides that route.
+- **Org scope.** `Event`, `Registration`, `User` and `SeasonPass` use
+  `App\Models\Tenancy\BelongsToOrg`: every query is filtered by the current
+  org and new rows get its id. The current org is the logged-in user's, or one
+  set explicitly with `app(CurrentOrg::class)->run($org, fn () => ...)` (use this
+  on public pages, in jobs and in webhooks). With neither, queries are unfiltered.
+  `registrations.org_id` always follows the event. `PaymentEvent` is deliberately
+  unscoped (provider webhook log). Bypass on purpose only:
+  `Model::withoutGlobalScope(OrgScope::class)`.
+- **Rate limits**: 5/min/IP on login, signup, forgot and reset password
+  (`throttle:auth`). Public registration routes must use `throttle:registration`
+  (same limit, defined here).
+- **Dashboard** (`/dashboard`): totals and per-event registrations, paid count,
+  paid total (INR) and checked-in count. `/dashboard/participants` filters by
+  event and status and exports CSV (custom answers as extra columns, spreadsheet
+  formulas neutralised).
 
 ### Product rules
 

@@ -16,7 +16,6 @@ use Illuminate\Http\Request;
 
 class CashfreeGateway implements PaymentGateway
 {
-    private Cashfree $cashfree;
     private string $appId;
     private string $secretKey;
     private string $env;
@@ -29,12 +28,21 @@ class CashfreeGateway implements PaymentGateway
         $this->secretKey = $cfg['secret_key'] ?? '';
         $this->env = $cfg['env'] ?? 'sandbox';
         $this->webhookSecret = $cfg['webhook_secret'] ?? '';
+    }
 
-        $this->cashfree = new Cashfree(
-            $this->env === 'production' ? Cashfree::PRODUCTION : Cashfree::SANDBOX,
-            $this->appId,
-            $this->secretKey
-        );
+    /**
+     * cashfree-pg 4.x is configured through static properties, so set them
+     * right before each API call.
+     */
+    private function client(): Cashfree
+    {
+        Cashfree::$XClientId = $this->appId;
+        Cashfree::$XClientSecret = $this->secretKey;
+        Cashfree::$XEnvironment = $this->env === 'production' ? Cashfree::$PRODUCTION : Cashfree::$SANDBOX;
+        // Keep SDK errors in our own logs instead of reporting them to Cashfree's error tracker.
+        Cashfree::$XEnableErrorAnalytics = false;
+
+        return new Cashfree();
     }
 
     public function createOrder(Registration $r): PaymentOrder
@@ -56,7 +64,7 @@ class CashfreeGateway implements PaymentGateway
         $request->setOrderMeta($meta);
         $request->setOrderNote('Registration '.$r->pass_no);
 
-        $response = $this->cashfree->PGCreateOrder($request);
+        $response = $this->client()->PGCreateOrder(Cashfree::$XApiVersion, $request);
         $order = $response[0] ?? $response;
 
         $orderId = $order->getOrderId() ?? $order['order_id'] ?? '';
@@ -122,7 +130,7 @@ class CashfreeGateway implements PaymentGateway
     public function fetchStatus(string $orderId): PaymentStatus
     {
         try {
-            $response = $this->cashfree->PGFetchOrder($orderId);
+            $response = $this->client()->PGFetchOrder(Cashfree::$XApiVersion, $orderId);
             $order = $response[0] ?? $response;
             $status = $order->getOrderStatus() ?? $order['order_status'] ?? 'ACTIVE';
 
