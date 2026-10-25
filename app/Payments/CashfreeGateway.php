@@ -7,7 +7,6 @@ use App\Models\Registration;
 use App\Payments\Dto\PaymentEvent;
 use App\Payments\Dto\PaymentOrder;
 use App\Payments\Dto\RefundResult;
-use App\Payments\PaymentStatus;
 use Cashfree\Cashfree;
 use Cashfree\Model\CreateOrderRequest;
 use Cashfree\Model\CustomerDetails;
@@ -17,17 +16,26 @@ use Illuminate\Http\Request;
 class CashfreeGateway implements PaymentGateway
 {
     private string $appId;
+
     private string $secretKey;
+
     private string $env;
+
     private string $webhookSecret;
 
-    public function __construct()
+    private ?string $notifyUrl;
+
+    /**
+     * @param  array<string, mixed>|null  $cfg  An org's own keys (GatewayManager); null = platform keys from config
+     */
+    public function __construct(?array $cfg = null)
     {
-        $cfg = config('eventflow.payment.providers.cashfree');
+        $cfg ??= config('eventflow.payment.providers.cashfree');
         $this->appId = $cfg['app_id'] ?? '';
         $this->secretKey = $cfg['secret_key'] ?? '';
         $this->env = $cfg['env'] ?? 'sandbox';
         $this->webhookSecret = $cfg['webhook_secret'] ?? '';
+        $this->notifyUrl = $cfg['notify_url'] ?? null;
     }
 
     /**
@@ -42,22 +50,22 @@ class CashfreeGateway implements PaymentGateway
         // Keep SDK errors in our own logs instead of reporting them to Cashfree's error tracker.
         Cashfree::$XEnableErrorAnalytics = false;
 
-        return new Cashfree();
+        return new Cashfree;
     }
 
     public function createOrder(Registration $r): PaymentOrder
     {
-        $customer = new CustomerDetails();
+        $customer = new CustomerDetails;
         $customer->setCustomerId('reg_'.$r->id);
         $customer->setCustomerName($r->participant_name);
         $customer->setCustomerEmail($r->email);
         $customer->setCustomerPhone($r->phone);
 
-        $meta = new OrderMeta();
+        $meta = new OrderMeta;
         $meta->setReturnUrl(url("/pay/return/{$r->id}"));
-        $meta->setNotifyUrl(url('/webhooks/cashfree'));
+        $meta->setNotifyUrl($this->notifyUrl ?? url('/webhooks/cashfree'));
 
-        $request = new CreateOrderRequest();
+        $request = new CreateOrderRequest;
         $request->setOrderAmount($r->amount_paise / 100);
         $request->setOrderCurrency('INR');
         $request->setCustomerDetails($customer);
@@ -87,7 +95,7 @@ class CashfreeGateway implements PaymentGateway
     {
         $signature = $req->header('x-webhook-signature') ?? $req->header('X-Webhook-Signature');
         $timestamp = $req->header('x-webhook-timestamp') ?? $req->header('X-Webhook-Timestamp');
-        if (!$signature || !$timestamp) {
+        if (! $signature || ! $timestamp) {
             return false;
         }
 

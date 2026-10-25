@@ -26,7 +26,39 @@ class Org extends Model
             'addons' => 'array',
             'trial_ends_at' => 'immutable_datetime',
             'suspended_at' => 'immutable_datetime',
+            'payment_credentials' => 'encrypted:array',
         ];
+    }
+
+    /** Organiser's own gateway keys never leave the model in arrays/JSON. */
+    protected $hidden = ['payment_credentials'];
+
+    /** Keys an organiser enters per provider; the first ones listed are required. */
+    public const PAYMENT_KEYS = [
+        'cashfree' => ['required' => ['app_id', 'secret_key'], 'optional' => ['webhook_secret']],
+        'razorpay' => ['required' => ['key_id', 'key_secret', 'webhook_secret'], 'optional' => []],
+    ];
+
+    /**
+     * The organiser's own keys for a provider, when complete:
+     * [...keys, 'mode' => test|live, 'verified_at' => ?string]. Null means
+     * payments for this org go through the platform account (env keys).
+     *
+     * @return array<string, mixed>|null
+     */
+    public function ownPaymentKeys(string $provider): ?array
+    {
+        $keys = $this->payment_credentials[$provider] ?? null;
+        if (! is_array($keys) || ! isset(self::PAYMENT_KEYS[$provider])) {
+            return null;
+        }
+        foreach (self::PAYMENT_KEYS[$provider]['required'] as $field) {
+            if (blank($keys[$field] ?? null)) {
+                return null;
+            }
+        }
+
+        return $keys;
     }
 
     /** URL-safe slug from $name, suffixed -2, -3, ... until unused. */

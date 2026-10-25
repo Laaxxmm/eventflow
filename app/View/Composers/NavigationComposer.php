@@ -28,6 +28,7 @@ class NavigationComposer
         'bell' => 'M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0',
         'settings' => 'M10.3 4.3a1.7 1.7 0 0 1 3.4 0 1.7 1.7 0 0 0 2.6 1.1 1.7 1.7 0 0 1 2.4 2.4 1.7 1.7 0 0 0 1.1 2.6 1.7 1.7 0 0 1 0 3.4 1.7 1.7 0 0 0-1.1 2.6 1.7 1.7 0 0 1-2.4 2.4 1.7 1.7 0 0 0-2.6 1.1 1.7 1.7 0 0 1-3.4 0 1.7 1.7 0 0 0-2.6-1.1 1.7 1.7 0 0 1-2.4-2.4 1.7 1.7 0 0 0-1.1-2.6 1.7 1.7 0 0 1 0-3.4 1.7 1.7 0 0 0 1.1-2.6 1.7 1.7 0 0 1 2.4-2.4 1.7 1.7 0 0 0 2.6-1.1zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
         'card' => 'M3 6h18v12H3zM3 10h18M7 15h3',
+        'wallet' => 'M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4zM4 7V6a2 2 0 0 1 2-2h10M16 13h2',
         'shield' => 'M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6z',
     ];
 
@@ -73,6 +74,9 @@ class NavigationComposer
                 }
                 if (Route::has('settings.notifications.show')) {
                     $settings[] = $this->item(__('Notifications'), 'settings.notifications.show', 'bell', 'settings.notifications.*');
+                }
+                if (Route::has('settings.payments.show')) {
+                    $settings[] = $this->item(__('Payments'), 'settings.payments.show', 'wallet', 'settings.payments.*');
                 }
             }
             if (Route::has('account.plan')) {
