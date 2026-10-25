@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Payments\GatewayManager;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class PaymentServiceProvider extends ServiceProvider
@@ -18,6 +19,10 @@ class PaymentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadRoutesFrom(base_path('routes/payments.php'));
+        // The web group gives route model binding (and sessions/CSRF) to /pay/*;
+        // webhooks/* is CSRF-exempt in bootstrap/app.php.
+        if (! $this->app->routesAreCached()) {
+            Route::middleware('web')->group(base_path('routes/payments.php'));
+        }
     }
 }
