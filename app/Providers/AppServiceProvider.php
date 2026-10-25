@@ -4,10 +4,13 @@ namespace App\Providers;
 
 use App\Certificates\DomPdfCertificateRenderer;
 use App\Contracts\CertificateRenderer;
+use App\Contracts\Entitlements;
 use App\Contracts\LandingSource;
 use App\Contracts\PassGenerator;
 use App\Contracts\RaceSheetBuilder;
 use App\Contracts\SportPackRepository;
+use App\Entitlements\GrantSeasonPass;
+use App\Entitlements\SeasonPassEntitlements;
 use App\Enums\Role;
 use App\Landing\DatabaseLandingSource;
 use App\Landing\YamlSportPackRepository;
@@ -37,6 +40,11 @@ class AppServiceProvider extends ServiceProvider
         // Stream E: certificates and race sheets.
         $this->app->singleton(CertificateRenderer::class, DomPdfCertificateRenderer::class);
         $this->app->singleton(RaceSheetBuilder::class, HeatRaceSheetBuilder::class);
+
+        // Session 5: Season Pass entitlements (memoised per request).
+        $this->app->scoped(SeasonPassEntitlements::class);
+        $this->app->scoped(Entitlements::class, fn ($app) => $app->make(SeasonPassEntitlements::class));
+        $this->commands([GrantSeasonPass::class]);
     }
 
     /**

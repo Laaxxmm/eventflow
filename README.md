@@ -247,7 +247,7 @@ Rules:
 
 Tests: `tests/Feature/Events` (schema failure, capacity full, age out of band, sync safety, CRUD).
 
-## Stream E: certificates and race sheets (Session 5)
+## Stream E: certificates, race sheets, Season Pass and Org Settings (Session 5)
 
 Organiser-only (owner and staff, gate `view-dashboard`) pages under
 `/dashboard/events/{event}/…` (`routes/reports.php`). Other orgs' events are 404
@@ -289,6 +289,29 @@ through the org scope; volunteers are sent to check-in.
 
 Tests: `tests/Feature/Reports` (fixtures in `tests/Feature/Reports/fixtures`:
 a skating event YAML and an A4 background PNG).
+
+### Season Pass and Org Settings
+
+- `App\Entitlements\SeasonPassEntitlements` implements `Entitlements`: core
+  modules (registration, payments, passes) are always on; check-in, race sheets,
+  certificates, email branding and SMS/WhatsApp need an active pass (status `active`, today within its dates
+  in IST, the latest-ending one wins) that includes them, and must not be
+  switched off in Org Settings.
+- **Enforcing a module on a route:**
+  `->middleware(App\Entitlements\EnsureModuleEnabled::class.':checkin')`
+  after `auth`; it checks the signed-in user's org and answers 403 with a
+  pointer to Org Settings. Race sheets and certificates use it; check-in
+  (stream D) should add `:checkin` to `routes/checkin.php`.
+- **Org Settings** (`/dashboard/settings`, owners only): shows the active pass
+  and lets the owner switch optional modules off and on. Modules outside the
+  pass are greyed out and can't be switched on. Stored in `orgs.modules`.
+  Links to the notification settings (`/dashboard/settings/notifications`),
+  whose add-ons go through the same `Entitlements` binding.
+- **Granting a pass** (Indefine staff, until passes can be bought online):
+  `php artisan season-pass:grant {org-slug} --plan="Season 2027" [--from=YYYY-MM-DD] [--until=YYYY-MM-DD] [--module=checkin --module=certificates] [--amount=25000]`.
+  Defaults: today, 365 days, every optional module.
+
+Tests: `tests/Feature/Entitlements`, `tests/Feature/Settings`.
 
 ## Ops: CI, Docker, staging and backups (Session 6)
 
