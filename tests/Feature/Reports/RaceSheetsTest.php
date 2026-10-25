@@ -68,9 +68,10 @@ test('random seeding is stable across reprints', function () {
 });
 
 test('events without a race_sheet get start lists with the same grouping', function () {
-    $config = ReportFixtures::config();
+    // Mass start: neither the event nor its sport pack (running) defines heats.
+    $config = ReportFixtures::config(['sport' => 'running']);
     unset($config['race_sheet']);
-    $this->event->update(['config' => $config]);
+    $this->event->update(['sport' => 'running', 'config' => $config]);
     foreach (range(1, 10) as $i) {
         ReportFixtures::entrant($this->event, '500M', 9, 'Boy');
     }
@@ -121,4 +122,20 @@ test('the print view downloads an A4 PDF', function () {
 
     $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
     expect(substr($response->getContent(), 0, 4))->toBe('%PDF');
+});
+
+test('age bands and heats the event does not set come from its sport pack', function () {
+    // As events:sync stores it: the authored YAML, without the skating pack's keys.
+    $config = ReportFixtures::config();
+    unset($config['age_bands'], $config['race_sheet']);
+    $this->event->update(['config' => $config]);
+    foreach (range(1, 9) as $i) {
+        ReportFixtures::entrant($this->event, '500M', 9, 'Boy');
+    }
+
+    $sheet = $this->builder->buildOrStartList($this->event->fresh());
+
+    expect($sheet->heats[0]->group)->toBe(['distance' => '500 m', 'age_band' => '8-10', 'gender' => 'Boy', 'skate_type' => 'Unspecified'])
+        ->and($sheet->config->heatSize)->toBe(8)                 // skating pack default
+        ->and(array_map('count', array_column(array_map(fn ($h) => (array) $h, $sheet->heats), 'registrationIds')))->toBe([5, 4]);
 });

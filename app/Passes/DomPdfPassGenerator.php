@@ -39,7 +39,7 @@ final class DomPdfPassGenerator implements PassGenerator
     }
 
     /**
-     * @param  array{primary: string, secondary: string, accent: string, background: string}  $colours
+     * @param  array{primary: string, secondary: string, accent: string, background: string, onPrimary: string, secondaryText: string}  $colours
      */
     private function renderPng(Registration $r, array $colours, string $qrPng): string
     {
@@ -63,14 +63,14 @@ final class DomPdfPassGenerator implements PassGenerator
         $image->text('OFFICIAL PARTICIPANT PASS', 44, 60, function (FontFactory $f) use ($bold, $colours) {
             $f->filename($bold);
             $f->size(16);
-            $f->color($colours['accent']);
+            $f->color($colours['onPrimary']);
             $f->valign('middle');
         });
 
         $image->text('REGISTRATION PASS', 520, 60, function (FontFactory $f) use ($bold, $colours) {
             $f->filename($bold);
             $f->size(14);
-            $f->color($colours['accent']);
+            $f->color($colours['onPrimary']);
             $f->align('right');
             $f->valign('middle');
         });
@@ -79,7 +79,7 @@ final class DomPdfPassGenerator implements PassGenerator
         $image->text($this->clip($org, 42), 44, 130, function (FontFactory $f) use ($bold, $colours) {
             $f->filename($bold);
             $f->size(16);
-            $f->color($colours['secondary']);
+            $f->color($colours['secondaryText']);
         });
 
         $image->text($this->clip((string) ($r->event?->name ?? 'Event'), 32), 44, 180, function (FontFactory $f) use ($bold) {
@@ -159,7 +159,7 @@ final class DomPdfPassGenerator implements PassGenerator
     }
 
     /**
-     * @param  array{primary: string, secondary: string, accent: string, background: string}  $colours
+     * @param  array{primary: string, secondary: string, accent: string, background: string, onPrimary: string, secondaryText: string}  $colours
      */
     private function renderPdf(Registration $r, array $colours, string $qrPng): string
     {
@@ -174,9 +174,13 @@ final class DomPdfPassGenerator implements PassGenerator
     }
 
     /**
-     * @return array{primary: string, secondary: string, accent: string, background: string}
+     * Brand colours (org, then event) validated as #rrggbb, plus readable text
+     * colours: brand colours are often light (the prototype's lime), so text
+     * only uses them at 4.5:1 contrast against what it sits on.
+     *
+     * @return array{primary: string, secondary: string, accent: string, background: string, onPrimary: string, secondaryText: string}
      */
-    private function colours(Registration $r): array
+    public function colours(Registration $r): array
     {
         $event = is_array($r->event?->colours) ? $r->event->colours : [];
         $org = is_array($r->event?->org?->colours) ? $r->event->org->colours : [];
@@ -194,7 +198,38 @@ final class DomPdfPassGenerator implements PassGenerator
                 : ['primary' => '#111a31', 'secondary' => '#5148d9', 'accent' => '#d3f36b', 'background' => '#ffffff'][$key];
         }
 
+        $merged['onPrimary'] = self::readable($merged['accent'], $merged['primary']);
+        $merged['secondaryText'] = self::readable($merged['secondary'], $merged['background']);
+
         return $merged;
+    }
+
+    /** $preferred on $background if it reaches 4.5:1, else white or ink, whichever reads better. */
+    public static function readable(string $preferred, string $background): string
+    {
+        if (self::contrast($preferred, $background) >= 4.5) {
+            return $preferred;
+        }
+
+        return self::contrast('#ffffff', $background) >= self::contrast('#111a31', $background) ? '#ffffff' : '#111a31';
+    }
+
+    /** WCAG contrast ratio between two #rrggbb colours. */
+    public static function contrast(string $a, string $b): float
+    {
+        $luminance = function (string $hex): float {
+            $channels = array_map(function (string $pair) {
+                $c = hexdec($pair) / 255;
+
+                return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+            }, str_split(ltrim($hex, '#'), 2));
+
+            return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
+        };
+
+        [$hi, $lo] = [max($luminance($a), $luminance($b)), min($luminance($a), $luminance($b))];
+
+        return ($hi + 0.05) / ($lo + 0.05);
     }
 
     private function clip(string $value, int $max): string
