@@ -57,9 +57,9 @@ return [
     ],
 
     'modules' => [
-        // On whenever the active pass includes them; cannot be toggled off.
+        // Always on, with or without a Season Pass; cannot be toggled off.
         'core' => ['registration', 'payments', 'passes'],
-        // Toggled per org in Org Settings.
+        // Need an active pass that includes them; toggled per org in Org Settings.
         'optional' => ['checkin', 'race_sheets', 'certificates'],
     ],
 
