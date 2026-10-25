@@ -7,7 +7,7 @@
 | `feat/b-<short>` | 2 | Payments (gateways, webhooks, checkout) |
 | `feat/c-<short>` | 3 | Events, YAML landings & registration |
 | `feat/d-<short>` | 4 | Passes (PNG/PDF, QR), email & check-in |
-| `feat/e-<short>` | 5 | Certificates & race sheets |
+| `feat/e-<short>` | 5 | Certificates, race sheets, entitlements (Season Pass) & org settings |
 | `feat/f-<short>` | 6 | Ops (CI, Docker) |
 
 ## Workflow
