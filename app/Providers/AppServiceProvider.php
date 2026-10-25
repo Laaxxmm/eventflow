@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\LandingSource;
 use App\Contracts\PassGenerator;
+use App\Contracts\SportPackRepository;
 use App\Enums\Role;
+use App\Landing\DatabaseLandingSource;
+use App\Landing\YamlSportPackRepository;
 use App\Models\User;
 use App\Passes\DomPdfPassGenerator;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -21,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(PassGenerator::class, DomPdfPassGenerator::class);
+
+        // Stream C: landings are served from events.config (YAML reaches it via events:sync).
+        $this->app->singleton(SportPackRepository::class, YamlSportPackRepository::class);
+        $this->app->bind(LandingSource::class, DatabaseLandingSource::class);
     }
 
     /**

@@ -27,3 +27,6 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 // --- Other streams: add one require line each below -----------------------
+
+// Stream C last: /{org} and /{org}/{slug} are catch-alls.
+require __DIR__.'/events.php';
