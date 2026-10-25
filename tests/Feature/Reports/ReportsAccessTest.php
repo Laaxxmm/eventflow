@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\Module;
+use App\Models\Org;
 use App\Models\User;
 use Tests\Feature\Reports\ReportFixtures;
 
@@ -41,3 +43,21 @@ test('another org cannot reach this event', function (string $route) {
 
     $this->actingAs($otherOwner)->get(route($route, $this->event))->assertNotFound();
 })->with('report routes');
+
+test('an org without a Season Pass cannot use race sheets or certificates', function (string $route) {
+    $event = ReportFixtures::event(Org::factory()->create()); // no pass
+
+    $this->actingAs(ReportFixtures::owner($event))->get(route($route, $event))
+        ->assertForbidden()
+        ->assertSee('Org Settings');
+})->with('report routes');
+
+test('a module outside the pass, or switched off, is blocked', function () {
+    $org = Org::factory()->create(['modules' => ['certificates' => false]]);
+    ReportFixtures::grantPass($org, [Module::Registration, Module::Payments, Module::Passes, Module::Certificates]);
+    $event = ReportFixtures::event($org);
+    $owner = ReportFixtures::owner($event);
+
+    $this->actingAs($owner)->get(route('reports.race-sheet', $event))->assertForbidden();   // not in the pass
+    $this->actingAs($owner)->get(route('reports.certificates', $event))->assertForbidden(); // switched off
+});

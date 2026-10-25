@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Reports;
 
+use App\Enums\Module;
 use App\Models\Event;
 use App\Models\Org;
 use App\Models\Registration;
+use App\Models\SeasonPass;
 use App\Models\User;
 use App\Payments\PaymentStatus;
 use Symfony\Component\Yaml\Yaml;
@@ -20,11 +22,33 @@ final class ReportFixtures
         return array_replace(Yaml::parseFile(__DIR__.'/fixtures/skating-open.yaml'), $overrides);
     }
 
+    /** Org with an active Season Pass that includes every module. */
+    public static function orgWithPass(): Org
+    {
+        $org = Org::factory()->create();
+        self::grantPass($org);
+
+        return $org;
+    }
+
+    /** @param  list<Module>|null  $modules */
+    public static function grantPass(Org $org, ?array $modules = null): SeasonPass
+    {
+        return SeasonPass::withoutGlobalScopes()->create([
+            'org_id' => $org->id,
+            'plan' => 'Test season',
+            'starts_on' => now('Asia/Kolkata')->subDay()->toDateString(),
+            'ends_on' => now('Asia/Kolkata')->addYear()->toDateString(),
+            'status' => 'active',
+            'modules' => $modules ?? Module::cases(),
+        ]);
+    }
+
     public static function event(?Org $org = null, array $configOverrides = []): Event
     {
         $config = self::config($configOverrides);
 
-        return Event::factory()->for($org ?? Org::factory()->create())->create([
+        return Event::factory()->for($org ?? self::orgWithPass())->create([
             'name' => $config['name'],
             'sport' => $config['sport'],
             'date' => $config['date'],
