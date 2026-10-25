@@ -29,9 +29,33 @@ final class Theme
     public function style(): string
     {
         return sprintf(
-            '--brand-primary:%s;--brand-on-primary:%s;--brand-secondary:%s;--brand-on-secondary:%s;',
-            $this->primary, self::ink($this->primary), $this->secondary, self::ink($this->secondary),
+            '--brand-primary:%s;--brand-on-primary:%s;--brand-secondary:%s;--brand-on-secondary:%s;--brand-accent-dark:%s;',
+            $this->primary, self::ink($this->primary), $this->secondary, self::ink($this->secondary), $this->accentOnDark(),
         );
+    }
+
+    /** A brand colour that stays readable as text on near-black (dark templates), else white. */
+    public function accentOnDark(): string
+    {
+        foreach ([$this->primary, $this->secondary] as $colour) {
+            if (self::luminance($colour) >= 0.18) {
+                return $colour;
+            }
+        }
+
+        return '#ffffff';
+    }
+
+    /** WCAG relative luminance of #rrggbb. */
+    public static function luminance(string $hex): float
+    {
+        [$r, $g, $b] = array_map(function (string $c) {
+            $c = hexdec($c) / 255;
+
+            return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+        }, str_split(ltrim($hex, '#'), 2));
+
+        return 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
     }
 
     /** Near-black or white, whichever reads better on $hex (WCAG relative luminance). */

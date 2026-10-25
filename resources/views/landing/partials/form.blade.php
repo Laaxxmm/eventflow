@@ -1,7 +1,8 @@
 {{-- Registration form generated from fields + distances + age_bands. $form: App\Landing\RegistrationForm --}}
 @php($control = 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full')
 
-<form method="POST" action="{{ route('registrations.store', [$config->org, $config->slug]) }}" class="mt-6 rounded-lg bg-white p-4 sm:p-8 shadow-sm space-y-6">
+@php($preview = $preview ?? false)
+<form method="POST" action="{{ $preview ? '#' : route('registrations.store', [$config->org, $config->slug]) }}" @if ($preview) onsubmit="return false" @endif class="mt-6 rounded-2xl bg-white p-4 sm:p-8 shadow-sm ring-1 ring-black/5 space-y-6 text-gray-900 text-left">
     @csrf
 
     @if ($errors->any())
