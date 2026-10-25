@@ -17,7 +17,7 @@
 
 <aside
     :class="open ? 'translate-x-0' : '-translate-x-full'"
-    class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#0b1020] text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0"
+    class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col bg-[#0b1020] text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:translate-x-0"
     aria-label="{{ __('Main') }}"
 >
     <div class="flex items-center justify-between px-6 pt-6">

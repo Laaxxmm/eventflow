@@ -14,7 +14,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-[#f5f6fa] text-slate-900">
-        <div x-data="{ open: false }" class="min-h-screen lg:flex">
+        {{-- The dark sidebar column is painted on the wrapper so it runs the full page height
+             (prints, full-page captures, long pages); the menu itself stays sticky inside it. --}}
+        <div x-data="{ open: false }" class="min-h-screen lg:flex lg:bg-[linear-gradient(to_right,#0b1020_18rem,transparent_18rem)]">
             @include('layouts.navigation')
 
             <div class="min-w-0 flex-1">
