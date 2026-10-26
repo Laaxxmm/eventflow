@@ -46,3 +46,19 @@ faq:
 certificate:
   template: heritage-gold
   orientation: landscape
+
+schedule:
+  - { time: "04:30", label: Bib collection closes and gates open }
+  - { time: "05:30", label: Full Marathon flag-off }
+  - { time: "05:45", label: Half Marathon flag-off }
+  - { time: "06:15", label: 10K flag-off }
+  - { time: "06:45", label: 5K Fun Run flag-off }
+  - { time: "09:30", label: Prize ceremony }
+
+sponsors:
+  - { name: Garden City Sports, tier: Title partner }
+  - { name: Kanteerava Timing, tier: Timing partner }
+  - { name: Nandi Hydration, tier: Hydration partner }
+  - { name: Cubbon Physio, tier: Recovery partner }
+
+charity: Every entry plants a tree with the Bengaluru Urban Forest Trust.

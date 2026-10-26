@@ -1,7 +1,7 @@
 # Generic pack: minimum defaults for any other event.
 sport: generic
 label: Generic event
-template: clean
+template: stadium-split
 fields:
   - { key: age, label: Age, type: number, required: false }
   - { key: emergency_contact_phone, label: Emergency contact phone, type: tel, required: false }

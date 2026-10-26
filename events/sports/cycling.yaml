@@ -1,7 +1,7 @@
 # Cycling pack defaults. Mass start, so no race_sheet; add one per event for criteriums.
 sport: cycling
 label: Cycling
-template: midnight
+template: night-circuit
 distances:
   - { code: 25K, label: 25 km ride }
   - { code: 50K, label: 50 km ride }

@@ -39,7 +39,8 @@ class MarketingController extends Controller
     private function pricingData(): array
     {
         return [
-            'plans' => Plans::all(),
+            'plans' => Plans::ordered(),
+            'entry' => Plans::entry(),
             'addons' => Plans::addons(),
             'trialDays' => Plans::trialDays(),
             'contactEmail' => config('plans.brand.contact_email'),

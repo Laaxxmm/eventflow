@@ -1,6 +1,65 @@
+/*
+ * Race Ink — EventFlow design tokens (see docs/design/race-ink.md).
+ * Fonts are self-hosted (@fontsource): Barlow Condensed for display, Inter for UI.
+ */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/barlow-condensed/700.css';
+@import '@fontsource/barlow-condensed/800.css';
+@import '@fontsource/barlow-condensed/800-italic.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    :root {
+        /* Space-separated RGB so Tailwind opacity modifiers work: rgb(var(--ri-ink) / .5) */
+        --ri-ink: 14 19 32;          /* #0E1320 */
+        --ri-track: 91 76 255;       /* #5B4CFF brand */
+        --ri-on-track: 255 255 255;
+        --ri-track-text: 91 76 255; /* Track as text on paper: 4.8:1 */
+        --ri-heat: 255 90 60;        /* #FF5A3C CTAs, urgency */
+        --ri-on-heat: 14 19 32;      /* ink on Heat: 6:1 (white would be 3.1:1) */
+        --ri-paper: 246 243 236;     /* #F6F3EC */
+        --ri-mist: 232 228 220;      /* #E8E4DC */
+        --ri-midnight: 18 22 31;     /* #12161F */
+        --ri-volt: 200 245 49;       /* #C8F531, sparingly, on dark only */
+    }
+
+    .font-display { font-feature-settings: 'ss01'; }
+}
+
+@layer components {
+    /* Huge athletic headline: condensed, tight, uppercase. */
+    .ri-headline {
+        @apply font-display font-extrabold uppercase leading-[0.86] tracking-[-0.01em];
+    }
+    .ri-kicker {
+        @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em];
+    }
+    .ri-kicker::before {
+        content: '';
+        @apply h-[2px] w-6 bg-current;
+    }
+    /* Photo grade: slightly cooler and contrasty, so mixed stock reads as one set. */
+    .ri-grade { filter: saturate(0.92) contrast(1.06); }
+}
+
 /* Alpine: hide until initialised (wizard steps, drawers). */
 [x-cloak] { display: none !important; }
+
+/* Motion: only when the visitor has not asked for less. */
+@media (prefers-reduced-motion: no-preference) {
+    .js [data-reveal] {
+        opacity: 0;
+        transform: translateY(18px);
+        transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .js [data-reveal].is-visible { opacity: 1; transform: none; }
+    .ri-kenburns { animation: ri-kenburns 24s ease-out both; }
+    @keyframes ri-kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+}
