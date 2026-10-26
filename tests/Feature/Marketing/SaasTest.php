@@ -42,11 +42,26 @@ it('serves the SaaS marketing home at / with plans from config', function () {
         ->assertOk()
         ->assertSee('EventFlow')
         ->assertSee('>by Indefine<', false)
-        ->assertSee('Keep your margins.')
+        ->assertSee('your start')
+        ->assertSee('Start your season — ₹12,345') // cheapest self-serve plan drives the hero CTA
         ->assertSee('Starter')->assertSee('Growth')->assertSee('Scale')
         ->assertSee('₹12,345')
         ->assertSee(route('pricing'))
         ->assertSee(route('login'));
+});
+
+it('leads with a single-race plan, cheapest first, when one is configured', function () {
+    config(['plans.plans' => ['single' => [
+        'name' => 'Single', 'tagline' => 'One race.', 'season_pass_inr' => 3999, 'participant_fee_percent' => null,
+        'self_serve' => true, 'max_events' => 1, 'max_registrations' => 500, 'modules' => ['checkin'], 'features' => ['One event'],
+    ]] + config('plans.plans')]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Start with one race — ₹3,999')
+        ->assertSeeInOrder(['Single', 'Starter', 'Growth', 'Scale']);
+
+    $this->get('/pricing')->assertOk()->assertSeeInOrder(['₹3,999', '₹19,999', '₹49,999', 'Custom']);
 });
 
 it('shows three selectable plans and add-ons on /pricing', function () {

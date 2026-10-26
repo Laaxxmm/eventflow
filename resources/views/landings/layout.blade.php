@@ -1,6 +1,7 @@
 {{--
     Shell for event landing templates (resources/views/landings/templates/*).
-    $page: App\View\LandingPage. Sections: body-class, content. Stack: head (fonts etc.).
+    $page: App\View\LandingPage. Sections: body-class, content. Stack: head.
+    Race Ink tokens are tinted per event by App\Landing\Theme::style() (contrast-checked).
 --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -18,23 +19,23 @@
         @if ($page->preview)
             <meta name="robots" content="noindex">
         @endif
-
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet" />
         @stack('head')
 
+        <script>document.documentElement.classList.add('js')</script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body data-template="{{ $page->config->template }}" class="font-sans antialiased @yield('body-class', 'bg-white text-gray-900')" style="{{ $page->theme->style() }}">
+    <body data-template="{{ $page->config->template }}" class="font-sans antialiased @yield('body-class', 'bg-paper text-ink')" style="{{ $page->theme->style() }}">
         @if ($page->preview)
-            <div class="sticky top-0 z-50 bg-gray-900 px-4 py-2 text-center text-xs font-semibold text-white">
-                {{ __(':template template preview · sample content', ['template' => config("eventflow.landing_templates.{$page->config->template}.label")]) }}
+            <div class="relative z-50 bg-volt px-4 py-1.5 text-center text-xs font-semibold uppercase tracking-[0.14em] text-midnight">
+                {{ __(':template · preview', ['template' => config("eventflow.landing_templates.{$page->config->template}.label")]) }}
             </div>
         @endif
 
         @yield('content')
 
-        <footer class="py-8 text-center text-xs opacity-60">
+        @include('landings.partials.sticky-register')
+
+        <footer class="pb-28 pt-8 text-center text-xs opacity-60 sm:pb-8">
             {{ __('Registrations powered by :app', ['app' => config('app.name', 'EventFlow')]) }}
         </footer>
     </body>

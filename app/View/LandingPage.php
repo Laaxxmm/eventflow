@@ -83,6 +83,90 @@ final readonly class LandingPage
         return '#register';
     }
 
+    /** Hero photo: the organiser's upload, else the n-th stock photo for the sport (or null: graphic fallback). */
+    public function heroPhoto(int $n = 0): ?string
+    {
+        return $this->heroUrl() ?? SportImagery::pick($this->config->sport->value, $n);
+    }
+
+    /** Extra photo for secondary slots (never the organiser hero twice). */
+    public function photo(int $n): ?string
+    {
+        return SportImagery::pick($this->config->sport->value, $n);
+    }
+
+    /** "Register — from ₹599" */
+    public function registerLabel(): string
+    {
+        return __('Register — from :price', ['price' => $this->fromPrice()]);
+    }
+
+    /** Big numeral for a distance: "21.1K" from "Half Marathon (21.1K)", else the code. */
+    public static function numeral(Distance $d): string
+    {
+        if (preg_match('/\(([^)]{1,8})\)/', $d->label, $m)) {
+            return $m[1];
+        }
+
+        return mb_strlen($d->label) <= 6 ? $d->label : $d->code;
+    }
+
+    /** Distance label without the numeral in brackets: "Half Marathon". */
+    public static function title(Distance $d): string
+    {
+        return trim((string) preg_replace('/\s*\([^)]*\)\s*$/', '', $d->label)) ?: $d->label;
+    }
+
+    /**
+     * Race-day schedule: the configured one, else bib collection an hour before the start
+     * and one indicative start per distance, 15 minutes apart.
+     *
+     * @return list<array{time: string, label: string, indicative: bool}>
+     */
+    public function schedule(): array
+    {
+        if ($this->config->schedule) {
+            return array_map(fn (array $s) => ['time' => $s['time'], 'label' => $s['label'], 'indicative' => false], $this->config->schedule);
+        }
+
+        $rows = [['time' => $this->date->subHour()->format('H:i'), 'label' => __('Reporting and bib collection'), 'indicative' => true]];
+        foreach ($this->distances as $i => $row) {
+            $rows[] = ['time' => $this->date->addMinutes($i * 15)->format('H:i'), 'label' => __(':distance start', ['distance' => $row['distance']->label]), 'indicative' => true];
+        }
+
+        return $rows;
+    }
+
+    /** @return list<array{name: string, logo: ?string, url: ?string, tier: ?string}> */
+    public function sponsors(): array
+    {
+        return array_map(fn (array $s) => [
+            'name' => (string) $s['name'],
+            'logo' => Theme::url($s['logo'] ?? null),
+            'url' => $s['url'] ?? null,
+            'tier' => $s['tier'] ?? null,
+        ], $this->config->sponsors);
+    }
+
+    /** Places left across capped distances, or null when any distance is unlimited. */
+    public function placesLeft(): ?int
+    {
+        $left = array_column($this->distances, 'left');
+
+        return in_array(null, $left, true) ? null : array_sum($left);
+    }
+
+    /** "Limited bibs" urgency: shown when every distance is capped. */
+    public function limited(): bool
+    {
+        return $this->placesLeft() !== null;
+    }
+
+    public function daysToGo(): int
+    {
+        return max(0, (int) now(ConfigCompiler::TIMEZONE)->startOfDay()->diffInDays($this->date->startOfDay(), false));
+    }
+
     public static function inr(int $amount): string
     {
         return $amount === 0 ? __('Free') : '₹'.number_format($amount);

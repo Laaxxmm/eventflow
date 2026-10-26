@@ -1,21 +1,20 @@
-{{-- EventFlow SaaS marketing shell (/, /pricing). Not used by per-event landings. --}}
+{{-- EventFlow SaaS marketing shell (/, /pricing), Race Ink. Not used by per-event landings. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>@yield('title', \App\Saas\Plans::brandName())</title>
-        <meta name="description" content="@yield('description', __('Branded race registration, payments, EF- passes and QR check-in for Indian running, skating and cycling events. One Season Pass a year.'))">
-
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet" />
-
+        <title>@yield('title', \App\Saas\Plans::brandName().' · '.__('Race registration and race-day ops for India'))</title>
+        <meta name="description" content="@yield('description', __('Sports-grade event pages, payments into your own account, QR passes, volunteer check-in and finisher certificates for Indian running, cycling and skating events.'))">
+        <meta name="theme-color" content="#0E1320">
+        <script>document.documentElement.classList.add('js')</script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-[#f7f6f1] text-[#0b1020]">
+    <body class="bg-paper font-sans text-ink antialiased">
+        <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-heat focus:px-4 focus:py-2 focus:text-on-heat">{{ __('Skip to content') }}</a>
         @include('marketing.partials.nav')
 
-        <main>
+        <main id="main">
             @yield('content')
         </main>
 

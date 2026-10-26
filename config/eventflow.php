@@ -69,11 +69,20 @@ return [
      * Custom layouts are not built in-app: organisers are pointed to Indefine.
      */
     'landing_templates' => [
-        'aurora' => ['label' => 'Aurora', 'tone' => 'light', 'description' => 'Light and athletic: airy hero, soft gradients, photo card.'],
-        'midnight' => ['label' => 'Midnight', 'tone' => 'dark', 'description' => 'Race night: full-bleed dark hero, high contrast, lane-style distances.'],
-        'clean' => ['label' => 'Clean', 'tone' => 'light', 'description' => 'Editorial minimal: one column, big type, lots of white space.'],
-        'festival' => ['label' => 'Festival', 'tone' => 'light', 'description' => 'Bold colour blocks and big tiles. Energetic, still tidy.'],
-        'heritage' => ['label' => 'Heritage', 'tone' => 'light', 'description' => 'Classic meet: crest, serif headings, order of events.'],
+        'gun-lap' => ['label' => 'Gun Lap', 'tone' => 'dark', 'description' => 'Full-bleed race photo, giant type, sticky Register. Pure race energy.'],
+        'stadium-split' => ['label' => 'Stadium Split', 'tone' => 'light', 'description' => 'Solid brand panel beside a big action photo; sponsors, accordions, FAQ.'],
+        'equipment-close' => ['label' => 'Equipment Close', 'tone' => 'light', 'description' => 'Sport-gear hero, “Limited bibs” urgency and category cards.'],
+        'night-circuit' => ['label' => 'Night Circuit', 'tone' => 'dark', 'description' => 'Dark canvas, volt accents, oversized date, one bright Register.'],
+        'heritage-crest' => ['label' => 'Heritage Crest', 'tone' => 'light', 'description' => 'Federation-formal: centred crest, paper, framed sections, sponsor row.'],
+    ],
+
+    // Earlier template keys still stored on events; they render as their Race Ink successor.
+    'landing_template_aliases' => [
+        'aurora' => 'gun-lap',
+        'midnight' => 'night-circuit',
+        'clean' => 'stadium-split',
+        'festival' => 'equipment-close',
+        'heritage' => 'heritage-crest',
     ],
 
     'race_sheets' => [

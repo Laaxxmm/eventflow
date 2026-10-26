@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <h1 class="ri-headline mb-8 text-6xl">{{ __('Log in') }}</h1>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

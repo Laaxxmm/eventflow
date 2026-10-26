@@ -1,7 +1,7 @@
 # Running pack defaults. Mass/wave start, so no race_sheet.
 sport: running
 label: Running
-template: aurora
+template: gun-lap
 distances:
   - { code: 5K, label: 5K }
   - { code: 10K, label: 10K }
