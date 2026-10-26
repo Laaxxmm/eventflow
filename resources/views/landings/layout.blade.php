@@ -25,7 +25,14 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body data-template="{{ $page->config->template }}" class="font-sans antialiased @yield('body-class', 'bg-paper text-ink')" style="{{ $page->theme->style() }}">
-        @if ($page->preview)
+        @isset($useTemplateUrl)
+            {{-- Public gallery preview (/templates/{key}): the template on sample data, one CTA. --}}
+            <div data-gallery-bar class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 bg-ink px-4 text-paper sm:px-6">
+                <a href="{{ route('templates.index') }}" class="truncate text-sm font-medium text-paper/70 hover:text-paper">← <span class="hidden sm:inline">{{ __('All templates') }} · </span><span class="font-display text-lg font-bold uppercase text-paper">{{ config("eventflow.landing_templates.{$page->config->template}.label") }}</span></a>
+                <a href="{{ $useTemplateUrl }}" class="shrink-0 bg-heat px-4 py-2 font-display text-lg font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ __('Use this template') }}</a>
+            </div>
+            <div class="h-14" aria-hidden="true"></div>
+        @elseif ($page->preview)
             <div class="relative z-50 bg-volt px-4 py-1.5 text-center text-xs font-semibold uppercase tracking-[0.14em] text-midnight">
                 {{ __(':template · preview', ['template' => config("eventflow.landing_templates.{$page->config->template}.label")]) }}
             </div>
@@ -35,8 +42,11 @@
 
         @include('landings.partials.sticky-register')
 
+        {{-- Bottom space clears the mobile sticky Register bar. The credit shows only on trial orgs. --}}
         <footer class="pb-28 pt-8 text-center text-xs opacity-60 sm:pb-8">
-            {{ __('Registrations powered by :app', ['app' => config('app.name', 'EventFlow')]) }}
+            @if ($page->watermark)
+                <a href="{{ route('home') }}" data-watermark>{{ __('Powered by :app', ['app' => config('plans.brand.name', 'EventFlow')]) }}</a>
+            @endif
         </footer>
     </body>
 </html>

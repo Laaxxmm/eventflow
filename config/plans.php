@@ -28,10 +28,34 @@ return [
         'contact_email' => env('SALES_CONTACT_EMAIL', 'hello@indefine.in'),
     ],
 
+    // Footer links, per deployment. An unset link is hidden (legal falls back to the contact email).
+    'links' => [
+        'docs' => env('MARKETING_DOCS_URL'),
+        'status' => env('MARKETING_STATUS_URL', '/up'),
+        'indefine' => env('MARKETING_INDEFINE_URL', 'https://indefine.in'),
+        'terms' => env('MARKETING_TERMS_URL'),
+        'privacy' => env('MARKETING_PRIVACY_URL'),
+    ],
+
     'currency' => 'INR',
 
-    // Every self-serve plan starts as a free trial. No card is taken.
+    /*
+     * Free trial (product-led: no card, no human gate before the first publish).
+     * The trial's Season Pass carries the chosen plan's caps (App\Saas\PlanLimits, always
+     * enforced). On top, App\Saas\Trial adds trial-only limits:
+     *
+     *   trial_events         events a trial org can publish
+     *   trial_registrations  test registrations across the trial org
+     *   trial_watermark      subtle "Powered by EventFlow" on landings until paid
+     *
+     * TRIAL_STUB=true (default until SaaS checkout is live) shows the trial-only limits but
+     * never enforces them: there is nothing to check out yet. Set TRIAL_STUB=false once it ships.
+     */
     'trial_days' => 14,
+    'trial_events' => 1,
+    'trial_registrations' => 25,
+    'trial_watermark' => true,
+    'trial_stub' => (bool) env('TRIAL_STUB', true),
 
     // Plan new organisers get when they sign up without choosing one.
     'default' => 'single_event',
@@ -48,7 +72,9 @@ return [
             'max_events' => 1,
             'max_participants_per_event' => 500,
             'self_serve' => true,
+            'highlight' => true, // Single-first: where the pricing strip starts the eye
             'upgrade_to' => 'club_season',
+            'support' => 'Email',
             'modules' => ['checkin'],
             'features' => [
                 'Branded event page, Razorpay or Cashfree checkout',
@@ -67,8 +93,8 @@ return [
             'max_events' => 5,
             'max_participants_per_event' => 1500,
             'self_serve' => true,
-            'highlight' => true,
             'upgrade_to' => 'circuit_season',
+            'support' => 'Email',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
                 'Everything in Single Event',
@@ -87,6 +113,7 @@ return [
             'max_participants_per_event' => 5000,
             'self_serve' => true,
             'upgrade_to' => 'custom',
+            'support' => 'Priority email',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
                 'Everything in Club Season',
@@ -104,6 +131,7 @@ return [
             'max_participants_per_event' => null,
             'self_serve' => false,
             'upgrade_to' => null,
+            'support' => 'Onboarding + race-day support',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
                 'Races, field sizes and term to suit you',

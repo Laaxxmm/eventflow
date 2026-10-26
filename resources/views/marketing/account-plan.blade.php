@@ -29,12 +29,12 @@
             @if ($welcome)
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="text-lg font-medium text-gray-900">{{ __('Welcome to EventFlow, :org!', ['org' => $org->name]) }}</h2>
-                    <p class="mt-1 text-sm text-gray-600">{{ __('Your free trial has started. Verify your email, then create your first event.') }}</p>
+                    <p class="mt-1 text-sm text-gray-600">{{ __('Your free trial has started. Verify your email, then publish your race site — no call with us first.') }}</p>
                     @unless (auth()->user()->hasVerifiedEmail())
                         <p class="mt-2 text-sm font-medium text-gray-900">{{ __('We sent a verification link to :email.', ['email' => auth()->user()->email]) }}</p>
                     @endunless
                     <div class="mt-4 flex flex-wrap gap-4">
-                        <a href="{{ route('organiser.events.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('Create an event') }}</a>
+                        <a href="{{ route('organiser.events.create', array_filter(['template' => $template])) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ $template ? __('Create your event with :name', ['name' => config("eventflow.landing_templates.{$template}.label")]) : __('Create your first event') }}</a>
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center text-sm text-gray-600 underline hover:text-gray-900">{{ __('Go to dashboard') }}</a>
                     </div>
                 </div>
@@ -71,6 +71,12 @@
                                         / {{ __($plan['term_label']) }} · {{ $plan['renews'] ? __('renews yearly') : __('one-off, does not auto-renew') }}
                                     @endif
                                 </dd>
+                            </div>
+                        @endif
+                        @if ($trial)
+                            <div class="flex justify-between gap-4 py-3">
+                                <dt class="text-gray-600">{{ __('Trial use') }}</dt>
+                                <dd class="font-medium text-gray-900 text-right">{{ __(':e of :el live events · :r of :rl registrations', ['e' => $trial['events'], 'el' => $trial['event_limit'], 'r' => $trial['registrations'], 'rl' => $trial['registration_limit']]) }}</dd>
                             </div>
                         @endif
                         @if ($pass)

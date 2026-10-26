@@ -4,7 +4,7 @@
 --}}
 @php($dark = $dark ?? true)
 <header x-data="{ solid: false }" x-init="solid = window.scrollY > 40" @scroll.window="solid = window.scrollY > 40"
-        @class(['fixed inset-x-0 z-30 transition-colors duration-300', $page->preview ? 'top-7' : 'top-0'])
+        @class(['fixed inset-x-0 z-30 transition-colors duration-300', isset($useTemplateUrl) ? 'top-14' : ($page->preview ? 'top-7' : 'top-0')])
         :class="solid ? '{{ $dark ? 'bg-ink/90 text-paper' : 'bg-paper/95 text-ink shadow-sm' }} backdrop-blur' : '{{ $dark ? 'text-paper' : 'text-ink' }}'">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6 lg:px-8">
         <a href="#top" class="flex items-center">

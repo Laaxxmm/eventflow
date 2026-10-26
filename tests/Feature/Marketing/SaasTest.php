@@ -35,39 +35,63 @@ function organiserOf(string $name = 'Trail Runners'): User
     return User::factory()->create(['org_id' => $org->id, 'role' => Role::Owner, 'email_verified_at' => now()]);
 }
 
-it('serves the SaaS marketing home at / pricing-first, Single Event leading', function () {
+it('serves the self-serve SaaS homepage with Single-first pricing from config', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('EventFlow')
         ->assertSee('>by Indefine<', false)
-        ->assertSee('your start')
-        ->assertSee('Start with one race — ₹3,999') // Single Event drives the hero CTA
-        ->assertSeeInOrder(['Single Event', '₹3,999', '1 race · 500 participants per race', 'Club Season', '₹12,999', 'Up to 5 races · 1,500 participants per race', 'Circuit Season', '₹29,999', 'Up to 25 races · 5,000 participants per race', 'Custom', 'Contact Indefine'])
-        ->assertSeeInOrder(['id="pricing"', 'id="race-day"'], false) // pricing comes straight after the hero
-        ->assertSee(route('pricing'))
-        ->assertSee(route('login'));
+        ->assertSee('Publish a race site you’re proud of')
+        ->assertSee('— in under an hour.')
+        ->assertSee('No ticket % required')->assertSee('Own SMTP free')->assertSee('India Razorpay-ready')
+        ->assertSee('Start free trial')
+        ->assertSee('href="'.route('register').'"', false)
+        ->assertSee('See live templates')
+        ->assertSee('href="'.route('templates.index').'"', false)
+        ->assertSeeInOrder(['Single Event', '₹3,999', 'Club Season', '₹12,999', 'Circuit Season', '₹29,999']) // price line under the hero
+        ->assertSee('Your runners land on a sports page, not a form.')
+        ->assertSee('Soft pax caps')
+        ->assertSee('Email ✓')->assertSee('Platform mail add-on')->assertSee('WhatsApp add-on')
+        ->assertSee('Upgrade, participant packs, and SMTP — all in settings. No waiting on a quote to go live.')
+        ->assertSee('Talk to Indefine')
+        ->assertSee('Managed race ops by Indefine')
+        ->assertDontSee('Book a demo');
 });
 
-it('shows the locked INR plans, terms and add-ons on /pricing', function () {
+it('keeps the nav to Product, Templates, Pricing, Login and Start free trial', function () {
+    $this->get('/')->assertSeeInOrder(['Product', 'Templates', 'Pricing', 'Login', 'Start free trial']);
+});
+
+it('reads every price on the homepage from config', function () {
+    config(['plans.plans.single_event.price_inr' => 4499]);
+
+    $this->get('/')->assertOk()->assertSee('₹4,499')->assertDontSee('₹3,999');
+});
+
+it('lists Single, Club, Circuit and a contact-only Custom on /pricing', function () {
     $this->get('/pricing')
         ->assertOk()
-        ->assertSeeInOrder(['Single Event', '₹3,999', '90-day window', 'One-off · does not auto-renew', 'Club Season', '₹12,999', '12 months', 'Renews yearly · unused races do not roll over', 'Circuit Season', '₹29,999', 'Custom'])
-        ->assertSee('name="plan" value="single_event"', false)
-        ->assertSee('name="plan" value="club_season"', false)
-        ->assertSee('name="plan" value="circuit_season"', false)
-        ->assertDontSee('name="plan" value="custom"', false) // contact-only, no fake price
+        ->assertSeeInOrder(['Single Event', '₹3,999', '90-day window', 'Club Season', '₹12,999', '12 months', 'Circuit Season', '₹29,999', 'Custom'])
+        ->assertSee('1 race · 500 participants per race')
+        ->assertSee('Up to 5 races · 1,500 participants per race')
+        ->assertSee('Up to 25 races · 5,000 participants per race')
+        ->assertSee(route('register', ['plan' => 'single_event']), false)
+        ->assertSee(route('register', ['plan' => 'club_season']), false)
+        ->assertSee(route('register', ['plan' => 'circuit_season']), false)
+        ->assertDontSee(route('register', ['plan' => 'custom']), false) // contact-only
         ->assertSee('mailto:hello@indefine.in', false)
         ->assertDontSee('on paid registrations');
 });
 
-it('never shows Platform mail or WhatsApp as included in the comparison', function () {
-    $html = $this->get('/pricing')->assertOk()->getContent();
+it('compares races, duration, pax, mail, WhatsApp and support, and explains overage', function () {
+    $html = $this->get('/pricing')
+        ->assertSee('data-compare', false)
+        ->assertSeeInOrder(['Races', 'Duration', 'Participants per race', 'Ticket percentage', 'Email · own SMTP', 'Platform mail', 'WhatsApp', 'Support'])
+        ->assertSee('data-overage', false)
+        ->assertSeeInOrder(['Upgrade', 'Buy a participant pack', 'Contact Indefine'])
+        ->getContent();
 
-    foreach (['Email', 'Own SMTP'] as $row) {
-        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*<span class="inline-flex" aria-label="Included">(?:(?!</td>).)*</td>){4}\s*</tr>#s');
-    }
+    // Platform mail and WhatsApp are never shown as included on any plan.
     foreach (['Platform mail', 'WhatsApp'] as $row) {
-        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*Add-on\s*</td>){4}\s*</tr>#');
+        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4[^"]*">\s*Paid add-on\s*</td>){4}\s*</tr>#');
     }
 });
 
@@ -87,11 +111,13 @@ it('can hide the Indefine brand line', function () {
     $this->get('/')->assertOk()->assertDontSee('>by Indefine<', false)->assertDontSee('A product by');
 });
 
-it('registers an organiser with an org on the chosen plan and a free trial', function () {
-    $this->get('/register?plan=club_season&addons[]=whatsapp')
+it('registers an organiser on a free trial of the chosen plan', function () {
+    $this->get('/register?plan=club_season')
         ->assertOk()
+        ->assertSee('Start your free trial')
+        ->assertSee('14 days · 1 event you can publish · up to 25 test registrations · no card.')
         ->assertSee('value="club_season"', false)
-        ->assertSee('Up to 5 races · 1,500 participants per race');
+        ->assertDontSee('% on paid registrations');
 
     $this->post('/register', signupForm(['plan' => 'club_season', 'addons' => ['whatsapp']]))
         ->assertRedirect(route('account.plan', ['welcome' => 1], absolute: false));
@@ -115,7 +141,7 @@ it('registers an organiser with an org on the chosen plan and a free trial', fun
         ->and($pass->max_events)->toBe(5)
         ->and($pass->max_registrations)->toBe(1500)
         ->and($pass->modules->contains(Module::SmsWhatsapp))->toBeTrue()
-        ->and($pass->modules->contains(Module::EmailBranding))->toBeFalse();
+        ->and($pass->modules->contains(Module::EmailBranding))->toBeFalse(); // Platform mail is a paid add-on
 });
 
 it('defaults to the Single Event trial and rejects contact-only plans or unknown add-ons', function () {
@@ -138,7 +164,7 @@ it('keeps org slugs off reserved site paths', function () {
     expect(User::where('email', 'meera@sunrise.test')->sole()->org->slug)->toBe('pricing-events');
 });
 
-it('shows the organiser their plan, trial and billing note', function () {
+it('shows the organiser their plan, trial use and billing note', function () {
     $this->post('/register', signupForm(['plan' => 'single_event']));
 
     $this->get('/account/plan?welcome=1')
@@ -146,8 +172,8 @@ it('shows the organiser their plan, trial and billing note', function () {
         ->assertSee('Welcome to EventFlow, Sunrise Sports Club!')
         ->assertSee('We sent a verification link to meera@sunrise.test.')
         ->assertSee('Free trial until')
+        ->assertSee('0 of 1 live events · 0 of 25 registrations')
         ->assertSee('₹3,999')->assertSee('one-off, does not auto-renew')
-        ->assertSee('0 of 1')
         ->assertSee('On hold: set up email')
         ->assertSee('Upgrade to Club Season (₹12,999)')
         ->assertSee('Buy a participant pack')

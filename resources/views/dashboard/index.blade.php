@@ -7,6 +7,7 @@
     $upcoming = $events->filter(fn ($e) => $e->date->isAfter(now()->subDay()))->sortBy('date');
     $past = $events->reject(fn ($e) => $e->date->isAfter(now()->subDay()));
     $firstName = \Illuminate\Support\Str::of(auth()->user()->name)->before(' ');
+    $trial = \App\Saas\Trial::onTrial($org) ? \App\Saas\Trial::status($org) : null;
 @endphp
 
 <x-app-layout>
@@ -25,6 +26,17 @@
     </x-slot>
 
     <div class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+        @if ($trial)
+            {{-- Trial banner: the same limits the homepage states. --}}
+            <div data-trial-banner class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#0b1020] px-5 py-4 text-sm text-white">
+                <p>
+                    <span class="font-semibold">{{ $trial['expired'] ? __('Your free trial has ended') : trans_choice('{1} Free trial · 1 day left|[2,*] Free trial · :count days left|[0] Free trial · last day', $trial['days_left']) }}</span>
+                    <span class="text-white/70">· {{ __(':e/:el live event · :r/:rl test registrations', ['e' => $trial['events'], 'el' => $trial['event_limit'], 'r' => $trial['registrations'], 'rl' => $trial['registration_limit']]) }}</span>
+                </p>
+                <a href="{{ route('account.plan') }}" class="rounded-lg bg-[#ff5a3c] px-4 py-2 font-semibold text-[#0b1020] hover:brightness-95">{{ __('Plans from :price', ['price' => \App\Saas\Plans::inr(\App\Saas\Plans::entry()['plan']['price_inr'] ?? null)]) }}</a>
+            </div>
+        @endif
+
         @if ($org)
             <div class="space-y-3 empty:hidden">@include('saas.plan-banner', ['org' => $org])</div>
         @endif
@@ -35,8 +47,8 @@
                 <div class="grid items-center gap-8 p-8 sm:p-12 lg:grid-cols-[1.1fr_0.9fr]">
                     <div>
                         <p class="text-sm font-semibold uppercase tracking-wider text-[#c2410c]">{{ __('Let\'s get started') }}</p>
-                        <h3 class="mt-3 text-3xl font-extrabold tracking-tight">{{ __('Create your first event') }}</h3>
-                        <p class="mt-3 max-w-lg text-slate-600">{{ __('Five quick steps: the basics, a sport pack, a page design and your branding. Your event page goes live as soon as you publish.') }}</p>
+                        <h3 class="mt-3 text-3xl font-extrabold tracking-tight">{{ __('Publish your race site in under an hour') }}</h3>
+                        <p class="mt-3 max-w-lg text-slate-600">{{ __('Five quick steps: the basics, a sport pack, a page design and your branding. Your runners land on a sports page, not a form — with QR passes, check-in and certificates ready.') }}</p>
                         <a href="{{ route('organiser.events.create') }}" class="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#0b1020] px-6 py-3.5 font-semibold text-white hover:bg-[#1f2a4a]">
                             {{ __('Create your first event') }} <span aria-hidden="true">→</span>
                         </a>

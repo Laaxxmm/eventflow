@@ -8,7 +8,7 @@
         'tagline' => old('tagline', ''),
         'sport' => old('sport', 'running'),
         'distances' => old('distances'),
-        'template' => old('template'),
+        'template' => old('template', $presetTemplate ?? null), // ?template= from the public gallery
         'primary' => old('primary', '#d9ff45'),
         'secondary' => old('secondary', '#ff6e61'),
     ];

@@ -30,6 +30,7 @@ final readonly class LandingPage
         array $remaining,
         public bool $open = true,
         public bool $preview = false,
+        public bool $watermark = false, // "Powered by EventFlow" while the org is on a trial
         public bool $paused = false, // plan participant cap reached (soft-block)
     ) {
         $this->date = $config->date->setTimezone(ConfigCompiler::TIMEZONE);

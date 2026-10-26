@@ -14,6 +14,7 @@ use App\Landing\LogoInspector;
 use App\Models\Event;
 use App\Models\Org;
 use App\Saas\PlanLimits;
+use App\Saas\Trial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -50,6 +51,7 @@ class EventController extends Controller
             'org' => $org,
             'packs' => EventWizard::packs($packs),
             'templates' => config('eventflow.landing_templates'),
+            'presetTemplate' => self::galleryTemplate($request->query('template')),
             'step' => (int) session('wizard_step', 1),
             'contact' => config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email'),
         ]);
@@ -68,6 +70,11 @@ class EventController extends Controller
                 ->with('wizard_step', EventWizard::stepFor($validator->errors()->keys()));
         }
         $input = $validator->validated();
+
+        if ($input['publish'] && ! Trial::canPublish($org)) {
+            return back()->withErrors(['publish' => self::trialLimitMessage()])->withInput($request->except(['logo', 'hero']))
+                ->with('wizard_step', EventWizard::stepFor(['publish']));
+        }
 
         $logo = $request->file('logo')?->storePublicly("branding/{$org->id}", 'public');
         $hero = $request->file('hero')?->storePublicly("branding/{$org->id}", 'public');
@@ -120,6 +127,11 @@ class EventController extends Controller
     {
         $org = $this->org($request, $event);
         $input = $request->validate(EventForm::rules());
+
+        $goingLive = $input['status'] === EventStatus::Published && $event->status !== EventStatus::Published;
+        if ($goingLive && ! Trial::canPublish($org, $event->id)) {
+            throw ValidationException::withMessages(['status' => self::trialLimitMessage()]);
+        }
 
         $authored = EventForm::toConfig($input, $org->slug, $event->slug, $event->config ?? []);
         $config = $this->compile($authored);
@@ -180,5 +192,16 @@ class EventController extends Controller
         } catch (InvalidEventConfig $e) {
             throw ValidationException::withMessages(EventForm::errorBag($e->errors));
         }
+    }
+
+    private static function trialLimitMessage(): string
+    {
+        return __('Your free trial covers :n live event. Pick Single Event, Club Season or Circuit Season in Plan & billing to publish more.', ['n' => Trial::eventLimit()]);
+    }
+
+    /** A template picked on the public /templates gallery, if it is one we ship. */
+    public static function galleryTemplate(mixed $key): ?string
+    {
+        return is_string($key) && array_key_exists($key, config('eventflow.landing_templates')) ? $key : null;
     }
 }

@@ -8,6 +8,7 @@ use App\Landing\EventStatus;
 use App\Landing\RegistrationForm;
 use App\Landing\Theme;
 use App\Saas\PlanLimits;
+use App\Saas\Trial;
 use App\View\LandingPage;
 use Illuminate\View\View;
 
@@ -49,6 +50,7 @@ class PublicEventController extends Controller
                 remaining: Capacity::remaining($event, $config),
                 open: RegistrationController::isOpen($config) && ! ($paused = PlanLimits::atParticipantCap($event)),
                 paused: $paused ?? false,
+                watermark: Trial::watermark($event->org),
             ),
         ]);
     }

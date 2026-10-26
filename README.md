@@ -560,18 +560,21 @@ Tests: `tests/Feature/Notifications` (mail paths, hold, add-on gates) and `tests
 
 ## SaaS marketing & auth
 
-The site that sells EventFlow, separate from organisers' event pages:
+The self-serve site that sells EventFlow to organisers, separate from their event pages.
+Design notes and screenshots: [docs/design/homepage-saas.md](docs/design/homepage-saas.md).
 
 | URL | What |
 |---|---|
-| `/` | Marketing home: hero, how it works, features, pricing, FAQ (`resources/views/marketing`) |
-| `/pricing` | Plans, add-ons, comparison table; each self-serve plan card starts signup with that plan and add-ons |
-| `/register` (`/signup`) | Organiser signup: org name, name, email, password, **plan + add-ons** |
+| `/` | Homepage: hero + price line, 3-step time to value, template teaser, product proof, Single-first pricing strip, self-serve trust line, CTA band |
+| `/templates` | Public gallery of the 5 Race Ink landing templates |
+| `/templates/{key}` | Full preview on sample data with a **Use this template** bar → `/register?template={key}` (signed-in organisers go straight to the wizard) |
+| `/pricing` | Single / Club / Circuit / Custom, comparison table, overage explainer, add-ons |
+| `/register` (`/signup`) | Free-trial signup: org, name, email, password, the plan to convert to; carries `?template=` |
 | `/login`, `/forgot-password` | Breeze login and password reset |
 | `/app` | Goes to the right home: dashboard, check-in (volunteers) or `/platform` (Indefine) |
-| `/account/plan` | Organiser's plan, trial end and add-ons; shown right after signup |
+| `/account/plan` | Plan, trial use and billing note; after signup, "Create your event with {template}" |
 | `/platform/orgs` | Indefine platform console (platform admins only) |
-| `/{org}`, `/{org}/{event}` | Per-event landings (stream C), unchanged |
+| `/{org}`, `/{org}/{event}` | Per-event landings |
 
 ### Plans, caps and overage
 
@@ -613,10 +616,41 @@ ones inside the 30-minute hold, the same count distance capacity uses):
 
 `BRAND_SHOW_INDEFINE=false` shows "EventFlow" without "by Indefine".
 
-**Marketing copy rules.** `/` and `/pricing` are pricing-first and lead with Single Event ₹3,999,
-then Club, Circuit and Custom. Every price shows its races and participants per race. Custom has no
-price, only "Contact Indefine". The comparison table marks Email ✓, Own SMTP ✓, Platform mail
-*Add-on* and WhatsApp *Add-on*; it never shows those two add-ons as included.
+**Marketing copy rules.** Every number on `/`, `/pricing` and signup comes from config. Pricing
+leads with Single Event ₹3,999 (also in the hero's price line), then Club, Circuit and a de-emphasised
+Custom with no price, only "Contact Indefine". Every price shows its races and participants per race.
+The comparison table marks Email · own SMTP as included and Platform mail and WhatsApp as *Paid add-on*;
+it never shows those two add-ons as included. Race sheets and certificates start at Club Season.
+
+### Free trial and `TRIAL_STUB`
+
+Signup starts a trial with no card and no human gate before the first publish. The trial pass
+carries the chosen plan's caps (enforced by `PlanLimits`, above). On top, `App\Saas\Trial`
+(config `plans.trial_*`) adds trial-only limits:
+
+| Key | Default | Meaning |
+|---|---|---|
+| `trial_days` | 14 | trial length |
+| `trial_events` | 1 | events a trial org can publish |
+| `trial_registrations` | 25 | test registrations across the trial org |
+| `trial_watermark` | true | subtle "Powered by EventFlow" in trial orgs' landing footers |
+| `trial_stub` | `env('TRIAL_STUB', true)` | **trial paywall off**: trial-only limits are shown, never enforced |
+
+Converting (publishing past the trial, more than 25 registrations, removing the watermark) means
+checking out Single Event, Club Season or Circuit Season. **SaaS checkout is not built yet**, so
+`TRIAL_STUB=true` is the default: the dashboard banner and `/account/plan` show trial use, and the
+homepage and pricing page say checkout is rolling out, but trial-only limits block nothing (plan caps
+still apply). Once checkout ships, set `TRIAL_STUB=false`: a second
+publish is then refused with a pointer to Plan & billing, and a 26th registration is refused on the landing.
+Orgs set up from YAML or by Indefine (no `orgs.plan`) are never on a trial and never watermarked.
+
+Footer links are per deployment: `MARKETING_DOCS_URL`, `MARKETING_STATUS_URL` (default `/up`),
+`MARKETING_INDEFINE_URL`, `MARKETING_TERMS_URL`, `MARKETING_PRIVACY_URL` (an unset link is hidden;
+legal falls back to the contact email). `SALES_CONTACT_EMAIL` sets "Talk to Indefine";
+`BRAND_SHOW_INDEFINE=false` shows "EventFlow" without "by Indefine".
+
+Template thumbnails in `public/images/templates/*.jpg` are screenshots of `/templates/{key}`;
+regenerate them after changing a template (see the design doc).
 
 ### Platform admin (Indefine)
 
@@ -645,8 +679,8 @@ php artisan db:seed --class=PlatformSeeder
 The seeder refuses to run without these variables, and in production refuses the `.env.example`
 values. Never commit a real password; set production ones only in the server's `.env`.
 
-Tests: `tests/Feature/Marketing` (marketing pages, signup with plan/add-ons, login, platform admin 403,
-suspension, seeder).
+Tests: `tests/Feature/Marketing` (`SaasTest`: marketing pages, signup, login, platform admin, seeder;
+`TrialFunnelTest`: trial rules, `TRIAL_STUB`, watermark, dashboard banner, template gallery and passthrough).
 
 ## UX templates
 
