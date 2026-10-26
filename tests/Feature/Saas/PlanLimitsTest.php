@@ -103,7 +103,7 @@ it('soft-blocks registrations at the plan participant cap, for runners and organ
 
     $this->get(PLAN_LANDING)->assertOk()
         ->assertSee('Registrations for this race are paused for now')
-        ->assertSee('Registrations paused')->assertDontSee('Registration closed')
+        ->assertSee('Entries paused')->assertDontSee('Entries closed')
         ->assertDontSee('name="participant_name"', false);
 
     $owner = planOwner($event->org);

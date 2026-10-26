@@ -122,6 +122,41 @@
     },
     "certificate": {
       "$ref": "#/definitions/certificate"
+    },
+    "sponsors": {
+      "type": "array",
+      "maxItems": 24,
+      "description": "Sponsor / partner strip on the event page. logo: public-disk path or https URL.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 80 },
+          "logo": { "type": ["string", "null"], "maxLength": 255 },
+          "url": { "type": ["string", "null"], "format": "uri", "maxLength": 255 },
+          "tier": { "type": ["string", "null"], "maxLength": 40, "description": "e.g. Title partner, Timing partner" }
+        }
+      }
+    },
+    "schedule": {
+      "type": "array",
+      "maxItems": 30,
+      "description": "Race-day schedule. Without it, pages show reporting time and one start per distance.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["time", "label"],
+        "properties": {
+          "time": { "type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$" },
+          "label": { "type": "string", "maxLength": 120 }
+        }
+      }
+    },
+    "charity": {
+      "type": ["string", "null"],
+      "maxLength": 600,
+      "description": "Charity / cause the event supports (shown as its own section)."
     }
   },
   "definitions": {
@@ -373,7 +408,7 @@
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
       "maxLength": 40,
-      "description": "Landing template key from config('eventflow.landing_templates'): aurora, midnight, clean, festival, heritage. Unknown keys render as aurora. Custom layouts: contact Indefine."
+      "description": "Landing template key from config('eventflow.landing_templates'): gun-lap, stadium-split, equipment-close, night-circuit, heritage-crest. Old keys aurora/midnight/clean/festival/heritage are aliases. Unknown keys render as gun-lap. Custom layouts: contact Indefine."
     }
   }
 }

@@ -1,7 +1,7 @@
 # Skating pack defaults. Events inherit any top-level key they omit.
 sport: skating
 label: Roller skating
-template: festival
+template: equipment-close
 distances:
   - { code: 1LAP, label: 1 Lap (rink) }
   - { code: 500M, label: 500 m }

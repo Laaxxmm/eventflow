@@ -249,7 +249,7 @@
                             </div>
                             <x-input-error class="mt-2" :messages="$errors->get('logo')" />
                             <p x-show="logoDark" x-cloak class="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800" role="status">
-                                {{ __('Dark logo — pick a light template (Aurora/Clean) or a light hero background so it stays classy.') }}
+                                {{ __('Dark logo — pick a light template (Stadium Split/Heritage Crest) or a light hero background so it stays classy.') }}
                             </p>
                             <p x-show="logoUrl && logoOpaque" x-cloak class="mt-2 text-xs text-slate-500">{{ __('Tip: this logo has a solid background. A transparent PNG blends into every template.') }}</p>
                         </div>

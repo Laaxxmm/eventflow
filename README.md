@@ -655,26 +655,29 @@ Branding & media → Review & publish). Publishing makes `/{org}/{slug}` live im
 layouts are not built in-app; every picker links to **Contact Indefine**
 (`CUSTOM_TEMPLATE_CONTACT`, falling back to the plans contact email).
 
-### Landing templates (5)
+### Landing templates (5, Race Ink)
 
 | ID | Look | Tone |
 | --- | --- | --- |
-| `aurora` | Light and athletic: airy hero, soft gradients, photo card | light |
-| `midnight` | Race night: full-bleed dark hero, lane-style distances | dark |
-| `clean` | Editorial minimal: one column, big type | light |
-| `festival` | Bold colour blocks and tiles | light |
-| `heritage` | Classic meet: crest, serif headings, order of events | light |
+| `gun-lap` | Full-bleed race photo, giant outline-over-solid type, sticky Register | dark |
+| `stadium-split` | Solid brand panel + big action photo, sponsor strip, accordions | light |
+| `equipment-close` | Gear close-up hero, "Limited bibs", category cards | light |
+| `night-circuit` | Midnight canvas, oversized date, volt Register | dark |
+| `heritage-crest` | Federation-formal crest, paper, framed sections | light |
+
+Old IDs (`aurora`, `midnight`, `clean`, `festival`, `heritage`) are aliases. Design details:
+[Race Ink](#design-race-ink) and `docs/design/race-ink.md`.
 
 - Views: `resources/views/landings/templates/<id>.blade.php`, sharing
   `resources/views/landings/layout.blade.php` and `landings/partials/{register,logo}.blade.php`.
   Every template gets one `App\View\LandingPage` (`$page`) view model.
 - Registry: `config('eventflow.landing_templates')` (label, `tone`, description). Stored in
   the event YAML as top-level `template:` and denormalised to `events.template_id`.
-  Unknown IDs render `aurora`.
+  Unknown IDs render `gun-lap`.
 - Live preview with sample data: `/organiser/templates/{id}/preview?primary=%23...&secondary=%23...`
   (used by the wizard's picker iframes).
 - Logos sit in fixed slots (header / crest). Upload helper text asks for a transparent PNG;
-  a dark logo triggers: "Dark logo — pick a light template (Aurora/Clean) or a light hero
+  a dark logo triggers: "Dark logo — pick a light template (Stadium Split/Heritage Crest) or a light hero
   background so it stays classy." (`App\Landing\LogoInspector`, also checked client-side).
 
 ### Certificate templates
@@ -683,10 +686,12 @@ Replaced by the premium gallery: see [Certificates](#certificates-1).
 
 ### Adding a 6th template
 
-1. Landing: add `resources/views/landings/templates/<id>.blade.php` (`@extends('landings.layout')`,
-   include `landings.partials.register` and `landings.partials.logo`), register it in
-   `config/eventflow.php` → `landing_templates` with `tone`, and add `<id>` to the wizard test
-   expectations. Check `/organiser/templates/<id>/preview` at 390 px and 1280 px.
+1. Landing: the five Race Ink layouts are the product; a custom layout is a "Contact Indefine"
+   request. For Indefine: add `resources/views/landings/templates/<id>.blade.php`
+   (`@extends('landings.layout')`, use `landings.partials.{header,register,schedule,faq,sponsors}`
+   and Race Ink tokens only), register it in `landing_templates` with `tone`, add it to the
+   datasets in `tests/Feature/Events/LandingTemplatesTest.php`, and check
+   `/organiser/templates/<id>/preview` at 390 px and 1440 px.
 2. Certificate: the gallery is a fixed, curated set of five; a custom design is a
    "Contact Indefine" request. Adding one for Indefine is described in
    [Certificates](#certificates-1).
@@ -845,3 +850,23 @@ account. Orgs that don't connect one use the platform account from `.env`
   keys (`Org::ownPaymentKeys()`), otherwise the platform one; `forOrg()` and `platform()` are
   used by the webhook controller. Reconciliation, the payment return page and refunds all go
   through `for($registration)`, so they use the same account that created the order.
+
+## Design: Race Ink
+
+The sports-editorial design system for the marketing site and event pages. Full write-up with
+before/after screenshots: [`docs/design/race-ink.md`](docs/design/race-ink.md).
+
+- **Tokens** (`resources/css/app.css`, Tailwind colours): `ink #0E1320`, `track #5B4CFF`,
+  `heat #FF5A3C`, `paper #F6F3EC`, `mist #E8E4DC`, `midnight #12161F`, `volt #C8F531`
+  (sparingly, on dark).
+- **Type:** Barlow Condensed (display) and Inter (UI), self-hosted with `@fontsource`; no font CDN.
+- **UI kit:** `<x-ri.button>`, `<x-ri.chip>`, `<x-ri.accordion>`, `<x-ri.photo>`.
+- **Motion:** `data-reveal` and `.ri-kenburns`, both only under
+  `prefers-reduced-motion: no-preference`.
+- **Brand tinting:** `App\Landing\Theme::raceInk()` maps organiser colours onto Track and Heat
+  with contrast checks (4.5:1 panels, 3:1 large CTAs, 4.5:1 track-as-text).
+- **Pricing:** `/` and `/pricing` read `config/plans.php`, cheapest first with custom plans last
+  (`Plans::ordered()`). The hero CTA comes from the cheapest self-serve plan: "Start with one race
+  — ₹X" when that plan allows one event, otherwise "Start your season — ₹X".
+- **Photography:** `public/images/race-ink/<set>/` (see `CREDITS.md`). Organiser hero uploads
+  always win; graphic fallbacks fill empty slots.

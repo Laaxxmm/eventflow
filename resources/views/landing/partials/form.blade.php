@@ -1,8 +1,8 @@
 {{-- Registration form generated from fields + distances + age_bands. $form: App\Landing\RegistrationForm --}}
-@php($control = 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full')
+@php($control = 'border-ink/25 focus:border-ink focus:ring-ink rounded-md shadow-sm mt-1 block w-full')
 
 @php($preview = $preview ?? false)
-<form method="POST" action="{{ $preview ? '#' : route('registrations.store', [$config->org, $config->slug]) }}" @if ($preview) onsubmit="return false" @endif class="mt-6 rounded-2xl bg-white p-4 sm:p-8 shadow-sm ring-1 ring-black/5 space-y-6 text-gray-900 text-left">
+<form method="POST" action="{{ $preview ? '#' : route('registrations.store', [$config->org, $config->slug]) }}" @if ($preview) onsubmit="return false" @endif class="mt-6 bg-white p-4 sm:p-8 ring-2 ring-ink space-y-6 text-ink text-left">
     @csrf
 
     @if ($errors->any())
@@ -16,8 +16,8 @@
         <div class="mt-2 grid gap-3 sm:grid-cols-2">
             @foreach ($config->distances as $distance)
                 @php($full = ($remaining[$distance->code] ?? null) === 0)
-                <label class="flex items-center gap-3 rounded-md border border-gray-300 p-3 has-[:checked]:border-[var(--brand-secondary)] has-[:checked]:ring-1 has-[:checked]:ring-[var(--brand-secondary)] {{ $full ? 'opacity-50' : 'cursor-pointer' }}">
-                    <input type="radio" name="distance" value="{{ $distance->code }}" class="text-indigo-600 focus:ring-indigo-500" @checked(old('distance') === $distance->code) @disabled($full) required>
+                <label class="flex items-center gap-3 border-2 border-ink/15 p-3 has-[:checked]:border-heat has-[:checked]:bg-heat/10 {{ $full ? 'opacity-50' : 'cursor-pointer' }}">
+                    <input type="radio" name="distance" value="{{ $distance->code }}" class="text-heat focus:ring-heat" @checked(old('distance') === $distance->code) @disabled($full) required>
                     <span class="flex-1">
                         <span class="block font-semibold">{{ $distance->label }}</span>
                         <span class="block text-sm text-gray-600">₹{{ number_format($distance->price_inr) }}@if ($full) · {{ __('Full') }}@endif</span>
@@ -66,7 +66,7 @@
                 @if ($field->type === 'checkbox' && $field->options === [])
                     <label for="{{ $id }}" class="inline-flex items-center gap-2">
                         <input type="hidden" name="{{ $name }}" value="0">
-                        <input id="{{ $id }}" type="checkbox" name="{{ $name }}" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked($old) @required($field->required)>
+                        <input id="{{ $id }}" type="checkbox" name="{{ $name }}" value="1" class="rounded-none border-ink/30 text-heat shadow-sm focus:ring-heat" @checked($old) @required($field->required)>
                         <span class="text-sm text-gray-700">{{ $field->label }}</span>
                     </label>
                 @elseif (in_array($field->type, ['radio', 'checkbox'], true))
@@ -76,9 +76,9 @@
                             @foreach ($field->options as $option)
                                 <label class="inline-flex items-center gap-2 text-sm">
                                     @if ($field->type === 'radio')
-                                        <input type="radio" name="{{ $name }}" value="{{ $option }}" class="text-indigo-600 focus:ring-indigo-500" @checked($old === $option) @required($field->required)>
+                                        <input type="radio" name="{{ $name }}" value="{{ $option }}" class="text-heat focus:ring-heat" @checked($old === $option) @required($field->required)>
                                     @else
-                                        <input type="checkbox" name="{{ $name }}[]" value="{{ $option }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(in_array($option, (array) $old, true))>
+                                        <input type="checkbox" name="{{ $name }}[]" value="{{ $option }}" class="rounded-none border-ink/30 text-heat shadow-sm focus:ring-heat" @checked(in_array($option, (array) $old, true))>
                                     @endif
                                     {{ $option }}
                                 </label>
@@ -106,7 +106,7 @@
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-        <button type="submit" class="inline-flex justify-center rounded-full px-6 py-3 font-semibold bg-[var(--brand-primary)] text-[var(--brand-on-primary)] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-primary)]">
+        <button type="submit" class="inline-flex w-full justify-center bg-heat px-7 py-4 font-display text-xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-heat sm:w-auto">
             {{ __('Continue to payment') }}
         </button>
         <p class="text-sm text-gray-600">{{ __('Your place is held for :minutes minutes while you pay.', ['minutes' => \App\Landing\Capacity::PENDING_HOLD_MINUTES]) }}</p>

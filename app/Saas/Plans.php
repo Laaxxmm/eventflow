@@ -23,6 +23,36 @@ final class Plans
         return self::all()[$key] ?? throw new \InvalidArgumentException("Unknown plan [{$key}]");
     }
 
+    /**
+     * Plans cheapest first, custom-priced ones last: the order the pricing strip shows
+     * (Single → Club → Circuit → Custom once those plans are configured).
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function ordered(): array
+    {
+        $plans = self::all();
+        uasort($plans, fn (array $a, array $b) => ($a['price_inr'] ?? PHP_INT_MAX) <=> ($b['price_inr'] ?? PHP_INT_MAX));
+
+        return $plans;
+    }
+
+    /**
+     * The cheapest self-serve plan, for "Start with … ₹X" calls to action.
+     *
+     * @return array{key: string, plan: array<string, mixed>}|null
+     */
+    public static function entry(): ?array
+    {
+        foreach (self::ordered() as $key => $plan) {
+            if (($plan['self_serve'] ?? false) && $plan['price_inr'] !== null) {
+                return ['key' => $key, 'plan' => $plan];
+            }
+        }
+
+        return null;
+    }
+
     /** @return list<string> Plans a visitor can start a trial on (others are "contact us"). */
     public static function selfServe(): array
     {

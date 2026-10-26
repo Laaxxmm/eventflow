@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <h1 class="ri-headline mb-8 text-6xl">{{ __('Start your season') }}</h1>
     <div class="mb-4 text-sm text-gray-600">
         {{ __('Create your organiser account. We will email you a link to verify your address before you can publish events.') }}
     </div>

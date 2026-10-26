@@ -29,7 +29,7 @@ function wizardInput(array $overrides = []): array
             ['code' => '5K', 'label' => '5K', 'price_inr' => '499', 'capacity' => '100'],
             ['code' => '10K', 'label' => '10K', 'price_inr' => '799', 'capacity' => ''],
         ],
-        'template' => 'midnight',
+        'template' => 'night-circuit',
         'primary' => '#D9FF45',
         'secondary' => '#ff6e61',
         'publish' => '1',
@@ -42,7 +42,7 @@ function eventInput(array $overrides = []): array
     return array_replace_recursive([
         'name' => 'Monsoon 10K',
         'sport' => 'running',
-        'template' => 'midnight',
+        'template' => 'night-circuit',
         'date' => '2027-07-04T06:00',
         'venue' => 'Cubbon Park',
         'status' => 'published',
@@ -82,7 +82,7 @@ it('shows the five-step wizard with sport packs and template previews', function
     $this->actingAs(organiser())->get('/organiser/events/create')
         ->assertOk()
         ->assertSeeInOrder(['1. Basics', '2. Sport pack', '3. Page design', '4. Branding', '5. Publish'])
-        ->assertSee('Aurora')->assertSee('Midnight')->assertSee('Clean')->assertSee('Festival')->assertSee('Heritage')
+        ->assertSee('Gun Lap')->assertSee('Stadium Split')->assertSee('Equipment Close')->assertSee('Night Circuit')->assertSee('Heritage Crest')
         ->assertSee('Need a custom template?')
         ->assertSee('transparent background');
 });
@@ -96,11 +96,11 @@ it('publishes the event with its template from the wizard, leaving the rest to t
     $response->assertSessionHasNoErrors()->assertRedirect(route('organiser.events.published', $event));
     expect($event->slug)->toBe('monsoon-10k')
         ->and($event->status)->toBe('published')
-        ->and($event->template_id)->toBe('midnight')
+        ->and($event->template_id)->toBe('night-circuit')
         ->and($event->certificate_template_id)->toBe('stadium-strip') // running pack
         ->and($event->config)->toMatchArray([
             'org' => 'city-runners',
-            'template' => 'midnight',
+            'template' => 'night-circuit',
             'date' => '2027-07-04T06:00:00+05:30',
             'branding' => ['primary' => '#d9ff45', 'secondary' => '#ff6e61'],
             'hero' => ['title' => 'Monsoon 10K', 'subtitle' => 'Run in the rain'],
@@ -116,7 +116,7 @@ it('publishes the event with its template from the wizard, leaving the rest to t
         ->assertOk()->assertSee('Your event is live')->assertSee(route('landing.show', ['city-runners', 'monsoon-10k']));
 
     // The landing renders the chosen template, with the running pack's FAQ.
-    $this->get('/city-runners/monsoon-10k')->assertOk()->assertSee('Choose your lane')->assertSee('Is the race chip timed?');
+    $this->get('/city-runners/monsoon-10k')->assertOk()->assertSee('Find your lane')->assertSee('Is the race chip timed?');
 });
 
 it('saves a draft that is not public', function () {
@@ -164,7 +164,7 @@ it('warns about dark logos and logos without transparency', function () {
 
     $event = Event::sole();
     $this->actingAs($user)->withSession(['logo_dark' => true])->get(route('organiser.events.published', $event))
-        ->assertSee('Dark logo — pick a light template (Aurora/Clean) or a light hero background so it stays classy.');
+        ->assertSee('Dark logo — pick a light template (Stadium Split/Heritage Crest) or a light hero background so it stays classy.');
 
     $solid = UploadedFile::fake()->image('logo.jpg', 400, 160);
     $this->actingAs($user)->post('/organiser/events', wizardInput(['name' => 'Another run', 'logo' => $solid]))
@@ -195,13 +195,13 @@ it('edits an event in the full editor, keeping its template and slug', function 
     $event = Event::first();
     $this->actingAs($user)->get("/organiser/events/{$event->id}/edit")->assertOk()->assertSee('Race categories');
 
-    $this->actingAs($user)->put("/organiser/events/{$event->id}", eventInput(['name' => 'Monsoon 10K 2027', 'template' => 'heritage']))
+    $this->actingAs($user)->put("/organiser/events/{$event->id}", eventInput(['name' => 'Monsoon 10K 2027', 'template' => 'heritage-crest']))
         ->assertSessionHasNoErrors();
 
     $event->refresh();
     expect($event->name)->toBe('Monsoon 10K 2027')
         ->and($event->slug)->toBe('monsoon-10k')
-        ->and($event->template_id)->toBe('heritage')
+        ->and($event->template_id)->toBe('heritage-crest')
         ->and(collect($event->config['fields'])->pluck('key')->all())->toBe(['gender', 'tshirt_size', 'running_club'])
         ->and(EventSchema::errors($event->config))->toBe([]);
 

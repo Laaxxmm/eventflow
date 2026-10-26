@@ -40,9 +40,10 @@ it('serves the SaaS marketing home at / pricing-first, Single Event leading', fu
         ->assertOk()
         ->assertSee('EventFlow')
         ->assertSee('>by Indefine<', false)
-        ->assertSee('Keep your margins.')
+        ->assertSee('your start')
+        ->assertSee('Start with one race — ₹3,999') // Single Event drives the hero CTA
         ->assertSeeInOrder(['Single Event', '₹3,999', '1 race · 500 participants per race', 'Club Season', '₹12,999', 'Up to 5 races · 1,500 participants per race', 'Circuit Season', '₹29,999', 'Up to 25 races · 5,000 participants per race', 'Custom', 'Contact Indefine'])
-        ->assertSeeInOrder(['id="pricing"', 'id="how-it-works"'], false) // pricing comes before the product tour
+        ->assertSeeInOrder(['id="pricing"', 'id="race-day"'], false) // pricing comes straight after the hero
         ->assertSee(route('pricing'))
         ->assertSee(route('login'));
 });
@@ -63,10 +64,10 @@ it('never shows Platform mail or WhatsApp as included in the comparison', functi
     $html = $this->get('/pricing')->assertOk()->getContent();
 
     foreach (['Email', 'Own SMTP'] as $row) {
-        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*<span class="font-bold text-\[\#16a34a\]" aria-label="Included">✓</span>\s*</td>){4}#');
+        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*<span class="inline-flex" aria-label="Included">(?:(?!</td>).)*</td>){4}\s*</tr>#s');
     }
     foreach (['Platform mail', 'WhatsApp'] as $row) {
-        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*Add-on\s*</td>){4}#');
+        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4">\s*Add-on\s*</td>){4}\s*</tr>#');
     }
 });
 

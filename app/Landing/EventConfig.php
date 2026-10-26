@@ -16,6 +16,8 @@ final readonly class EventConfig
      * @param  list<AgeBand>  $ageBands
      * @param  list<FormField>  $fields
      * @param  list<Faq>  $faq
+     * @param  list<array{name: string, logo?: ?string, url?: ?string, tier?: ?string}>  $sponsors
+     * @param  list<array{time: string, label: string}>  $schedule
      */
     public function __construct(
         public string $org,
@@ -33,10 +35,13 @@ final readonly class EventConfig
         public Sport $sport = Sport::Generic,
         public ?RaceSheetConfig $raceSheet = null,
         public string $template = self::DEFAULT_TEMPLATE,
+        public array $sponsors = [],
+        public array $schedule = [],
+        public ?string $charity = null,
     ) {}
 
     /** Landing template used when the event and its sport pack set none (or an unknown key). */
-    public const DEFAULT_TEMPLATE = 'aurora';
+    public const DEFAULT_TEMPLATE = 'gun-lap';
 
     /**
      * @param  array<string, mixed>  $data  Decoded YAML/JSON matching events/schema.json,
@@ -59,9 +64,19 @@ final readonly class EventConfig
             certificate: isset($data['certificate']) ? new Certificate(...$data['certificate']) : null,
             sport: Sport::from($data['sport'] ?? Sport::Generic->value),
             raceSheet: isset($data['race_sheet']) ? RaceSheetConfig::fromArray($data['race_sheet']) : null,
-            template: array_key_exists((string) ($data['template'] ?? ''), (array) config('eventflow.landing_templates'))
-                ? $data['template']
-                : self::DEFAULT_TEMPLATE,
+            template: self::resolveTemplate($data['template'] ?? null),
+            sponsors: array_values(array_filter($data['sponsors'] ?? [], fn ($s) => is_array($s) && filled($s['name'] ?? null))),
+            schedule: array_values(array_filter($data['schedule'] ?? [], fn ($s) => is_array($s) && filled($s['time'] ?? null))),
+            charity: filled($data['charity'] ?? null) ? (string) $data['charity'] : null,
         );
+    }
+
+    /** A landing template key: aliases mapped to their successor, unknown keys to the default. */
+    public static function resolveTemplate(mixed $key): string
+    {
+        $key = (string) $key;
+        $key = (string) config("eventflow.landing_template_aliases.{$key}", $key);
+
+        return array_key_exists($key, (array) config('eventflow.landing_templates')) ? $key : self::DEFAULT_TEMPLATE;
     }
 }

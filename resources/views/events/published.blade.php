@@ -26,7 +26,7 @@
                 @endif
 
                 @if (session('logo_dark'))
-                    <p class="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800" role="status">{{ __('Dark logo — pick a light template (Aurora/Clean) or a light hero background so it stays classy.') }}</p>
+                    <p class="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800" role="status">{{ __('Dark logo — pick a light template (Stadium Split/Heritage Crest) or a light hero background so it stays classy.') }}</p>
                 @endif
                 @if (session('logo_opaque'))
                     <p class="mt-3 text-sm text-slate-500">{{ __('Tip: your logo has a solid background. A transparent PNG blends into every template.') }}</p>
