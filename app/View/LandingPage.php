@@ -30,6 +30,7 @@ final readonly class LandingPage
         array $remaining,
         public bool $open = true,
         public bool $preview = false,
+        public bool $paused = false, // plan participant cap reached (soft-block)
     ) {
         $this->date = $config->date->setTimezone(ConfigCompiler::TIMEZONE);
         $this->distances = array_map(fn (Distance $d) => [
@@ -38,6 +39,12 @@ final readonly class LandingPage
             'full' => ($remaining[$d->code] ?? null) === 0,
             'price' => self::inr($d->price_inr),
         ], $config->distances);
+    }
+
+    /** Label for the hero call-to-action when the form is not shown. */
+    public function closedLabel(): string
+    {
+        return $this->paused ? __('Entries paused') : __('Entries closed');
     }
 
     public function logoUrl(): ?string

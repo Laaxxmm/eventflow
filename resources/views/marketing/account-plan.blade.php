@@ -7,6 +7,25 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if ($limitHit === 'races')
+                <div class="p-4 sm:p-6 rounded-lg bg-red-50 text-sm text-red-900 ring-1 ring-red-200" role="alert">
+                    <p class="font-semibold">{{ __('You have used all :n races on your plan for this term.', ['n' => $racesAllowed]) }}</p>
+                    <p class="mt-1">{{ __('Unused races do not roll over, and a new term starts with a fresh count.') }}</p>
+                    <div class="mt-3">@include('saas.overage-actions', ['org' => $org])</div>
+                </div>
+            @endif
+
+            @foreach ($pressure as $row)
+                <div @class(['p-4 sm:p-6 rounded-lg text-sm ring-1', 'bg-red-50 text-red-900 ring-red-200' => $row['full'], 'bg-amber-50 text-amber-900 ring-amber-200' => ! $row['full']]) role="status">
+                    <p class="font-semibold">
+                        {{ $row['full']
+                            ? __(':race has reached its plan limit (:taken of :cap participants). New registrations are paused.', ['race' => $row['event']->name, 'taken' => number_format($row['taken']), 'cap' => number_format($row['cap'])])
+                            : __(':race is close to its plan limit: :taken of :cap participants.', ['race' => $row['event']->name, 'taken' => number_format($row['taken']), 'cap' => number_format($row['cap'])]) }}
+                    </p>
+                    <div class="mt-3">@include('saas.overage-actions', ['org' => $org, 'event' => $row['event']])</div>
+                </div>
+            @endforeach
+
             @if ($welcome)
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <h2 class="text-lg font-medium text-gray-900">{{ __('Welcome to EventFlow, :org!', ['org' => $org->name]) }}</h2>
@@ -43,12 +62,40 @@
                                 @endif
                             </dd>
                         </div>
-                        @if ($plan && $plan['season_pass_inr'] !== null)
+                        @if ($plan)
                             <div class="flex justify-between gap-4 py-3">
-                                <dt class="text-gray-600">{{ __('Season Pass') }}</dt>
-                                <dd class="font-medium text-gray-900">{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }} {{ __('+ :pct% on paid registrations', ['pct' => rtrim(rtrim(number_format($plan['participant_fee_percent'], 1), '0'), '.')]) }}</dd>
+                                <dt class="text-gray-600">{{ __('Price') }}</dt>
+                                <dd class="font-medium text-gray-900 text-right">
+                                    {{ \App\Saas\Plans::priceLabel($plan['price_inr']) }}
+                                    @if ($plan['term_label'])
+                                        / {{ __($plan['term_label']) }} · {{ $plan['renews'] ? __('renews yearly') : __('one-off, does not auto-renew') }}
+                                    @endif
+                                </dd>
                             </div>
                         @endif
+                        @if ($pass)
+                            <div class="flex justify-between gap-4 py-3">
+                                <dt class="text-gray-600">{{ __('Current term') }}</dt>
+                                <dd class="font-medium text-gray-900">{{ $pass->starts_on->format('j M Y') }} – {{ $pass->ends_on->format('j M Y') }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-4 py-3">
+                                <dt class="text-gray-600">{{ __('Races this term') }}</dt>
+                                <dd class="font-medium text-gray-900">{{ $racesAllowed === null ? __(':used (not capped)', ['used' => $racesUsed]) : __(':used of :allowed', ['used' => $racesUsed, 'allowed' => $racesAllowed]) }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-4 py-3">
+                                <dt class="text-gray-600">{{ __('Participants per race') }}</dt>
+                                <dd class="font-medium text-gray-900">{{ $pass->max_registrations === null ? __('Not capped') : number_format($pass->max_registrations).' '.__('(plus any participant packs)') }}</dd>
+                            </div>
+                        @endif
+                        <div class="flex justify-between gap-4 py-3">
+                            <dt class="text-gray-600">{{ __('Participant email') }}</dt>
+                            <dd class="font-medium text-gray-900 text-right">
+                                {{ ['smtp' => __('Your SMTP (free)'), 'platform' => __('Platform mail (add-on)'), 'held' => __('On hold: set up email')][$mail] }}
+                                @can('manage-org')
+                                    · <a href="{{ route('settings.notifications.show') }}" class="underline hover:text-gray-900">{{ __('Settings') }}</a>
+                                @endcan
+                            </dd>
+                        </div>
                         <div class="flex justify-between gap-4 py-3">
                             <dt class="text-gray-600">{{ __('Add-ons') }}</dt>
                             <dd class="font-medium text-gray-900 text-right">{{ collect($addons)->pluck('name')->map(fn ($n) => __($n))->implode(', ') ?: __('None') }}</dd>
@@ -56,12 +103,10 @@
                     </dl>
 
                     <p class="mt-6 rounded-md bg-gray-50 p-4 text-sm text-gray-700">
-                        {{ __('Billing connects when Cashfree/Razorpay SaaS subscription is live. Nothing is charged during or after your trial until then; Indefine will contact you to activate your season.') }}
+                        {{ __('Online plan billing is being connected. Until it is live nothing is charged automatically: Indefine activates your plan and add-ons when you ask.') }}
                     </p>
-                    <p class="mt-4 text-sm text-gray-600">
-                        {{ __('To change plan or add-ons, email') }} <a href="mailto:{{ $contactEmail }}" class="underline hover:text-gray-900">{{ $contactEmail }}</a>.
-                        <a href="{{ route('pricing') }}" class="underline hover:text-gray-900">{{ __('Compare plans') }}</a>
-                    </p>
+                    <div class="mt-4">@include('saas.overage-actions', ['org' => $org])</div>
+                    <p class="mt-4 text-sm text-gray-600"><a href="{{ route('pricing') }}" class="underline hover:text-gray-900">{{ __('Compare plans') }}</a></p>
                 </div>
             </section>
         </div>

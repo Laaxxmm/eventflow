@@ -16,7 +16,7 @@
                         <input type="radio" name="plan" value="{{ $key }}" class="mt-1 text-indigo-600 focus:ring-indigo-500" @checked(old('plan', $selectedPlan) === $key)>
                         <span class="flex-1 text-sm">
                             <span class="block font-semibold text-gray-900">{{ $plan['name'] }}</span>
-                            <span class="block text-gray-600">{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }} {{ __('/ season + :pct% on paid registrations', ['pct' => rtrim(rtrim(number_format($plan['participant_fee_percent'], 1), '0'), '.')]) }}</span>
+                            <span class="block text-gray-600">{{ \App\Saas\Plans::inr($plan['price_inr']) }} / {{ __($plan['term_label']) }} · {{ \App\Saas\Plans::limitsLabel($plan) }}</span>
                         </span>
                     </label>
                 @endforeach
@@ -29,7 +29,7 @@
                     <label class="flex items-center gap-2 text-sm text-gray-700">
                         <input type="checkbox" name="addons[]" value="{{ $key }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(in_array($key, old('addons', $selectedAddons), true))>
                         <span class="flex-1">{{ __($addon['name']) }}</span>
-                        <span class="text-gray-500">+{{ \App\Saas\Plans::inr($addon['season_inr']) }}</span>
+                        <span class="text-gray-500">{{ \App\Saas\Plans::inr($addon['price_inr']) ? '+'.\App\Saas\Plans::inr($addon['price_inr']) : __('Paid add-on') }}</span>
                     </label>
                 @endforeach
             </div>

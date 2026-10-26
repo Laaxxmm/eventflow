@@ -13,6 +13,7 @@ use App\Landing\InvalidEventConfig;
 use App\Landing\LogoInspector;
 use App\Models\Event;
 use App\Models\Org;
+use App\Saas\PlanLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -38,9 +39,12 @@ class EventController extends Controller
     }
 
     /** The 5-step create wizard (App\Landing\EventWizard). */
-    public function create(Request $request, SportPackRepository $packs): View
+    public function create(Request $request, SportPackRepository $packs): View|RedirectResponse
     {
         $org = $this->org($request);
+        if (! PlanLimits::canCreateRace($org)) {
+            return redirect()->route('account.plan')->with('plan_limit', 'races');
+        }
 
         return view('events.wizard', [
             'org' => $org,
@@ -55,6 +59,9 @@ class EventController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $org = $this->org($request);
+        if (! PlanLimits::canCreateRace($org)) {
+            return redirect()->route('account.plan')->with('plan_limit', 'races');
+        }
         $validator = Validator::make($request->all(), EventWizard::rules(), EventWizard::messages());
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput($request->except(['logo', 'hero']))

@@ -40,7 +40,7 @@
                 @if ($page->open)
                     <a href="{{ $page->registerUrl() }}" class="inline-flex items-center justify-center gap-3 bg-heat px-9 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ $page->registerLabel() }} <span aria-hidden="true">→</span></a>
                 @else
-                    <p class="font-display text-2xl font-bold uppercase text-paper/60">{{ __('Entries closed') }}</p>
+                    <p class="font-display text-2xl font-bold uppercase text-paper/60">{{ $page->closedLabel() }}</p>
                 @endif
             </div>
         </div>

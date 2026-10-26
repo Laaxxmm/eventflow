@@ -37,7 +37,7 @@
         <section class="grid gap-4 sm:grid-cols-3">
             @foreach ([
                 [__('Fine-tune'), __('Age categories, form questions, FAQ, certificate and heats.'), route('organiser.events.edit', $event), __('Event settings')],
-                [__('Notifications'), __('Branded emails with the pass PDF go out after payment.'), Route::has('settings.notifications.show') ? route('settings.notifications.show') : null, __('Email & WhatsApp')],
+                [__('Email'), __('Branded emails with the pass PDF go out after payment once your email is set up: your own SMTP (free) or Platform mail.'), Route::has('settings.notifications.show') ? route('settings.notifications.show') : null, __('Email & WhatsApp')],
                 [__('Dashboard'), __('Watch registrations and payments come in.'), route('dashboard'), __('Go to home')],
             ] as [$title, $body, $href, $cta])
                 @if ($href)

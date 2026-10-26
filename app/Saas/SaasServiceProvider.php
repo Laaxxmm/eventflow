@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * SaaS surface: platform-admin gate and suspended-org sign-out.
+ * SaaS surface: platform-admin gate, suspended-org sign-out and plan commands
+ * (plans:activate, plans:pack).
  * Routes live in routes/marketing.php and routes/platform.php (required from routes/web.php).
  */
 class SaasServiceProvider extends ServiceProvider
@@ -22,6 +23,10 @@ class SaasServiceProvider extends ServiceProvider
         $kernel = $this->app->make(HttpKernel::class);
         if ($kernel instanceof Kernel) {
             $kernel->appendMiddlewareToGroup('web', EnsureOrgNotSuspended::class);
+        }
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([Console\ActivatePlan::class, Console\GrantParticipantPack::class]);
         }
     }
 }

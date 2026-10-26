@@ -14,6 +14,7 @@ use App\Models\Registration;
 use App\Models\Tenancy\CurrentOrg;
 use App\Models\Tenancy\OrgScope;
 use App\Payments\PaymentStatus;
+use App\Saas\PlanLimits;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,9 @@ use Illuminate\View\View;
 
 class RegistrationController extends Controller
 {
+    /** Shown when the race reaches its plan's participant cap. */
+    public const PAUSED_MESSAGE = 'Registrations for this race are paused for now: it has reached its participant limit. Please check back soon or contact the organiser.';
+
     /** How long the signed review link (the hand-off to /pay) stays valid. */
     public const REVIEW_LINK_HOURS = 24;
 
@@ -59,6 +63,11 @@ class RegistrationController extends Controller
         $registration = DB::transaction(function () use ($event, $distance, $input, $answers) {
             // Serialise registrations for this event so two last-place requests cannot both win.
             Event::whereKey($event->id)->lockForUpdate()->first();
+
+            // Plan cap (config/plans.php): soft-block, never unlimited on a capped plan.
+            if (PlanLimits::atParticipantCap($event)) {
+                throw ValidationException::withMessages(['distance' => __(self::PAUSED_MESSAGE)]);
+            }
 
             if (Capacity::isFull($event, $distance)) {
                 throw ValidationException::withMessages([

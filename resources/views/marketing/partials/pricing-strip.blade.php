@@ -26,7 +26,7 @@
                 <x-ri.button :variant="$featured ? 'heat' : 'ink'" size="md" class="w-full" :href="route('register', ['plan' => $key])">{{ __('Start with :plan', ['plan' => $plan['name']]) }}</x-ri.button>
                 <p @class(['mt-2 text-center text-xs', 'text-ink/55' => ! $featured, 'opacity-70' => $featured])>{{ __(':days-day free trial · no card', ['days' => $trialDays]) }}</p>
             @else
-                <x-ri.button variant="ghost" size="md" class="w-full {{ $featured ? '!ring-current !text-current' : '' }}" href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan', ['plan' => $plan['name']])) }}">{{ __('Talk to Indefine') }}</x-ri.button>
+                <x-ri.button variant="ghost" size="md" class="w-full {{ $featured ? '!ring-current !text-current' : '' }}" href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan', ['plan' => $plan['name']])) }}">{{ __('Contact Indefine') }}</x-ri.button>
                 <p class="mt-2 text-center text-xs text-ink/55">{{ $contactEmail }}</p>
             @endif
         </article>

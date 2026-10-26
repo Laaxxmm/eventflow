@@ -9,8 +9,8 @@
     // "Start with one race" only when the cheapest plan is a single event (Session M2 pricing).
     $entryLabel = match (true) {
         $entryPlan === null => __('Start free trial'),
-        ($entryPlan['max_events'] ?? null) === 1 => __('Start with one race — :price', ['price' => Plans::inr($entryPlan['season_pass_inr'])]),
-        default => __('Start your season — :price', ['price' => Plans::inr($entryPlan['season_pass_inr'])]),
+        ($entryPlan['max_events'] ?? null) === 1 => __('Start with one race — :price', ['price' => Plans::inr($entryPlan['price_inr'])]),
+        default => __('Start your season — :price', ['price' => Plans::inr($entryPlan['price_inr'])]),
     };
     $checklist = [
         [__('A race page that sells'), __('Your logo and colours on one of five sports page designs. Distances, prices, schedule, FAQ, sponsors.')],
@@ -28,7 +28,9 @@
     $designs = collect(config('eventflow.landing_templates'));
     $faq = [
         ['title' => __('Who collects the entry fees?'), 'body' => __('You do. Connect your own Razorpay or Cashfree account in Settings → Payments and participants pay you directly.')],
-        ['title' => __('How is EventFlow priced?'), 'body' => __('A Season Pass per plan, plus a small percentage on paid entries where the plan has one. No per-event invoices. See the pricing page for exact numbers.')],
+        ['title' => __('How is EventFlow priced?'), 'body' => __('Single Event is ₹3,999 for one race (up to 500 participants) in a 90-day window. Club Season is ₹12,999 for up to 5 races a year, Circuit Season ₹29,999 for up to 25. Bigger series get a Custom quote. Prices exclude GST.')],
+        ['title' => __('What if a race fills up my plan?'), 'body' => __('New registrations pause at your plan\'s participant limit, never silently going over. Upgrade to the next plan, buy a participant pack for that race, or talk to Indefine.')],
+        ['title' => __('Is email included?'), 'body' => __('Yes. Connect your own SMTP (Google Workspace, a Gmail app password or your domain\'s mail server) at no extra charge. No mail server? Platform mail is a paid add-on, and so is WhatsApp.')],
         ['title' => __('Which sports work?'), 'body' => __('Running, cycling and skating have sport packs with distances, age bands, form fields and heat sizes. Anything else runs on the generic pack.')],
         ['title' => __('Do I need a developer or designer?'), 'body' => __('No. A five-step wizard creates the event and publishes its page. Pick one of five designs; for a fully custom design, talk to Indefine.')],
         ['title' => __('What happens on race day?'), 'body' => __('Volunteers scan QR passes on their phones, you print heats, and finishers get certificates with a verify QR.')],
@@ -70,7 +72,7 @@
                     <p class="ri-kicker text-heat">{{ __('Pricing') }}</p>
                     <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('Pick your distance.') }}</h2>
                 </div>
-                <p class="max-w-md text-ink/70">{{ __('Start with one race, grow into a season. Entry fees go straight to your gateway; prices exclude GST.') }}</p>
+                <p class="max-w-md text-ink/70">{{ __('Start with one race, grow into a season. Every price shows the races and participants it covers. Email is included; prices exclude GST.') }}</p>
             </div>
             <div class="mt-12">
                 @include('marketing.partials.pricing-strip')

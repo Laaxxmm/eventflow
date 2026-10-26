@@ -27,11 +27,12 @@
             <fieldset @class(['p-4 text-sm', 'bg-paper' => ! $featured, 'bg-black/15' => $featured])>
                 <legend class="sr-only">{{ __('Add-ons') }}</legend>
                 <p class="text-xs font-semibold uppercase tracking-[0.16em]">{{ __('Add-ons') }}</p>
+                <p class="mt-1 text-xs opacity-70">{{ __('Free during the trial; Indefine quotes them when you activate.') }}</p>
                 @foreach ($addons as $addonKey => $addon)
                     <label class="mt-2 flex cursor-pointer items-start gap-2">
                         <input type="checkbox" name="addons[]" value="{{ $addonKey }}" class="mt-0.5 rounded-none border-ink/40 text-heat focus:ring-heat">
                         <span class="flex-1">{{ __($addon['name']) }}</span>
-                        <span class="whitespace-nowrap opacity-70">+{{ \App\Saas\Plans::inr($addon['season_inr']) }}</span>
+                        <span class="whitespace-nowrap opacity-70">{{ \App\Saas\Plans::inr($addon['price_inr']) ? '+'.\App\Saas\Plans::inr($addon['price_inr']) : __('Paid add-on') }}</span>
                     </label>
                 @endforeach
             </fieldset>
@@ -39,7 +40,7 @@
             <p @class(['mt-2 text-center text-xs', 'text-ink/55' => ! $featured, 'opacity-70' => $featured])>{{ __('No card needed.') }}</p>
         </form>
     @else
-        <x-ri.button variant="ghost" size="md" class="mt-8 w-full" href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}">{{ __('Talk to Indefine') }}</x-ri.button>
+        <x-ri.button variant="ghost" size="md" class="mt-8 w-full" href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}">{{ __('Contact Indefine') }}</x-ri.button>
         <p class="mt-2 text-center text-xs text-ink/55">{{ $contactEmail }}</p>
     @endif
 </article>
