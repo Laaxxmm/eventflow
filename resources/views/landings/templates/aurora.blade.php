@@ -32,7 +32,7 @@
                     @if ($page->open)
                         <a href="#register" class="rounded-full bg-[var(--brand-primary)] px-7 py-3.5 font-bold text-[var(--brand-on-primary)] shadow-lg shadow-black/5 hover:opacity-90">{{ __('Register from :price', ['price' => $page->fromPrice()]) }}</a>
                     @else
-                        <span class="rounded-full bg-slate-200 px-7 py-3.5 font-bold text-slate-600">{{ __('Registration closed') }}</span>
+                        <span class="rounded-full bg-slate-200 px-7 py-3.5 font-bold text-slate-600">{{ $page->closedLabel() }}</span>
                     @endif
                     <a href="#distances" class="rounded-full px-5 py-3.5 font-semibold text-slate-700 hover:bg-white">{{ __('See distances') }} →</a>
                 </div>

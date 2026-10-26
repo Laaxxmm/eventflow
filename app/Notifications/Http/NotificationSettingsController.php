@@ -27,8 +27,9 @@ use Illuminate\View\View;
 use Throwable;
 
 /**
- * Org Settings -> Notifications (owner only): platform email branding, optional custom
- * SMTP (module email_branding), WhatsApp (module sms_whatsapp), previews and delivery log.
+ * Org Settings -> Email and WhatsApp (owner only): sender details, own SMTP (free on every
+ * plan), Platform mail (paid add-on, module email_branding), WhatsApp (paid add-on, module
+ * sms_whatsapp), previews and delivery log.
  */
 class NotificationSettingsController extends Controller
 {
@@ -46,7 +47,8 @@ class NotificationSettingsController extends Controller
         return view('notifications.settings', [
             'org' => $org,
             'settings' => $settings,
-            'smtpModule' => NotificationModules::enabled($org, Module::EmailBranding),
+            'platformMailIncluded' => NotificationSettings::platformMailIncluded($org),
+            'heldCount' => NotificationDelivery::query()->where('status', NotificationDelivery::SKIPPED)->where('channel', 'mail')->where('updated_at', '>=', now()->subDays(30))->count(),
             'whatsappModule' => NotificationModules::enabled($org, Module::SmsWhatsapp),
             'platformFrom' => OrgMailer::from($org, $settings->replicate()->fill(['smtp_enabled' => false])),
             'deliveries' => NotificationDelivery::query()->with('registration')->latest('updated_at')->limit(25)->get(),
@@ -69,10 +71,9 @@ class NotificationSettingsController extends Controller
         return back()->with('status', 'platform-saved');
     }
 
+    /** Own SMTP: free on every plan. */
     public function updateSmtp(Request $request): RedirectResponse
     {
-        $org = $this->org($request);
-        abort_unless(NotificationModules::enabled($org, Module::EmailBranding), 403);
 
         $data = $request->validate([
             'smtp_enabled' => ['boolean'],
@@ -103,7 +104,6 @@ class NotificationSettingsController extends Controller
     public function testSmtp(Request $request): RedirectResponse
     {
         $org = $this->org($request);
-        abort_unless(NotificationModules::enabled($org, Module::EmailBranding), 403);
         $to = $request->validate(['test_email' => ['required', 'email']])['test_email'];
 
         $settings = $this->settings($request);
@@ -124,9 +124,11 @@ class NotificationSettingsController extends Controller
         return back()->with('status', 'smtp-verified');
     }
 
+    /** Platform mail test: only with the add-on. */
     public function testPlatform(Request $request): RedirectResponse
     {
         $org = $this->org($request);
+        abort_unless(NotificationSettings::platformMailIncluded($org), 403);
         $to = $request->validate(['test_email' => ['required', 'email']])['test_email'];
         $settings = $this->settings($request);
         $from = OrgMailer::from($org, $settings->replicate()->fill(['smtp_enabled' => false]));

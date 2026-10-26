@@ -13,18 +13,19 @@
     <p @class(['mt-1 text-sm', 'text-white/70' => $featured, 'text-gray-600' => ! $featured])>{{ $plan['tagline'] }}</p>
 
     <div class="mt-6">
-        @if ($plan['season_pass_inr'] !== null)
+        @if ($plan['price_inr'] !== null)
             <p class="flex items-baseline gap-2">
-                <span class="text-4xl font-black tracking-tight">{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }}</span>
-                <span @class(['text-sm', 'text-white/70' => $featured, 'text-gray-600' => ! $featured])>{{ __('/ season') }}</span>
+                <span class="text-4xl font-black tracking-tight">{{ \App\Saas\Plans::inr($plan['price_inr']) }}</span>
+                <span @class(['text-sm', 'text-white/70' => $featured, 'text-gray-600' => ! $featured])>/ {{ __($plan['term_label']) }}</span>
             </p>
-            <p @class(['mt-1 text-sm font-semibold', 'text-[#d9ff45]' => $featured, 'text-[#c2410c]' => ! $featured])>
-                {{ __('+ :pct% on paid registrations', ['pct' => rtrim(rtrim(number_format($plan['participant_fee_percent'], 1), '0'), '.')]) }}
+            <p @class(['mt-1 text-xs', 'text-white/60' => $featured, 'text-gray-500' => ! $featured])>
+                {{ $plan['renews'] ? __('Renews yearly · unused races do not roll over') : __('One-off · does not auto-renew') }} · {{ __('+ GST') }}
             </p>
         @else
-            <p class="text-4xl font-black tracking-tight">{{ __('Custom') }}</p>
-            <p @class(['mt-1 text-sm font-semibold', 'text-[#d9ff45]' => $featured, 'text-[#c2410c]' => ! $featured])>{{ __('Season Pass and fee to suit your series') }}</p>
+            <p class="text-4xl font-black tracking-tight">{{ __('Contact Indefine') }}</p>
+            <p @class(['mt-1 text-xs', 'text-white/60' => $featured, 'text-gray-500' => ! $featured])>{{ __('Quoted for your series') }}</p>
         @endif
+        <p @class(['mt-3 text-sm font-semibold', 'text-[#d9ff45]' => $featured, 'text-[#c2410c]' => ! $featured])>{{ \App\Saas\Plans::limitsLabel($plan) }}</p>
     </div>
 
     <ul class="mt-6 space-y-3 text-sm flex-1">
@@ -42,11 +43,12 @@
             <fieldset @class(['rounded-2xl p-4 text-sm', 'bg-white/5' => $featured, 'bg-[#f7f6f1]' => ! $featured])>
                 <legend class="sr-only">{{ __('Add-ons') }}</legend>
                 <p class="font-semibold">{{ __('Add-ons') }}</p>
+                <p @class(['mt-1 text-xs', 'text-white/60' => $featured, 'text-gray-500' => ! $featured])>{{ __('Free during the trial; Indefine quotes them when you activate.') }}</p>
                 @foreach ($addons as $addonKey => $addon)
                     <label class="mt-2 flex items-start gap-2 cursor-pointer">
                         <input type="checkbox" name="addons[]" value="{{ $addonKey }}" class="mt-0.5 rounded border-gray-300 text-[#0b1020] focus:ring-[#d9ff45]">
                         <span class="flex-1">{{ __($addon['name']) }}</span>
-                        <span @class(['whitespace-nowrap', 'text-white/70' => $featured, 'text-gray-600' => ! $featured])>+{{ \App\Saas\Plans::inr($addon['season_inr']) }}</span>
+                        <span @class(['whitespace-nowrap', 'text-white/70' => $featured, 'text-gray-600' => ! $featured])>{{ \App\Saas\Plans::inr($addon['price_inr']) ? '+'.\App\Saas\Plans::inr($addon['price_inr']) : __('Paid add-on') }}</span>
                     </label>
                 @endforeach
             </fieldset>
@@ -62,7 +64,7 @@
             'mt-8 block w-full rounded-full px-6 py-3 text-center font-bold focus:outline-none focus:ring-2 focus:ring-offset-2',
             'bg-[#d9ff45] text-[#0b1020] hover:bg-white' => $featured,
             'border-2 border-[#0b1020] hover:bg-[#0b1020] hover:text-white focus:ring-[#0b1020]' => ! $featured,
-        ])>{{ __('Talk to Indefine') }}</a>
+        ])>{{ __('Contact Indefine') }}</a>
         <p class="mt-2 text-center text-xs text-gray-500">{{ $contactEmail }}</p>
     @endif
 </article>

@@ -1,14 +1,22 @@
 <?php
 
 /*
- * EventFlow SaaS plans (marketing site, pricing page, signup).
+ * EventFlow SaaS plans (marketing site, pricing page, signup, plan caps).
  *
- * Organisers pay a Season Pass per year plus an optional percentage on paid
- * participant registrations. All amounts are PLACEHOLDERS until Indefine
- * confirms pricing; change them here, never in the Blade views.
+ * Prices are LOCKED (Indefine, Session M2). Change them here only, never in Blade.
+ * Amounts are INR, exclusive of GST. null price = quoted by Indefine ("Contact Indefine").
  *
- * Modules use App\Enums\Module values. Core modules (registration, payments,
- * passes) are in every plan.
+ * term: how long a paid plan runs from activation. Single Event is a 90-day window that
+ * never renews; the season plans run 12 months and renew yearly. Race slots are counted
+ * per term and unused slots do not roll over into the next one.
+ *
+ * max_events: races an org can create in one term (null = quote).
+ * max_participants_per_event: registrations per race before the soft-block (null = quote).
+ * Participant packs raise one race's cap; Indefine grants them (php artisan plans:pack).
+ *
+ * Modules use App\Enums\Module values. Core modules (registration, payments, passes)
+ * are in every plan. Email with the organiser's own SMTP is free on every plan;
+ * Platform mail (module email_branding) and WhatsApp (sms_whatsapp) are paid add-ons.
  */
 
 return [
@@ -26,82 +34,107 @@ return [
     'trial_days' => 14,
 
     // Plan new organisers get when they sign up without choosing one.
-    'default' => 'starter',
+    'default' => 'single_event',
 
+    // Display order: Single Event leads on / and /pricing.
     'plans' => [
-        'starter' => [
-            'name' => 'Starter',
-            'tagline' => 'One club, a full season of races.',
-            'season_pass_inr' => 19999, // placeholder, per season (12 months)
-            'participant_fee_percent' => 3.0, // placeholder, on paid registrations
+        'single_event' => [
+            'name' => 'Single Event',
+            'tagline' => 'One race, from entries to finish line.',
+            'price_inr' => 3999,
+            'term' => ['days' => 90],
+            'term_label' => '90-day window',
+            'renews' => false, // one-off: does not auto-renew next year
+            'max_events' => 1,
+            'max_participants_per_event' => 500,
             'self_serve' => true,
-            'max_events' => 5,
-            'max_registrations' => 2000,
+            'upgrade_to' => 'club_season',
             'modules' => ['checkin'],
             'features' => [
-                'Branded event pages from YAML or the editor',
-                'Razorpay or Cashfree checkout',
+                'Branded event page, Razorpay or Cashfree checkout',
                 'EF- passes (PNG + PDF) by email',
                 'QR check-in on volunteers\' phones',
-                'Up to 5 events and 2,000 registrations a season',
+                'Email included: connect your own SMTP free',
             ],
         ],
-        'growth' => [
-            'name' => 'Growth',
-            'tagline' => 'For organisers running a race calendar.',
-            'season_pass_inr' => 49999, // placeholder
-            'participant_fee_percent' => 2.0, // placeholder
+        'club_season' => [
+            'name' => 'Club Season',
+            'tagline' => 'A club calendar, all season.',
+            'price_inr' => 12999,
+            'term' => ['months' => 12],
+            'term_label' => '12 months',
+            'renews' => true, // yearly; unused race slots do not roll over
+            'max_events' => 5,
+            'max_participants_per_event' => 1500,
             'self_serve' => true,
             'highlight' => true,
-            'max_events' => 25,
-            'max_registrations' => 15000,
+            'upgrade_to' => 'circuit_season',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
-                'Everything in Starter',
+                'Everything in Single Event',
                 'Race sheets: heats by distance, age band and gender',
                 'Finisher certificates (A4 template gallery)',
-                'Up to 25 events and 15,000 registrations a season',
-                'Priority email support',
             ],
         ],
-        'scale' => [
-            'name' => 'Scale',
-            'tagline' => 'Federations, city marathons and multi-city series.',
-            'season_pass_inr' => null, // custom quote
-            'participant_fee_percent' => null,
-            'self_serve' => false,
-            'max_events' => null,
-            'max_registrations' => null,
-            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
+        'circuit_season' => [
+            'name' => 'Circuit Season',
+            'tagline' => 'Series, circuits and multi-city calendars.',
+            'price_inr' => 29999,
+            'term' => ['months' => 12],
+            'term_label' => '12 months',
+            'renews' => true,
+            'max_events' => 25,
+            'max_participants_per_event' => 5000,
+            'self_serve' => true,
+            'upgrade_to' => 'custom',
+            'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
-                'Everything in Growth, unlimited events',
-                'WhatsApp notifications and custom sender domain included',
+                'Everything in Club Season',
+                'Built for big fields and busy calendars',
+            ],
+        ],
+        'custom' => [
+            'name' => 'Custom',
+            'tagline' => 'Federations, city marathons, special requirements.',
+            'price_inr' => null, // quote
+            'term' => null,
+            'term_label' => null,
+            'renews' => null,
+            'max_events' => null,
+            'max_participants_per_event' => null,
+            'self_serve' => false,
+            'upgrade_to' => null,
+            'modules' => ['checkin', 'race_sheets', 'certificates'],
+            'features' => [
+                'Races, field sizes and term to suit you',
                 'Custom certificate layouts by Indefine',
                 'Onboarding and race-day support',
-                'Custom participant fee',
             ],
         ],
     ],
 
-    // Optional add-ons, chosen at signup or later. "module" switches an App\Enums\Module on.
+    // Paid add-ons. "module" switches an App\Enums\Module on. Prices are quoted by Indefine.
     'addons' => [
-        'whatsapp' => [
-            'name' => 'WhatsApp notifications',
-            'description' => 'Confirmation with the pass link and race-day reminders on WhatsApp (Meta charges extra).',
-            'season_inr' => 4999, // placeholder
-            'module' => 'sms_whatsapp',
-        ],
-        'custom_smtp' => [
-            'name' => 'Custom email sender',
-            'description' => 'Send participant emails from your own domain or mailbox.',
-            'season_inr' => 1999, // placeholder
+        'platform_mail' => [
+            'name' => 'Platform mail',
+            'description' => 'No SMTP of your own? Indefine sends participant emails for you (Brevo / Amazon SES), with your name and reply-to.',
+            'price_inr' => null,
             'module' => 'email_branding',
         ],
-        'sport_pack' => [
-            'name' => 'Extra sport pack',
-            'description' => 'Defaults for another sport: skating, cycling, running or a custom pack.',
-            'season_inr' => 2999, // placeholder, per pack
-            'module' => null,
+        'whatsapp' => [
+            'name' => 'WhatsApp notifications',
+            'description' => 'Confirmation with the pass link and race-day reminders on WhatsApp (Meta charges per message).',
+            'price_inr' => null,
+            'module' => 'sms_whatsapp',
+        ],
+    ],
+
+    // When a race reaches its participant cap: soft-block, then these ways out.
+    'overage' => [
+        'participant_pack' => [
+            'name' => 'Participant pack',
+            'description' => 'More places for one race on your current plan.',
+            'price_inr' => null, // quoted by Indefine
         ],
     ],
 

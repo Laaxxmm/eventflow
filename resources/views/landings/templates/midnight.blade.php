@@ -44,7 +44,7 @@
             @if ($page->open)
                 <a href="#register" class="mt-12 inline-flex w-fit items-center gap-3 rounded-full bg-[var(--brand-primary)] px-8 py-4 text-lg font-black uppercase tracking-wider text-[var(--brand-on-primary)] hover:opacity-90">{{ __('Claim your bib') }} <span aria-hidden="true">→</span></a>
             @else
-                <p class="mt-12 text-lg font-bold uppercase tracking-wider text-white/60">{{ __('Registration closed') }}</p>
+                <p class="mt-12 text-lg font-bold uppercase tracking-wider text-white/60">{{ $page->closedLabel() }}</p>
             @endif
         </div>
     </section>

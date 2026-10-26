@@ -296,7 +296,7 @@ a skating event YAML and an A4 background PNG).
 
 - `App\Entitlements\SeasonPassEntitlements` implements `Entitlements`: core
   modules (registration, payments, passes) are always on; check-in, race sheets,
-  certificates, email branding and SMS/WhatsApp need an active pass (status `active`, today within its dates
+  certificates, Platform mail and WhatsApp need an active pass (status `active`, today within its dates
   in IST, the latest-ending one wins) that includes them, and must not be
   switched off in Org Settings.
 - **Enforcing a module on a route:**
@@ -452,7 +452,20 @@ $c up -d
 
 ## Notifications: branded email, pass PDF, WhatsApp
 
-Owner-only settings at **`/dashboard/settings/notifications`** (Org Settings → Notifications).
+Owner-only settings at **`/dashboard/settings/notifications`** (Settings → Email and WhatsApp).
+
+**Rules.** Email is included in every plan:
+- **Use my SMTP** is free.
+- **Platform mail** (Brevo / SES via Indefine) is a paid add-on (module `email_branding`).
+- **WhatsApp** is a paid add-on (module `sms_whatsapp`).
+
+Participant mail goes through the org's own SMTP when it is on and verified, otherwise through
+Platform mail if the org has the add-on. With neither, participant mail is **held**:
+- Nothing is sent, and each email is logged as *skipped* with the reason.
+- The dashboard and settings page say "Participant emails are on hold".
+- The payment return page still offers **Download your pass (PDF)**.
+
+Organiser account mail (email verification, password reset) always uses `MAIL_*` and is never held.
 
 ### What is sent, and when
 
@@ -471,10 +484,13 @@ Every email is a queued `App\Mail\BrandedMail` (5 tries over about 40 minutes). 
 **Delivery status** on the settings page. The pass link in emails and WhatsApp is a signed URL
 (`/passes/{id}/pass.pdf`, valid 120 days) that generates the PDF on first open if needed.
 
-### Email: platform sender (default)
+### Email: Platform mail (paid add-on)
 
-The platform mailer from `MAIL_*` sends for every org: from `MAIL_FROM_ADDRESS` with the organiser's
-name (or the **Sender name** setting), reply-to the organiser (setting, else the org owner's email).
+With the add-on, the platform mailer from `MAIL_*` sends the org's participant mail. It sends from
+`MAIL_FROM_ADDRESS` with the organiser's name (or the **Sender name** setting), and replies go to the
+organiser (the reply-to setting, else the org owner's email). Without the add-on, the section shows an
+"Add Platform mail" link and the test button is refused (403). Ops setup for `MAIL_*` (also used for
+organiser account mail):
 
 1. **Brevo:** Brevo → SMTP & API → SMTP: `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`,
    `MAIL_USERNAME=<SMTP login>`, `MAIL_PASSWORD=<SMTP key>`.
@@ -482,7 +498,7 @@ name (or the **Sender name** setting), reply-to the organiser (setting, else the
    `MAIL_PORT=587`, `MAIL_USERNAME`/`MAIL_PASSWORD` = the SES SMTP user. (No AWS SDK needed.)
 2. Verify the sending domain of `MAIL_FROM_ADDRESS` with the provider (SPF + DKIM records; ask Indefine ops).
 3. Run a queue worker (`queue` service in Sail and in `deploy/compose.prod.yml`) and the scheduler.
-4. Settings page → **Send test** sends through the platform mailer.
+4. Settings page → Platform mail → **Send test** sends through the platform mailer (add-on only).
 
 Locally everything lands in Mailpit (`MAIL_HOST=mailpit MAIL_PORT=1025`, UI on :8025).
 
@@ -491,15 +507,30 @@ Locally everything lands in Mailpit (`MAIL_HOST=mailpit MAIL_PORT=1025`, UI on :
 the event's `branding` colours (header = secondary, accent and button = primary, text colour chosen
 for contrast), its logo (`branding.logo` on the public disk or an absolute URL), and include a plain-text part.
 
-### Email: custom SMTP (add-on `email_branding`)
+### Email: Use my SMTP (free on every plan)
 
-For organisers who want mail from their own mailbox or domain. Enter host, port, encryption
-(STARTTLS/SSL/none), username, password, from-email and from-name, then **Send test**. Their server
-is used only after a test succeeds; changing the server details requires a new test. The password is
-stored with Laravel's `encrypted` cast (needs a stable `APP_KEY`). Without the add-on in the Season
-Pass the section says to contact Indefine.
+Settings → Email → **Use my SMTP**:
 
-### WhatsApp (add-on `sms_whatsapp`)
+| Field | What to enter |
+|---|---|
+| Host / port | From the mail provider. Google Workspace or Gmail: `smtp.gmail.com`, 587. Microsoft 365: `smtp.office365.com`, 587. Zoho Mail India: `smtp.zoho.in`, 465. |
+| Encryption | STARTTLS for 587, SSL/TLS for 465, None only on a private relay |
+| Username | Usually the full email address |
+| Password | The SMTP password. **Google needs an app password:** turn on 2-Step Verification, create one at myaccount.google.com/apppasswords, and paste the 16 characters (never the sign-in password). |
+| From email / name | An address the mailbox may send as, and the name participants see |
+
+- Save, then **Send test**. The org's server is used only after a test succeeds, and changing the
+  server details needs a new test.
+- The password is stored with Laravel's `encrypted` cast (needs a stable `APP_KEY`). It is never in
+  git or `.env`.
+- Google caps sending at about 500 a day (Gmail) or 2,000 (Workspace). Bigger fields should use their
+  domain's SMTP or Platform mail.
+- Indefine's own platform mail never uses Gmail; it uses Brevo or SES.
+
+### WhatsApp (paid add-on `sms_whatsapp`)
+
+Without the add-on the section shows only an "Add WhatsApp" upsell. Nothing can be saved or tested
+(403), and no WhatsApp message is ever sent.
 
 Provider: **Meta WhatsApp Cloud API** (`App\Services\WhatsApp\MetaCloudGateway`), behind the
 `App\Services\WhatsApp\WhatsAppGateway` interface so Interakt, Wati or AiSensy adapters can be added
@@ -515,17 +546,17 @@ in `WhatsAppGatewayFactory`. Each org uses its own WhatsApp Business number:
    then **Send test** (sends Meta's built-in `hello_world`), and switch it on.
 
 The token is stored encrypted. With the add-on off, the toggle off, or setup incomplete, no WhatsApp
-call is made and the page shows the setup checklist; email still goes out. WhatsApp errors are
+call is made; with the add-on on, the page shows the setup checklist. Email is unaffected. WhatsApp errors are
 retried and logged; they never affect the registration or its email. Numbers are normalised to
 `91XXXXXXXXXX` for 10-digit Indian mobiles.
 
 ### Season Pass modules
 
-`Module::EmailBranding` (`email_branding`) and `Module::SmsWhatsapp` (`sms_whatsapp`) are optional
-modules. When an `App\Contracts\Entitlements` implementation is bound it decides; until then the org
+`Module::EmailBranding` (`email_branding`, shown as **Platform mail**) and `Module::SmsWhatsapp`
+(`sms_whatsapp`) are optional modules, switched on by the add-ons in `config/plans.php`. When an `App\Contracts\Entitlements` implementation is bound it decides; until then the org
 toggle in `orgs.modules` does (available unless set to `false`).
 
-Tests: `tests/Feature/Notifications`.
+Tests: `tests/Feature/Notifications` (mail paths, hold, add-on gates) and `tests/Feature/Saas` (plans, caps, packs).
 
 ## SaaS marketing & auth
 
@@ -542,18 +573,50 @@ The site that sells EventFlow, separate from organisers' event pages:
 | `/platform/orgs` | Indefine platform console (platform admins only) |
 | `/{org}`, `/{org}/{event}` | Per-event landings (stream C), unchanged |
 
-### Plans
+### Plans, caps and overage
 
-Plans and add-ons are config, not Blade: **`config/plans.php`** (Season Pass per season in INR,
-percentage on paid registrations, limits, modules, features, add-on prices, trial length, sales
-email, brand line). Amounts there are placeholders until Indefine confirms them.
+Prices are **locked** in **`config/plans.php`** (INR, + GST). Blade only reads them.
 
-Signup creates the user (owner), the org (`orgs.plan`, `orgs.addons`), and starts a **14-day free trial**
-(`subscription_status=trialing`, `trial_ends_at`). The trial is also stored as a zero-amount Season
-Pass with the plan's modules, and optional modules outside the plan are switched off in `orgs.modules`.
-No card is taken and nothing is charged: billing connects when Cashfree/Razorpay SaaS subscriptions
-are live (the organiser sees this on `/account/plan`). **Scale** is "contact Indefine" (mailto
-`SALES_CONTACT_EMAIL`). `BRAND_SHOW_INDEFINE=false` shows "EventFlow" without "by Indefine".
+| Plan | Price | Term | Races | Participants per race |
+|---|---|---|---|---|
+| Single Event | ₹3,999 | 90-day window, one-off (does not auto-renew) | 1 | 500 |
+| Club Season | ₹12,999 | 12 months, renews yearly | up to 5 | 1,500 |
+| Circuit Season | ₹29,999 | 12 months, renews yearly | up to 25 | 5,000 |
+| Custom | Contact Indefine | quote | quote | quote |
+
+- **Unused races do not roll over.** Races are counted per term (events created since the active
+  Season Pass started). A new term starts a fresh count.
+- **Signup** creates the owner and org, then starts a 14-day trial on the chosen plan (default Single
+  Event). The trial is a zero-amount Season Pass with the plan's caps and modules. No card is taken.
+  Custom can't be picked at signup; it is a mailto to `SALES_CONTACT_EMAIL`.
+- **Activating a paid term** (Indefine staff, until online billing is live):
+  `php artisan plans:activate <org-slug> <plan> [--from=YYYY-MM-DD] [--addon=platform_mail --addon=whatsapp | --no-addons]`.
+  Single Event gets 90 days, the season plans 12 months. The new pass replaces the current one and
+  records the plan price.
+- **Caps** are read from the active pass (`max_events` = races per term, `max_registrations` =
+  participants per race) by `App\Saas\PlanLimits`. An org with no active pass is not capped there.
+
+**Overage (soft-block).** When a race reaches its participant cap (paid registrations plus pending
+ones inside the 30-minute hold, the same count distance capacity uses):
+
+- New registrations are refused. The landing page replaces the form with "Registrations for this
+  race are paused for now", and the server rejects posts too.
+- The organiser sees a red banner on the dashboard and on `/account/plan`, with **Upgrade to the next
+  plan**, **Buy a participant pack** and **Contact Indefine**. These open an email to Indefine until
+  online billing is live. An amber warning shows from 90% of the cap.
+- When an org has used every race in its term, the event wizard sends the organiser to
+  `/account/plan` with the same choices.
+- Indefine adds places to one race with
+  `php artisan plans:pack <org-slug> <event-slug> <participants> [--amount=INR] [--note=...]`
+  (`participant_packs` table). Pack prices are quoted, not in config.
+- A capped plan never silently goes unlimited.
+
+`BRAND_SHOW_INDEFINE=false` shows "EventFlow" without "by Indefine".
+
+**Marketing copy rules.** `/` and `/pricing` are pricing-first and lead with Single Event ₹3,999,
+then Club, Circuit and Custom. Every price shows its races and participants per race. Custom has no
+price, only "Contact Indefine". The comparison table marks Email ✓, Own SMTP ✓, Platform mail
+*Add-on* and WhatsApp *Add-on*; it never shows those two add-ons as included.
 
 ### Platform admin (Indefine)
 
@@ -577,7 +640,7 @@ php artisan db:seed --class=PlatformSeeder
 | Account | Email | Password |
 |---|---|---|
 | Demo platform admin | `admin@eventflow.local` | `PLATFORM_ADMIN_PASSWORD` |
-| Demo organiser (Starter trial, org `demo-organiser`) | `organiser@eventflow.local` | `DEMO_ORGANISER_PASSWORD` |
+| Demo organiser (Single Event trial, org `demo-organiser`) | `organiser@eventflow.local` | `DEMO_ORGANISER_PASSWORD` |
 
 The seeder refuses to run without these variables, and in production refuses the `.env.example`
 values. Never commit a real password; set production ones only in the server's `.env`.

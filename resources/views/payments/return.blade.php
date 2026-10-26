@@ -10,6 +10,8 @@
         </p>
         @if($registration->status === \App\Payments\PaymentStatus::Paid)
             <p class="text-green-700">Thank you! Your registration is confirmed.</p>
+            {{-- Always offered, so participants have their pass even when the organiser's email is on hold. --}}
+            <a href="{{ \App\Notifications\EmailBrand::passUrl($registration) }}" class="mt-4 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700">{{ __('Download your pass (PDF)') }}</a>
         @else
             <p class="text-gray-600">Payment is being processed. You will receive confirmation shortly.</p>
         @endif

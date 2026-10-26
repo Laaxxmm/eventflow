@@ -2,14 +2,15 @@
 
 @php
     $starter = $plans[config('plans.default')];
-    $fee = rtrim(rtrim(number_format($starter['participant_fee_percent'], 1), '0'), '.');
     $faq = [
-        __('How does pricing work?') => __('You buy a Season Pass for 12 months of events, plus a small percentage on paid registrations. No per-event invoices. Add-ons such as WhatsApp are billed per season.'),
+        __('How does pricing work?') => __('Single Event is :single for one race (up to 500 participants) in a 90-day window. Club Season is :club for up to 5 races a year, Circuit Season :circuit for up to 25. Larger series get a Custom quote. Prices exclude GST.', ['single' => \App\Saas\Plans::inr($plans['single_event']['price_inr']), 'club' => \App\Saas\Plans::inr($plans['club_season']['price_inr']), 'circuit' => \App\Saas\Plans::inr($plans['circuit_season']['price_inr'])]),
+        __('What if a race fills up my plan?') => __('New registrations pause at your plan\'s participant limit, never silently going over. Upgrade to the next plan, buy a participant pack for that race, or talk to Indefine.'),
+        __('Is email included?') => __('Yes. Connect your own SMTP (Google Workspace, Gmail app password or your domain\'s mail server) at no extra charge. No mail server? Platform mail is a paid add-on.'),
         __('Who collects the entry fees?') => __('You do. Connect your own Razorpay or Cashfree account and participants pay you directly. EventFlow never holds your money.'),
         __('Which sports does it support?') => __('Running, skating and cycling come with ready sport packs (distances, age bands, form fields and race sheets). Any other event works with the generic pack.'),
         __('Do I need a developer?') => __('No. Set up an event in the editor, or describe it in a short YAML file if you prefer. Your event page is live at your own link straight away.'),
-        __('What happens after the free trial?') => __(':days days free, no card needed. Billing connects when online Season Pass subscriptions go live; until then Indefine will contact you before anything is charged.', ['days' => $trialDays]),
-        __('Can participants get passes on WhatsApp?') => __('Yes, with the WhatsApp add-on on your own WhatsApp Business number. Every participant also gets the pass by email with the PDF attached.'),
+        __('What happens after the free trial?') => __(':days days free, no card needed. Online plan billing is being connected; until it is live Indefine contacts you before anything is charged.', ['days' => $trialDays]),
+        __('Can participants get passes on WhatsApp?') => __('Yes, with the paid WhatsApp add-on on your own WhatsApp Business number. Participants also get the pass by email with the PDF attached.'),
     ];
     $features = [
         ['title' => __('Registration that converts'), 'body' => __('Mobile-first event pages in your colours, with distances, prices, age categories and your own questions. Age is checked from date of birth.'), 'icon' => 'M4 6h16M4 12h16M4 18h10'],
@@ -39,7 +40,7 @@
                     <span class="text-[#d9ff45]">{{ __('Keep your margins.') }}</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-lg text-white/75">
-                    {{ __('Branded registration pages, payments straight to your Razorpay or Cashfree account, EF- passes with QR, and volunteer check-in. One Season Pass for the year, plus :fee% on paid entries.', ['fee' => $fee]) }}
+                    {{ __('Branded registration pages, payments straight to your Razorpay or Cashfree account, EF- passes with QR, and volunteer check-in.') }}
                 </p>
                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
                     <a href="{{ route('pricing') }}" class="inline-flex justify-center rounded-full bg-[#d9ff45] px-7 py-3.5 font-bold text-[#0b1020] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d9ff45] focus:ring-offset-2 focus:ring-offset-[#0b1020]">
@@ -50,7 +51,8 @@
                     </a>
                 </div>
                 <p class="mt-4 text-sm text-white/60">
-                    {{ __('Season Pass from :price · no card for the trial', ['price' => \App\Saas\Plans::inr($starter['season_pass_inr'])]) }}
+                    <span class="font-semibold text-white">{{ __(':plan :price', ['plan' => $starter['name'], 'price' => \App\Saas\Plans::inr($starter['price_inr'])]) }}</span>
+                    · {{ \App\Saas\Plans::limitsLabel($starter) }} · {{ __($starter['term_label']) }} · {{ __('no card for the trial') }}
                 </p>
             </div>
 
@@ -83,6 +85,21 @@
                 </div>
             </div>
         </div>
+    </section>
+
+    {{-- Pricing --}}
+    <section id="pricing" class="scroll-mt-16 mx-auto max-w-6xl px-4 sm:px-6 py-20">
+        <div class="text-center">
+            <p class="text-sm font-bold uppercase tracking-widest text-[#c2410c]">{{ __('Pricing') }}</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl font-black tracking-tight">{{ __('One race from :price. A season when you need it.', ['price' => \App\Saas\Plans::inr($starter['price_inr'])]) }}</h2>
+            <p class="mx-auto mt-4 max-w-2xl text-gray-600">{{ __('Every price shows the races and participants it covers. Email is included; prices exclude GST. Start with a :days-day trial.', ['days' => $trialDays]) }}</p>
+        </div>
+        <div class="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
+            @foreach ($plans as $key => $plan)
+                @include('marketing.partials.plan-card')
+            @endforeach
+        </div>
+        <p class="mt-8 text-center text-sm"><a href="{{ route('pricing') }}" class="font-semibold underline underline-offset-4">{{ __('Compare plans and add-ons') }}</a></p>
     </section>
 
     {{-- Social proof (placeholders until real customers agree to be named) --}}
@@ -134,20 +151,6 @@
         </div>
     </section>
 
-    {{-- Pricing --}}
-    <section id="pricing" class="scroll-mt-16 mx-auto max-w-6xl px-4 sm:px-6 py-20">
-        <div class="text-center">
-            <p class="text-sm font-bold uppercase tracking-widest text-[#c2410c]">{{ __('Pricing') }}</p>
-            <h2 class="mt-3 text-3xl sm:text-4xl font-black tracking-tight">{{ __('One Season Pass. A small share of paid entries.') }}</h2>
-            <p class="mx-auto mt-4 max-w-2xl text-gray-600">{{ __('No per-event invoices. Free events cost nothing extra. Start with a :days-day trial.', ['days' => $trialDays]) }}</p>
-        </div>
-        <div class="mt-14 grid gap-6 lg:grid-cols-3 lg:items-center">
-            @foreach ($plans as $key => $plan)
-                @include('marketing.partials.plan-card')
-            @endforeach
-        </div>
-        <p class="mt-8 text-center text-sm"><a href="{{ route('pricing') }}" class="font-semibold underline underline-offset-4">{{ __('Compare plans and add-ons') }}</a></p>
-    </section>
 
     {{-- Testimonials (placeholders) --}}
     <section class="bg-white">

@@ -34,7 +34,7 @@
             @if ($page->open)
                 <a href="#register" class="inline-flex w-fit items-center gap-3 rounded-2xl bg-gray-900 px-7 py-4 text-lg font-black text-white shadow-[6px_6px_0_rgba(0,0,0,0.25)] hover:-translate-y-0.5">{{ __('I\'m in!') }} <span aria-hidden="true">→</span></a>
             @else
-                <p class="font-black uppercase">{{ __('Registration closed') }}</p>
+                <p class="font-black uppercase">{{ $page->closedLabel() }}</p>
             @endif
         </div>
 

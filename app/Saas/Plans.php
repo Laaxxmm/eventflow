@@ -3,6 +3,7 @@
 namespace App\Saas;
 
 use App\Enums\Module;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Number;
 
 /**
@@ -42,6 +43,36 @@ final class Plans
     public static function inr(?int $amount): ?string
     {
         return $amount === null ? null : Number::currency($amount, in: 'INR', locale: 'en_IN', precision: 0);
+    }
+
+    /** "₹3,999", or the quote wording when Indefine prices it. */
+    public static function priceLabel(?int $amount): string
+    {
+        return self::inr($amount) ?? __('Contact Indefine');
+    }
+
+    /** "1 race · 500 participants" for a plan card or table. */
+    public static function limitsLabel(array $plan): string
+    {
+        if ($plan['max_events'] === null) {
+            return __('Races and field size to suit you');
+        }
+
+        return trans_choice('{1} 1 race|[2,*] Up to :count races', $plan['max_events'], ['count' => $plan['max_events']])
+            .' · '.__(':pax participants per race', ['pax' => number_format($plan['max_participants_per_event'])]);
+    }
+
+    /** Last day (inclusive) of a paid term that starts on $from. */
+    public static function termEnd(string $plan, \DateTimeInterface $from): ?CarbonImmutable
+    {
+        $term = self::get($plan)['term'];
+        if ($term === null) {
+            return null;
+        }
+        $start = CarbonImmutable::instance($from)->startOfDay();
+        $end = isset($term['days']) ? $start->addDays($term['days']) : $start->addMonthsNoOverflow($term['months']);
+
+        return $end->subDay();
     }
 
     /**

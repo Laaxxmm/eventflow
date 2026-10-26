@@ -21,11 +21,14 @@ use Throwable;
 
 /**
  * Base for participant emails: always queued, branded with the event/org, sent through
- * the org's mailer (platform or custom SMTP) and logged in notification_deliveries.
+ * the org's mailer (own SMTP or the Platform mail add-on) and logged in notification_deliveries.
+ * With neither, the mail is held and logged as skipped.
  */
 abstract class BrandedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
+
+    public const HELD_REASON = 'Held: connect your own SMTP (free) or add Platform mail in Settings -> Email.';
 
     /** Queue retries: 5 tries over about 40 minutes. */
     public int $tries = 5;
@@ -87,6 +90,12 @@ abstract class BrandedMail extends Mailable implements ShouldQueue
         $delivery = NotificationDelivery::track($org->id, $registration->id, 'mail', $this->type(), $registration->email);
 
         $mailerName = OrgMailer::mailerName($org, NotificationSettings::for($org));
+        if ($mailerName === null) {
+            // No own SMTP and no Platform mail add-on: hold, and tell the organiser why.
+            $delivery->markSkipped(self::HELD_REASON);
+
+            return null;
+        }
         $this->mailer($mailerName);
         if ($mailer instanceof MailerContract && ! $mailer instanceof MailFactory) {
             $mailer = app(MailFactory::class);

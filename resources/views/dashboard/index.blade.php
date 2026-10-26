@@ -25,6 +25,10 @@
     </x-slot>
 
     <div class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+        @if ($org)
+            <div class="space-y-3 empty:hidden">@include('saas.plan-banner', ['org' => $org])</div>
+        @endif
+
         @if ($events->isEmpty())
             {{-- Empty state: one primary action --}}
             <section class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200/70">

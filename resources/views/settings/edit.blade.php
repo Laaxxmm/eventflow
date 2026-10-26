@@ -59,8 +59,8 @@
 
                         @if (Route::has('settings.notifications.show'))
                             <p class="mt-2 text-sm text-gray-600">
-                                <a href="{{ route('settings.notifications.show') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{{ __('Notification settings') }}</a>
-                                {{ __('(email sender, custom SMTP, WhatsApp)') }}
+                                <a href="{{ route('settings.notifications.show') }}" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">{{ __('Email and WhatsApp') }}</a>
+                                {{ __('(own SMTP free; Platform mail and WhatsApp add-ons)') }}
                             </p>
                         @endif
                     </header>
