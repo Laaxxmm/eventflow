@@ -16,6 +16,7 @@
             'whatsapp-verified' => __('Test message sent. Check the phone.'),
         ];
         $badge = fn (bool $ok) => $ok ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700';
+        $paymentTemplateHelp = __('Used by event payment reminders: body {{1}} name, {{2}} event, {{3}} date, {{4}} payment link. Leave blank to send reminders by email only.');
     @endphp
 
     <div class="py-12">
@@ -303,6 +304,12 @@
                                     <x-input-label for="whatsapp_template_reminder" :value="__('Reminder template name (optional)')" />
                                     <x-text-input id="whatsapp_template_reminder" name="whatsapp_template_reminder" type="text" class="mt-1 block w-full" :value="old('whatsapp_template_reminder', $settings->whatsapp_template_reminder)" placeholder="event_reminder" />
                                     <x-input-error class="mt-2" :messages="$errors->get('whatsapp_template_reminder')" />
+                                </div>
+                                <div>
+                                    <x-input-label for="whatsapp_template_payment" :value="__('Payment reminder template (optional)')" />
+                                    <x-text-input id="whatsapp_template_payment" name="whatsapp_template_payment" type="text" class="mt-1 block w-full" :value="old('whatsapp_template_payment', $settings->whatsapp_template_payment)" placeholder="payment_reminder" />
+                                    <p class="mt-1 text-xs text-gray-500">{{ $paymentTemplateHelp }}</p>
+                                    <x-input-error class="mt-2" :messages="$errors->get('whatsapp_template_payment')" />
                                 </div>
                                 <div>
                                     <x-input-label for="whatsapp_language" :value="__('Template language code')" />

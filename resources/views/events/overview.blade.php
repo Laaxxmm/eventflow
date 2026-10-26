@@ -33,6 +33,7 @@
                 <a href="{{ $publicUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-xl bg-[#0b1020] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1f2a4a]" data-open-public>{{ __('Open public URL') }} ↗</a>
             @endif
             <a href="{{ route('organiser.events.edit', $event) }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">{{ __('Edit content') }}</a>
+            <a href="{{ route('organiser.events.communications', $event) }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50" data-communications-link>{{ __('Communications') }}</a>
             <form method="POST" action="{{ route('organiser.events.status', $event) }}">
                 @csrf
                 @method('PATCH')

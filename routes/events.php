@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\EventCommunicationsController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventOverviewController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\ReminderOptOutController;
 use App\Http\Controllers\TemplatePreviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +23,17 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('organiser
     Route::get('events/{event}/preview', [EventOverviewController::class, 'preview'])->name('events.preview');
     Route::patch('events/{event}/template', [EventOverviewController::class, 'updateTemplate'])->name('events.template');
     Route::patch('events/{event}/status', [EventOverviewController::class, 'updateStatus'])->name('events.status');
+    // Event → Settings → Communications: payment reminders (Session N2).
+    Route::get('events/{event}/communications', [EventCommunicationsController::class, 'show'])->name('events.communications');
+    Route::put('events/{event}/communications', [EventCommunicationsController::class, 'update'])->name('events.communications.update');
+    Route::get('events/{event}/communications/preview', [EventCommunicationsController::class, 'preview'])->name('events.communications.preview');
 });
+
+// Session N2: one-click "stop payment reminders" from the reminder email (signed link).
+Route::get('/r/{registration}/reminders/stop', ReminderOptOutController::class)
+    ->whereNumber('registration')
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('reminders.stop');
 
 Route::get('/r/{registration}/review', [RegistrationController::class, 'review'])
     ->whereNumber('registration')

@@ -550,6 +550,56 @@ call is made; with the add-on on, the page shows the setup checklist. Email is u
 retried and logged; they never affect the registration or its email. Numbers are normalised to
 `91XXXXXXXXXX` for 10-digit Indian mobiles.
 
+### Payment reminders for unpaid registrations (Session N2)
+
+Helps organisers fill the field without manual follow-ups. **Opt-in per event, off by default:**
+the switch is on Event → **Communications** (`/organiser/events/{id}/communications`).
+
+- **Who gets one:** registrations with status `pending` or `failed`. Never `paid` or `refunded`,
+  never someone who opted out, and nothing once the event has started.
+- **Cadence (editable):**
+  - #1 is sent 1 hour after registering, #2 24 hours later, and #3 72 hours later.
+  - From #3 on, a reminder goes out no later than 48 hours before the start. If that point has
+    already passed, the remaining reminders are skipped.
+  - The cap is 3; organisers can raise it to 5. Extra reminders reuse the last delay.
+  - The organiser edits the subject and opening message; placeholders are `{name}`, `{event}`,
+    `{date}` and `{org}`.
+- **Stops when:**
+  - the payment succeeds (the job re-checks, and `RegistrationPaid` cancels queued reminders);
+  - the participant clicks the signed **Stop payment reminders** link (`/r/{id}/reminders/stop`);
+  - the event starts;
+  - the organiser switches it off;
+  - `FEATURE_PAYMENT_REMINDERS=false` is set.
+- **Email** (`App\Mail\PaymentReminderMail`, included in every plan):
+  - goes through the org's own SMTP or Platform mail; with neither, it is held and logged, like
+    all participant mail;
+  - shows the organiser's sender name and reply-to, the event details, and **Pay now** (a fresh
+    signed link to the registration's review page, which posts to `/pay`).
+- **WhatsApp:**
+  - sent only when the org has the WhatsApp add-on (switched on and set up), a **Payment reminder
+    template** is saved in Settings → Email & WhatsApp, and the participant has a mobile number;
+  - otherwise it is skipped silently, and email still goes out;
+  - template body: `{{1}}` name, `{{2}}` event, `{{3}}` date, `{{4}}` payment link.
+- **Safety:**
+  - nothing is sent from 21:00 to 08:00 Asia/Kolkata; due reminders go out at 08:00;
+  - one log row per registration, channel and dispatch key makes sends idempotent;
+  - queue rate limit per org (`PAYMENT_REMINDERS_PER_MINUTE`, default 60) and per scheduler run
+    (`PAYMENT_REMINDERS_PER_RUN`, default 500).
+- **Scheduler:** `php artisan reminders:payments` runs every 10 minutes (`--dry-run` lists what is due).
+  It needs the queue worker and `schedule:run`.
+- **Organiser view:**
+  - Participants has **All / Paid / Unpaid** tabs, and each row shows *Last* and *Next* reminder
+    with channel icons;
+  - select rows, then **Send reminder now**. A manual reminder does not count toward the cap, is
+    refused within 12 hours of another reminder, follows quiet hours, and pushes the next
+    automatic one past that cooldown;
+  - Communications shows channel status, email and WhatsApp previews, and the latest reminders.
+- **Audit:** every reminder (automatic or manual, per channel, with status and provider id) is in
+  `registration_reminder_logs`.
+
+Settings: `config/reminders.php` (defaults, quiet hours, limits), `config/features.php` (flag).
+Tests: `tests/Feature/Reminders`.
+
 ### Season Pass modules
 
 `Module::EmailBranding` (`email_branding`, shown as **Platform mail**) and `Module::SmsWhatsapp`

@@ -24,7 +24,7 @@ class NotificationSettings extends Model
         'smtp_enabled', 'smtp_host', 'smtp_port', 'smtp_encryption', 'smtp_username', 'smtp_password',
         'smtp_from_email', 'smtp_from_name', 'smtp_verified_at',
         'whatsapp_enabled', 'whatsapp_provider', 'whatsapp_phone_number_id', 'whatsapp_token',
-        'whatsapp_template_confirmed', 'whatsapp_template_reminder', 'whatsapp_language', 'whatsapp_verified_at',
+        'whatsapp_template_confirmed', 'whatsapp_template_reminder', 'whatsapp_template_payment', 'whatsapp_language', 'whatsapp_verified_at',
     ];
 
     protected $hidden = ['smtp_password', 'whatsapp_token'];
