@@ -14,6 +14,7 @@ use App\Models\Registration;
 use App\Models\Tenancy\CurrentOrg;
 use App\Models\Tenancy\OrgScope;
 use App\Payments\PaymentStatus;
+use App\Saas\Trial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,11 @@ class RegistrationController extends Controller
 
         if (! self::isOpen($config) || ! $this->registrationEnabled($event)) {
             throw ValidationException::withMessages(['distance' => __('Registration for this event is closed.')]);
+        }
+
+        // Trial orgs take up to plans.trial_registrations test entries (never blocks while TRIAL_STUB=true).
+        if (! Trial::canRegister($event->org)) {
+            throw ValidationException::withMessages(['distance' => __('This event is not taking more registrations yet. Please check back soon.')]);
         }
 
         $input = $request->validate($form->rules(), [], $form->attributes());

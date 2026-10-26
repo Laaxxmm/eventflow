@@ -1,42 +1,36 @@
 <x-guest-layout>
-    <h1 class="ri-headline mb-8 text-6xl">{{ __('Start your season') }}</h1>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Create your organiser account. We will email you a link to verify your address before you can publish events.') }}
-    </div>
+    <h1 class="ri-headline mb-3 text-6xl">{{ __('Start your free trial') }}</h1>
+    <p class="mb-6 text-sm text-ink/70">
+        {{ __(':days days · :events event you can publish · up to :regs test registrations · no card.', ['days' => $trial['days'], 'events' => $trial['events'], 'regs' => $trial['registrations']]) }}
+        {{ __('Verify your email, then publish — no call with us first.') }}
+    </p>
 
     <form method="POST" action="{{ route('register') }}">
         @csrf
+        @if ($template)
+            <input type="hidden" name="template" value="{{ $template }}">
+            <p class="mb-6 border-l-4 border-heat bg-mist px-4 py-3 text-sm">
+                {{ __('Template: :name. It will be preselected when you create your event.', ['name' => config("eventflow.landing_templates.{$template}.label")]) }}
+            </p>
+        @endif
 
-        <!-- Plan (free trial; billing is not connected yet) -->
+        <!-- The plan the trial converts to. Changeable later in Plan & billing. -->
         <fieldset class="mb-6">
-            <legend class="block font-medium text-sm text-gray-700">{{ __('Plan') }}</legend>
+            <legend class="block text-sm font-medium text-ink">{{ __('Plan after your trial') }}</legend>
             <div class="mt-2 space-y-2">
                 @foreach ($plans as $key => $plan)
-                    <label class="flex items-start gap-3 rounded-md border border-gray-300 p-3 cursor-pointer has-[:checked]:border-indigo-500 has-[:checked]:ring-1 has-[:checked]:ring-indigo-500">
-                        <input type="radio" name="plan" value="{{ $key }}" class="mt-1 text-indigo-600 focus:ring-indigo-500" @checked(old('plan', $selectedPlan) === $key)>
+                    <label class="flex cursor-pointer items-start gap-3 border-2 border-ink/15 p-3 has-[:checked]:border-ink">
+                        <input type="radio" name="plan" value="{{ $key }}" class="mt-1 text-ink focus:ring-ink" @checked(old('plan', $selectedPlan) === $key)>
                         <span class="flex-1 text-sm">
-                            <span class="block font-semibold text-gray-900">{{ $plan['name'] }}</span>
-                            <span class="block text-gray-600">{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }} {{ __('/ season + :pct% on paid registrations', ['pct' => rtrim(rtrim(number_format($plan['participant_fee_percent'], 1), '0'), '.')]) }}</span>
+                            <span class="flex justify-between gap-3 font-semibold text-ink"><span>{{ $plan['name'] }}</span><span>{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }}</span></span>
+                            <span class="block text-ink/60">@include('marketing.partials.plan-limits', ['plan' => $plan])</span>
                         </span>
                     </label>
                 @endforeach
             </div>
             <x-input-error :messages="$errors->get('plan')" class="mt-2" />
-
-            <p class="mt-4 text-sm font-medium text-gray-700">{{ __('Add-ons (optional)') }}</p>
-            <div class="mt-2 space-y-1">
-                @foreach ($addons as $key => $addon)
-                    <label class="flex items-center gap-2 text-sm text-gray-700">
-                        <input type="checkbox" name="addons[]" value="{{ $key }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(in_array($key, old('addons', $selectedAddons), true))>
-                        <span class="flex-1">{{ __($addon['name']) }}</span>
-                        <span class="text-gray-500">+{{ \App\Saas\Plans::inr($addon['season_inr']) }}</span>
-                    </label>
-                @endforeach
-            </div>
-            <x-input-error :messages="$errors->get('addons.*')" class="mt-2" />
-
-            <p class="mt-3 text-xs text-gray-500">
-                {{ __(':days-day free trial, no card needed. Billing connects when Cashfree/Razorpay SaaS subscription is live.', ['days' => config('plans.trial_days')]) }}
+            <p class="mt-3 text-xs text-ink/55">
+                {{ __('No ticket percentage on any plan. Nothing is charged during the trial.') }}
                 <a href="{{ route('pricing') }}" class="underline">{{ __('Compare plans') }}</a>
             </p>
         </fieldset>

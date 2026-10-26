@@ -7,6 +7,7 @@ use App\Landing\DatabaseLandingSource;
 use App\Landing\EventStatus;
 use App\Landing\RegistrationForm;
 use App\Landing\Theme;
+use App\Saas\Trial;
 use App\View\LandingPage;
 use Illuminate\View\View;
 
@@ -47,6 +48,7 @@ class PublicEventController extends Controller
                 theme: Theme::for($config->branding),
                 remaining: Capacity::remaining($event, $config),
                 open: RegistrationController::isOpen($config),
+                watermark: Trial::watermark($event->org),
             ),
         ]);
     }

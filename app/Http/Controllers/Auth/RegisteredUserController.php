@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Enums\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\EventController;
 use App\Models\Org;
 use App\Models\User;
 use App\Saas\PlanAssigner;
 use App\Saas\Plans;
 use App\Saas\ReservedSlugs;
+use App\Saas\Trial;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,6 +44,8 @@ class RegisteredUserController extends Controller implements HasMiddleware
             'addons' => Plans::addons(),
             'selectedPlan' => in_array($plan, Plans::selfServe(), true) ? $plan : config('plans.default'),
             'selectedAddons' => array_values(array_intersect((array) $request->query('addons', []), array_keys(Plans::addons()))),
+            'template' => EventController::galleryTemplate($request->query('template')),
+            'trial' => ['days' => Trial::days(), 'events' => Trial::eventLimit(), 'registrations' => Trial::registrationLimit()],
         ]);
     }
 
@@ -62,6 +66,7 @@ class RegisteredUserController extends Controller implements HasMiddleware
             'plan' => ['nullable', Rule::in(Plans::selfServe())],
             'addons' => ['nullable', 'array'],
             'addons.*' => [Rule::in(array_keys(Plans::addons()))],
+            'template' => ['nullable', Rule::in(array_keys(config('eventflow.landing_templates')))],
         ]);
 
         // The signing-up organiser becomes the owner of a new org.
@@ -88,6 +93,7 @@ class RegisteredUserController extends Controller implements HasMiddleware
         Auth::login($user);
 
         // Plan + trial welcome (says to verify the email before creating events).
-        return redirect(route('account.plan', ['welcome' => 1], absolute: false));
+        // A template chosen on /templates carries through to "Create your first event".
+        return redirect(route('account.plan', array_filter(['welcome' => 1, 'template' => $request->input('template')]), absolute: false));
     }
 }

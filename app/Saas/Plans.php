@@ -19,12 +19,32 @@ final class Plans
     /** @return array<string, mixed> */
     public static function get(string $key): array
     {
-        return self::all()[$key] ?? throw new \InvalidArgumentException("Unknown plan [{$key}]");
+        return self::all()[self::resolve($key)] ?? throw new \InvalidArgumentException("Unknown plan [{$key}]");
+    }
+
+    /** A plan key, with pre-Single/Club/Circuit keys (starter, growth, scale) mapped to their successor. */
+    public static function resolve(string $key): string
+    {
+        return config("plans.legacy.{$key}", $key);
+    }
+
+    /** @return array<string, mixed>|null The plan an org is on, or null when it has none. */
+    public static function forOrg(?string $key): ?array
+    {
+        return $key === null ? null : (self::all()[self::resolve($key)] ?? null);
+    }
+
+    /** Total participants a pass covers: events × pax per event, or null for unlimited. */
+    public static function maxRegistrations(array $plan): ?int
+    {
+        return $plan['max_events'] === null || $plan['pax_per_event'] === null
+            ? null
+            : $plan['max_events'] * $plan['pax_per_event'];
     }
 
     /**
      * Plans cheapest first, custom-priced ones last: the order the pricing strip shows
-     * (Single → Club → Circuit → Custom once those plans are configured).
+     * (Single → Club → Circuit → Custom).
      *
      * @return array<string, array<string, mixed>>
      */

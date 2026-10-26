@@ -20,6 +20,7 @@ final class PlanAssigner
     /** @param  list<string>  $addons */
     public static function startTrial(Org $org, string $plan, array $addons = []): Org
     {
+        $plan = Plans::resolve($plan);
         $definition = Plans::get($plan);
         $addons = array_values(array_intersect($addons, array_keys(Plans::addons())));
         $modules = Plans::modules($plan, $addons);
@@ -49,8 +50,9 @@ final class PlanAssigner
                     ...array_map(fn (string $m) => Module::from($m), config('eventflow.modules.core')),
                     ...$modules,
                 ],
-                'max_events' => $definition['max_events'],
-                'max_registrations' => $definition['max_registrations'],
+                // The trial's own limits (App\Saas\Trial), not the plan's.
+                'max_events' => Trial::eventLimit(),
+                'max_registrations' => Trial::registrationLimit(),
                 'amount_paise' => 0,
             ]);
 

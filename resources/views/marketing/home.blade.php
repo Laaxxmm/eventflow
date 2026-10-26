@@ -1,186 +1,153 @@
 @extends('marketing.layout')
 
+{{--
+    Self-serve SaaS homepage (Session UX-H). Order: hero → price line → 3-step time to value →
+    template teaser → product proof → pricing strip → self-serve trust line → CTA band.
+    Every number comes from config/plans.php; nothing here is hard-coded pricing.
+--}}
+
 @php
     use App\Saas\Plans;
     use App\View\SportImagery;
 
-    $entryPlan = $entry['plan'] ?? null;
-    $entryHref = $entry ? route('register', ['plan' => $entry['key']]) : route('pricing');
-    // "Start with one race" only when the cheapest plan is a single event (Session M2 pricing).
-    $entryLabel = match (true) {
-        $entryPlan === null => __('Start free trial'),
-        ($entryPlan['max_events'] ?? null) === 1 => __('Start with one race — :price', ['price' => Plans::inr($entryPlan['season_pass_inr'])]),
-        default => __('Start your season — :price', ['price' => Plans::inr($entryPlan['season_pass_inr'])]),
-    };
-    $checklist = [
-        [__('A race page that sells'), __('Your logo and colours on one of five sports page designs. Distances, prices, schedule, FAQ, sponsors.')],
-        [__('Money into your account'), __('UPI, cards and net banking through your own Razorpay or Cashfree. EventFlow never holds entry fees.')],
-        [__('EF- pass with signed QR'), __('Every paid entry gets a branded pass by email (and WhatsApp with the add-on). QR codes cannot be forged.')],
-        [__('Volunteer check-in'), __('Scan passes on any phone at the gate. Duplicates are flagged with the first check-in time.')],
-        [__('Heats and race sheets'), __('By distance, age band and gender, as CSV or print-ready PDF, the night before.')],
-        [__('Finisher certificates'), __('Five print-ready A4 designs with an EF-CERT number and a verify QR on each.')],
+    $selfServe = array_filter($plans, fn ($p) => $p['self_serve']);
+    $proof = [
+        [__('QR pass on every entry'), __('A branded EF- pass by email the moment an entry is paid. Signed QR codes cannot be forged.')],
+        [__('Gate check-in'), __('Volunteers scan passes on any phone. Duplicates are flagged with the first check-in time.')],
+        [__('Distance pricing'), __('5K, 10K, half, full — each with its own price, age bands and form fields.')],
+        [__('Soft pax caps'), __('Set places per distance. Near your plan cap you get a nudge, not a locked door.')],
+        [__('Finisher certificates'), __('Print-ready A4 designs with an EF-CERT number and a verify QR on each.')],
+        [__('Your logo, your colours'), __('Upload a logo and pick brand colours; every template tints itself, contrast-checked.')],
     ];
-    $sports = [
-        ['running', __('Running'), __('5K to full marathon, age bands, bib collection.')],
-        ['cycling', __('Cycling'), __('Criteriums and gran fondos, category waves.')],
-        ['skating', __('Skating'), __('Rink races by age group, heats of 6, 8 or 10.')],
-    ];
-    $designs = collect(config('eventflow.landing_templates'));
-    $faq = [
-        ['title' => __('Who collects the entry fees?'), 'body' => __('You do. Connect your own Razorpay or Cashfree account in Settings → Payments and participants pay you directly.')],
-        ['title' => __('How is EventFlow priced?'), 'body' => __('A Season Pass per plan, plus a small percentage on paid entries where the plan has one. No per-event invoices. See the pricing page for exact numbers.')],
-        ['title' => __('Which sports work?'), 'body' => __('Running, cycling and skating have sport packs with distances, age bands, form fields and heat sizes. Anything else runs on the generic pack.')],
-        ['title' => __('Do I need a developer or designer?'), 'body' => __('No. A five-step wizard creates the event and publishes its page. Pick one of five designs; for a fully custom design, talk to Indefine.')],
-        ['title' => __('What happens on race day?'), 'body' => __('Volunteers scan QR passes on their phones, you print heats, and finishers get certificates with a verify QR.')],
+    $steps = [
+        [__('Sign up'), __('2 minutes'), __('Name, email, password. No card, no call.')],
+        [__('Pick a template, add your race'), __('20 minutes'), __('Distances, prices, logo and colours in a five-step wizard.')],
+        [__('Publish and share'), __('Under an hour'), __('Your race site is live. Share the link; entries, passes and check-in run themselves.')],
     ];
 @endphp
 
 @section('content')
-    {{-- Hero: full-bleed race photo, oversized editorial type --}}
-    <section class="relative isolate overflow-hidden bg-midnight text-paper">
+    {{-- 1 · Hero --}}
+    <section class="relative isolate overflow-hidden bg-midnight text-paper" style="--ri-track: var(--ri-volt)">{{-- photo fallback glows volt + heat, not violet --}}
         <x-ri.photo :src="SportImagery::pick('marketing', 0)" sport="running" kenburns class="absolute inset-0 -z-10" alt="" />
-        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink via-ink/75 to-ink/10" aria-hidden="true"></div>
-        <div class="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-ink to-transparent" aria-hidden="true"></div>
+        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-ink via-ink/80 to-ink/20" aria-hidden="true"></div>
 
-        <div class="mx-auto max-w-7xl px-4 pb-16 pt-20 sm:px-6 sm:pb-24 sm:pt-28 lg:px-8 lg:pt-36">
-            <p class="ri-kicker text-heat" data-reveal>{{ __('Race registration · race-day ops · India') }}</p>
-            <h1 class="ri-headline mt-6 max-w-5xl text-[3.6rem] sm:text-[6.5rem] lg:text-[9rem]" data-reveal>
-                {{ __('Sell out') }}<br>{{ __('your start') }} <span class="text-heat">{{ __('line.') }}</span>
+        <div class="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 sm:pb-14 sm:pt-24 lg:px-8 lg:pt-28">
+            <p class="ri-kicker text-heat" data-reveal>{{ __('Race sites for Indian organisers') }}</p>
+            <h1 class="ri-headline mt-6 max-w-6xl text-[3.2rem] sm:text-[5.5rem] lg:text-[7.5rem]" data-reveal>
+                {{ __('Publish a race site you’re proud of') }} <span class="text-heat">{{ __('— in under an hour.') }}</span>
             </h1>
-            <p class="mt-8 max-w-xl text-lg text-paper/80 sm:text-xl" data-reveal>
-                {{ __('Sports-grade event pages, payments straight into your account, QR passes and volunteer check-in. Built for Indian running, cycling and skating organisers.') }}
+            <p class="mt-6 max-w-2xl text-lg text-paper/80 sm:mt-8 sm:text-xl" data-reveal>
+                {{ __('Registrations, QR passes, gate check-in and finisher certificates in one workspace. Entry fees go straight to your own Razorpay or Cashfree.') }}
             </p>
-            <div class="mt-10 flex flex-col gap-3 sm:flex-row" data-reveal>
-                <x-ri.button variant="heat" size="lg" :href="$entryHref">{{ $entryLabel }}</x-ri.button>
-                <x-ri.button variant="ghost-light" size="lg" :href="route('pricing')">{{ __('See season packs') }}</x-ri.button>
+            <div class="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row" data-reveal>
+                <x-ri.button variant="heat" size="lg" :href="route('register')">{{ __('Start free trial') }}</x-ri.button>
+                <x-ri.button variant="ghost-light" size="lg" :href="route('templates.index')">{{ __('See live templates') }}</x-ri.button>
             </div>
-            <ul class="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-sm text-paper/75" data-reveal>
-                @foreach ([__('QR pass on every entry'), __('Check-in on any phone'), __('Certificates with verify QR')] as $item)
-                    <li class="flex items-center gap-3">@include('marketing.partials.tick'){{ $item }}</li>
+            <p class="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-1 bg-paper/10 px-4 py-2 text-sm font-medium text-paper ring-1 ring-inset ring-paper/20" data-reveal data-proof-chip>
+                <span>{{ __('No ticket % required') }}</span><span class="text-paper/40" aria-hidden="true">·</span>
+                <span>{{ __('Own SMTP free') }}</span><span class="text-paper/40" aria-hidden="true">·</span>
+                <span>{{ __('India Razorpay-ready') }}</span>
+            </p>
+        </div>
+
+        {{-- Price line: Single is visible without scrolling. --}}
+        <div class="border-t border-paper/15 bg-ink/80">
+            <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-2 px-4 py-4 text-sm sm:px-6 lg:px-8" data-price-line>
+                @foreach ($selfServe as $key => $plan)
+                    <a href="{{ route('pricing') }}#{{ $key }}" class="flex items-baseline gap-2 hover:text-paper">
+                        <span class="font-display text-lg font-bold uppercase text-paper/70">{{ $plan['name'] }}</span>
+                        <span class="font-display text-2xl font-extrabold {{ $loop->first ? 'text-heat' : 'text-paper' }}">{{ Plans::inr($plan['season_pass_inr']) }}</span>
+                    </a>
+                @endforeach
+                <a href="{{ route('pricing') }}" class="ml-auto font-semibold text-paper/75 underline decoration-heat decoration-2 underline-offset-4 hover:text-paper">{{ __('Full pricing') }}</a>
+            </div>
+        </div>
+    </section>
+
+    {{-- 2 · Time to value --}}
+    <section id="start" class="scroll-mt-16 border-b-2 border-ink bg-paper">
+        <ol class="mx-auto grid max-w-7xl md:grid-cols-3">
+            @foreach ($steps as $i => [$title, $time, $body])
+                <li data-reveal @class(['flex gap-5 px-4 py-10 sm:px-6 lg:px-8', 'border-t-2 border-ink md:border-l-2 md:border-t-0' => ! $loop->first])>
+                    <span class="font-display text-7xl font-extrabold leading-none text-heat">{{ $i + 1 }}</span>
+                    <div>
+                        <p class="ri-kicker text-heat">{{ $time }}</p>
+                        <h2 class="mt-2 font-display text-3xl font-bold uppercase leading-none">{{ $title }}</h2>
+                        <p class="mt-3 text-ink/70">{{ $body }}</p>
+                    </div>
+                </li>
+            @endforeach
+        </ol>
+    </section>
+
+    {{-- 3 · Template teaser --}}
+    <section id="templates" class="scroll-mt-16 bg-mist">
+        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+            <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                    <p class="ri-kicker text-heat">{{ __('Templates') }}</p>
+                    <h2 class="ri-headline mt-4 max-w-4xl text-6xl sm:text-7xl">{{ __('Your runners land on a sports page, not a form.') }}</h2>
+                </div>
+                <x-ri.button variant="ink" size="md" :href="route('templates.index')">{{ __('See all templates') }}</x-ri.button>
+            </div>
+            <div class="mt-12 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+                @foreach (config('eventflow.landing_templates') as $key => $tpl)
+                    @include('marketing.partials.template-card', ['index' => $loop->iteration])
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- 4 · Product proof --}}
+    <section id="product" class="scroll-mt-16 bg-ink text-paper">
+        <div class="mx-auto grid max-w-7xl gap-14 px-4 py-24 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+            <div class="lg:sticky lg:top-28 lg:self-start">
+                <p class="ri-kicker text-heat">{{ __('Product') }}</p>
+                <h2 class="ri-headline mt-4 text-6xl sm:text-8xl">{{ __('Race day,') }} <span class="text-heat">{{ __('ticked off.') }}</span></h2>
+                <p class="mt-6 max-w-md text-paper/70">{{ __('Every plan, including the trial, has all of it. You only choose how many races and runners.') }}</p>
+            </div>
+            <ul class="grid gap-px bg-paper/15 sm:grid-cols-2">
+                @foreach ($proof as [$title, $body])
+                    <li class="bg-ink p-6" data-reveal>
+                        <h3 class="flex items-center gap-3 font-display text-2xl font-bold uppercase tracking-wide">@include('marketing.partials.tick'){{ $title }}</h3>
+                        <p class="mt-3 text-sm text-paper/70">{{ $body }}</p>
+                    </li>
                 @endforeach
             </ul>
         </div>
     </section>
 
-    {{-- Pricing strip, first-class --}}
+    {{-- 5 · Pricing strip, Single first --}}
     <section id="pricing" class="scroll-mt-16 bg-paper">
-        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
             <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                 <div>
                     <p class="ri-kicker text-heat">{{ __('Pricing') }}</p>
-                    <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('Pick your distance.') }}</h2>
+                    <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('One race or a season.') }}</h2>
                 </div>
-                <p class="max-w-md text-ink/70">{{ __('Start with one race, grow into a season. Entry fees go straight to your gateway; prices exclude GST.') }}</p>
+                <p class="max-w-md text-ink/70">{{ __('One flat price per pass. No percentage on tickets; entry fees go straight to your gateway. Prices exclude GST.') }}</p>
             </div>
             <div class="mt-12">
                 @include('marketing.partials.pricing-strip')
             </div>
-            <p class="mt-6 text-sm"><a href="{{ route('pricing') }}" class="font-semibold underline decoration-heat decoration-2 underline-offset-4">{{ __('Compare plans and add-ons') }}</a></p>
-        </div>
-    </section>
-
-    {{-- Race-day checklist --}}
-    <section id="race-day" class="scroll-mt-16 bg-ink text-paper">
-        <div class="mx-auto grid max-w-7xl gap-14 px-4 py-24 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-            <div class="lg:sticky lg:top-28 lg:self-start">
-                <p class="ri-kicker text-heat">{{ __('Race-day checklist') }}</p>
-                <h2 class="ri-headline mt-4 text-6xl sm:text-8xl">{{ __('Everything ticked') }} <span class="text-heat">{{ __('before the gun.') }}</span></h2>
-                <p class="mt-6 max-w-md text-paper/70">{{ __('From the announcement post to the last finisher certificate, one organiser account runs it.') }}</p>
-            </div>
-            <ol class="divide-y divide-paper/15 border-y border-paper/15">
-                @foreach ($checklist as $i => [$title, $body])
-                    <li class="grid grid-cols-[3.5rem_1fr] gap-4 py-7" data-reveal>
-                        <span class="font-display text-4xl font-extrabold text-paper/30">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                        <div>
-                            <h3 class="flex items-center gap-3 font-display text-3xl font-bold uppercase tracking-wide">@include('marketing.partials.tick'){{ $title }}</h3>
-                            <p class="mt-2 text-paper/70">{{ $body }}</p>
-                        </div>
-                    </li>
-                @endforeach
-            </ol>
-        </div>
-    </section>
-
-    {{-- Sports --}}
-    <section class="bg-paper">
-        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-            <p class="ri-kicker text-heat">{{ __('Sport packs') }}</p>
-            <h2 class="ri-headline mt-4 max-w-3xl text-6xl sm:text-7xl">{{ __('Made for clubs that race.') }}</h2>
-            <div class="mt-12 grid gap-4 md:grid-cols-3">
-                @foreach ($sports as $i => [$sport, $name, $line])
-                    <x-ri.photo :src="SportImagery::pick($sport, 1)" :sport="$sport" class="aspect-[4/5] text-paper" :alt="$name" data-reveal>
-                        <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent"></div>
-                        <div class="absolute inset-x-0 bottom-0 p-6">
-                            <p class="font-display text-6xl font-extrabold uppercase leading-none">{{ $name }}</p>
-                            <p class="mt-2 text-sm text-paper/80">{{ $line }}</p>
-                        </div>
-                    </x-ri.photo>
-                @endforeach
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+                @include('marketing.partials.messaging-line', ['class' => 'text-ink/75'])
+                <a href="{{ route('pricing') }}" class="text-sm font-semibold underline decoration-heat decoration-2 underline-offset-4">{{ __('Full pricing') }} →</a>
             </div>
         </div>
     </section>
 
-    {{-- Event page designs --}}
-    <section id="pages" class="scroll-mt-16 border-t-2 border-ink bg-mist">
-        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-            <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-                <div>
-                    <p class="ri-kicker text-heat">{{ __('Event pages') }}</p>
-                    <h2 class="ri-headline mt-4 max-w-3xl text-6xl sm:text-7xl">{{ __('Five race-day designs. Your colours.') }}</h2>
-                </div>
-                <p class="max-w-md text-ink/70">{{ __('Every event gets its own page the moment you publish. Your logo, brand colours and race photos; Register is never more than a thumb away.') }}</p>
-            </div>
-            <ul class="mt-12 grid gap-px border-2 border-ink bg-ink sm:grid-cols-2 lg:grid-cols-5">
-                @foreach ($designs as $key => $design)
-                    <li class="flex flex-col bg-paper p-6" data-reveal>
-                        <span class="font-display text-sm font-bold text-heat">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
-                        <p class="mt-3 font-display text-3xl font-extrabold uppercase leading-none">{{ $design['label'] }}</p>
-                        <p class="mt-3 text-sm text-ink/65">{{ $design['description'] }}</p>
-                    </li>
-                @endforeach
-            </ul>
-            <p class="mt-6 text-sm text-ink/65">{{ __('Need a one-off design for a federation or city marathon?') }} <a href="mailto:{{ $contactEmail }}" class="font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }}</a></p>
+    {{-- 6 · Self-serve trust line --}}
+    <section class="border-y-2 border-ink bg-volt text-midnight">
+        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <p class="font-display text-3xl font-bold uppercase leading-tight sm:text-4xl" data-trust-line>{{ __('Upgrade, participant packs, and SMTP — all in settings. No waiting on a quote to go live.') }}</p>
+            @if (\App\Saas\Trial::stubbed())
+                <p class="mt-3 text-sm opacity-80">{{ __('Online checkout for upgrades and packs is rolling out. Until it is live, your trial is never blocked at its limits.') }}</p>
+            @endif
         </div>
     </section>
 
-    {{-- How it works --}}
-    <section class="bg-paper">
-        <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-            <p class="ri-kicker text-heat">{{ __('How it works') }}</p>
-            <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('Four steps to the start line.') }}</h2>
-            <ol class="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ([
-                    [__('Pick a sport pack'), __('Distances, age bands and form fields for running, cycling, skating or anything else.')],
-                    [__('Publish your page'), __('Five steps in the wizard: basics, sport, design, branding, publish.')],
-                    [__('Collect entries'), __('Participants pay into your gateway; passes go out on their own.')],
-                    [__('Run race day'), __('Scan passes, print heats, issue certificates.')],
-                ] as $i => [$title, $body])
-                    <li data-reveal>
-                        <span class="font-display text-8xl font-extrabold leading-none text-track-text">{{ $i + 1 }}</span>
-                        <h3 class="mt-4 font-display text-3xl font-bold uppercase">{{ $title }}</h3>
-                        <p class="mt-2 text-ink/70">{{ $body }}</p>
-                    </li>
-                @endforeach
-            </ol>
-        </div>
-    </section>
-
-    {{-- FAQ --}}
-    <section id="faq" class="scroll-mt-16 border-t-2 border-ink bg-paper">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 py-24 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-            <h2 class="ri-headline text-6xl sm:text-7xl">{{ __('Organiser questions.') }}</h2>
-            <x-ri.accordion :items="$faq" :open="0" />
-        </div>
-    </section>
-
-    {{-- Final CTA --}}
-    <section class="bg-heat text-on-heat">
-        <div class="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-20 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
-            <h2 class="ri-headline text-7xl sm:text-9xl">{{ __('Your next') }}<br>{{ __('start line.') }}</h2>
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <x-ri.button variant="ink" size="lg" :href="$entryHref">{{ $entryLabel }}</x-ri.button>
-                <x-ri.button variant="ghost" size="lg" href="mailto:{{ $contactEmail }}">{{ __('Talk to Indefine') }}</x-ri.button>
-            </div>
-        </div>
-    </section>
+    {{-- 7 · Final CTA --}}
+    @include('marketing.partials.cta-band')
 @endsection

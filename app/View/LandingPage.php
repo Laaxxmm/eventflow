@@ -30,6 +30,7 @@ final readonly class LandingPage
         array $remaining,
         public bool $open = true,
         public bool $preview = false,
+        public bool $watermark = false, // "Powered by EventFlow" while the org is on a trial
     ) {
         $this->date = $config->date->setTimezone(ConfigCompiler::TIMEZONE);
         $this->distances = array_map(fn (Distance $d) => [

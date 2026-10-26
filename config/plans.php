@@ -3,9 +3,9 @@
 /*
  * EventFlow SaaS plans (marketing site, pricing page, signup).
  *
- * Organisers pay a Season Pass per year plus an optional percentage on paid
- * participant registrations. All amounts are PLACEHOLDERS until Indefine
- * confirms pricing; change them here, never in the Blade views.
+ * Organisers buy a flat pass (Single Event, Club Season, Circuit Season) with no
+ * percentage on tickets, or talk to Indefine for Custom. Change prices here,
+ * never in the Blade views.
  *
  * Modules use App\Enums\Module values. Core modules (registration, payments,
  * passes) are in every plan.
@@ -20,87 +20,154 @@ return [
         'contact_email' => env('SALES_CONTACT_EMAIL', 'hello@indefine.in'),
     ],
 
+    // Footer links, per deployment. An unset link is hidden (legal falls back to the contact email).
+    'links' => [
+        'docs' => env('MARKETING_DOCS_URL'),
+        'status' => env('MARKETING_STATUS_URL', '/up'),
+        'indefine' => env('MARKETING_INDEFINE_URL', 'https://indefine.in'),
+        'terms' => env('MARKETING_TERMS_URL'),
+        'privacy' => env('MARKETING_PRIVACY_URL'),
+    ],
+
     'currency' => 'INR',
 
-    // Every self-serve plan starts as a free trial. No card is taken.
+    /*
+     * Free trial (product-led: no card, no human gate before the first publish).
+     *
+     *   trial_days           length of the trial
+     *   trial_events         events a trial org can create and publish
+     *   trial_registrations  test registrations across the trial org's events
+     *   trial_watermark      subtle "Powered by EventFlow" on landings until paid
+     *
+     * TRIAL_STUB=true (the default until SaaS billing checkout is live) keeps the
+     * limits visible in the UI but never hard-blocks: there is no way to pay yet,
+     * so blocking would strand a trial. Set TRIAL_STUB=false once checkout ships.
+     */
     'trial_days' => 14,
+    'trial_events' => 1,
+    'trial_registrations' => 25,
+    'trial_watermark' => true,
+    'trial_stub' => (bool) env('TRIAL_STUB', true),
 
     // Plan new organisers get when they sign up without choosing one.
-    'default' => 'starter',
+    'default' => 'single',
 
+    // Plan keys from before Single/Club/Circuit, resolved to their successor.
+    'legacy' => [
+        'starter' => 'club',
+        'growth' => 'circuit',
+        'scale' => 'custom',
+    ],
+
+    /*
+     * No ticket percentage on any plan: organisers pay one flat price per pass.
+     * max_events per pass window; pax_per_event is a soft cap per event
+     * (over it: Upgrade, Buy a participant pack, or Contact Indefine).
+     */
     'plans' => [
-        'starter' => [
-            'name' => 'Starter',
-            'tagline' => 'One club, a full season of races.',
-            'season_pass_inr' => 19999, // placeholder, per season (12 months)
-            'participant_fee_percent' => 3.0, // placeholder, on paid registrations
+        'single' => [
+            'name' => 'Single Event',
+            'tagline' => 'One race, done properly.',
+            'season_pass_inr' => 3999,
+            'term' => '90-day window',
+            'duration_days' => 90,
+            'participant_fee_percent' => null,
             'self_serve' => true,
-            'max_events' => 5,
-            'max_registrations' => 2000,
-            'modules' => ['checkin'],
+            'highlight' => true, // where the pricing strip starts the eye
+            'max_events' => 1,
+            'pax_per_event' => 500,
+            'support' => 'Email',
+            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
             'features' => [
-                'Branded event pages from YAML or the editor',
-                'Razorpay or Cashfree checkout',
-                'EF- passes (PNG + PDF) by email',
-                'QR check-in on volunteers\' phones',
-                'Up to 5 events and 2,000 registrations a season',
+                '1 race over a 90-day window',
+                'Up to 500 participants',
+                'QR passes, gate check-in and certificates',
+                'Email confirmations · own SMTP free',
             ],
         ],
-        'growth' => [
-            'name' => 'Growth',
-            'tagline' => 'For organisers running a race calendar.',
-            'season_pass_inr' => 49999, // placeholder
-            'participant_fee_percent' => 2.0, // placeholder
+        'club' => [
+            'name' => 'Club Season',
+            'tagline' => 'A club calendar for the year.',
+            'season_pass_inr' => 12999,
+            'term' => '12 months',
+            'duration_days' => 365,
+            'participant_fee_percent' => null,
             'self_serve' => true,
-            'highlight' => true,
-            'max_events' => 25,
-            'max_registrations' => 15000,
-            'modules' => ['checkin', 'race_sheets', 'certificates'],
+            'max_events' => 5,
+            'pax_per_event' => 1500,
+            'support' => 'Priority email',
+            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
             'features' => [
-                'Everything in Starter',
-                'Race sheets: heats by distance, age band and gender',
-                'Finisher certificates (A4 template gallery)',
-                'Up to 25 events and 15,000 registrations a season',
+                '5 races over 12 months',
+                'Up to 1,500 participants per race',
+                'Everything in Single Event',
                 'Priority email support',
             ],
         ],
-        'scale' => [
-            'name' => 'Scale',
-            'tagline' => 'Federations, city marathons and multi-city series.',
-            'season_pass_inr' => null, // custom quote
+        'circuit' => [
+            'name' => 'Circuit Season',
+            'tagline' => 'Series, circuits and busy organisers.',
+            'season_pass_inr' => 29999,
+            'term' => '12 months',
+            'duration_days' => 365,
+            'participant_fee_percent' => null,
+            'self_serve' => true,
+            'max_events' => 25,
+            'pax_per_event' => 5000,
+            'support' => 'Priority email + race-week chat',
+            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
+            'features' => [
+                '25 races over 12 months',
+                'Up to 5,000 participants per race',
+                'Everything in Club Season',
+                'Race-week chat support',
+            ],
+        ],
+        'custom' => [
+            'name' => 'Custom',
+            'tagline' => 'Federations, city marathons, managed race ops.',
+            'season_pass_inr' => null, // quoted by Indefine
+            'term' => 'Custom term',
+            'duration_days' => null,
             'participant_fee_percent' => null,
             'self_serve' => false,
             'max_events' => null,
-            'max_registrations' => null,
+            'pax_per_event' => null,
+            'support' => 'Named contact + race-day support',
             'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
             'features' => [
-                'Everything in Growth, unlimited events',
-                'WhatsApp notifications and custom sender domain included',
-                'Custom certificate layouts by Indefine',
-                'Onboarding and race-day support',
-                'Custom participant fee',
+                'Unlimited races and participants',
+                'Platform mail and WhatsApp included',
+                'Custom certificate layouts',
+                'Managed race ops by Indefine',
             ],
         ],
     ],
 
-    // Optional add-ons, chosen at signup or later. "module" switches an App\Enums\Module on.
+    // What every self-serve plan includes for participant messaging.
+    'messaging' => [
+        'email' => true,          // confirmations and passes by email
+        'own_smtp' => true,       // free: plug in your own SMTP in Settings
+    ],
+
+    // Optional add-ons, bought in Settings. "module" switches an App\Enums\Module on.
     'addons' => [
+        'platform_mail' => [
+            'name' => 'Platform mail',
+            'description' => 'We send participant email for you from a verified EventFlow sender. Skip it if you use your own SMTP.',
+            'season_inr' => null, // TODO: price not confirmed by Indefine yet
+            'module' => null,
+        ],
         'whatsapp' => [
             'name' => 'WhatsApp notifications',
             'description' => 'Confirmation with the pass link and race-day reminders on WhatsApp (Meta charges extra).',
             'season_inr' => 4999, // placeholder
             'module' => 'sms_whatsapp',
         ],
-        'custom_smtp' => [
-            'name' => 'Custom email sender',
-            'description' => 'Send participant emails from your own domain or mailbox.',
-            'season_inr' => 1999, // placeholder
-            'module' => 'email_branding',
-        ],
-        'sport_pack' => [
-            'name' => 'Extra sport pack',
-            'description' => 'Defaults for another sport: skating, cycling, running or a custom pack.',
-            'season_inr' => 2999, // placeholder, per pack
+        'participant_pack' => [
+            'name' => 'Participant pack',
+            'description' => 'Extra participants on one event when it outgrows its plan cap.',
+            'season_inr' => null, // TODO: price not confirmed by Indefine yet
             'module' => null,
         ],
     ],
