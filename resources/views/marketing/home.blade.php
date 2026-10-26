@@ -27,7 +27,7 @@
             <div>
                 <p class="ri-kicker text-heat" data-reveal>{{ __('Race sites for Indian organisers') }}</p>
                 <h1 class="ri-headline mt-6 text-[3.25rem] leading-[0.95] sm:text-[5rem] lg:text-[6.25rem]" data-reveal>
-                    {{ __('Your race,') }}<br>{{ __('online in') }} <span class="text-heat">{{ __('an hour.') }}</span>
+                    {{ __('Your race,') }}<br>{{ __('online in') }} <span class="whitespace-nowrap text-heat">{{ __('an hour.') }}</span>
                 </h1>
                 <p class="mt-8 max-w-xl text-lg text-ink/70 sm:text-xl" data-reveal>
                     {{ __('A race page runners trust, entries paid straight to your Razorpay or Cashfree, and a QR pass for every runner.') }}

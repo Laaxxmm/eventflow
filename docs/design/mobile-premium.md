@@ -30,4 +30,18 @@ Homepage phone mock, and the dashboard's mobile preview on a phone:
 |---|---|
 | ![Home](mobile-premium/after-home-phone.jpg) | ![Overview](mobile-premium/after-overview-phone.jpg) |
 
+## The rest of the mobile site
+
+| Page | On a phone, before | Now |
+|---|---|---|
+| Registration form (all 5 templates) | Generic thin-bordered admin inputs, tiny labels, a cramped white box | Numbered sections (01 Distance · 02 About you · 03 Race details); distance cards with the price on the right and a dark selected state; 48px inputs with 16px text (no iOS zoom); uppercase micro-labels; radio options as tap-sized chips; a full-width "Continue to payment →" with the hold note |
+| `/pricing` | Four full plan cards stacked into an 8,000px page; a comparison table running off the right; the add-ons table squeezed into slivers | Plans are a swipeable row with the next card peeking ("Swipe to compare plans →"); the comparison is a plan switcher with a clean label/value list; add-ons are cards; tighter headline sizes. About 5,300px |
+| Equipment Close distances | Four tall cards, one per screen | A compact two-up grid (the sticky bar carries Register) |
+| `/` | "ONLINE IN AN / HOUR." broke awkwardly; the footer was one long column | "Online in / an hour." stays together; the footer link lists sit in two columns |
+| Login and sign-up | A small right-aligned button | A full-width primary button, with the secondary link below |
+
+| Form | Pricing | Compare |
+|---|---|---|
+| ![Form](mobile-premium/after-form.jpg) | ![Pricing](mobile-premium/after-pricing.jpg) | ![Compare](mobile-premium/after-pricing-compare.jpg) |
+
 Tests: `tests/Feature/Events/MobileLandingTest.php`.

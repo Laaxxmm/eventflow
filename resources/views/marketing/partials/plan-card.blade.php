@@ -1,17 +1,15 @@
 {{-- One plan on /pricing. Self-serve plans start a trial; Custom is contact-only. $key, $plan, $trialDays, $contactEmail --}}
 @php($featured = $plan['highlight'] ?? false)
 <article id="{{ $key }}" data-reveal data-plan="{{ $key }}" @class([
-    'relative flex scroll-mt-24 flex-col p-6 sm:p-8',
-    'bg-ink text-paper shadow-[12px_12px_0_0_rgb(var(--ri-heat))]' => $featured,
+    'relative flex h-full scroll-mt-24 flex-col p-6 sm:p-8',
+    'bg-ink text-paper shadow-[8px_8px_0_0_rgb(var(--ri-heat))] md:shadow-[12px_12px_0_0_rgb(var(--ri-heat))]' => $featured,
     'bg-white text-ink ring-2 ring-ink' => ! $featured && $plan['self_serve'],
     'bg-mist text-ink/80 ring-1 ring-ink/20' => ! $plan['self_serve'],
 ])>
-    <div class="flex items-start justify-between gap-3">
-        <h3 @class(['font-display font-extrabold uppercase tracking-wide', 'text-4xl' => $plan['self_serve'], 'text-3xl text-ink' => ! $plan['self_serve']])>{{ $plan['name'] }}</h3>
-        @if ($featured)
-            <x-ri.chip tone="heat">{{ __('Start here') }}</x-ri.chip>
-        @endif
-    </div>
+    @if ($featured)
+        <x-ri.chip tone="heat" class="mb-3 self-start">{{ __('Start here') }}</x-ri.chip>
+    @endif
+    <h3 @class(['font-display font-extrabold uppercase leading-none tracking-wide', 'text-4xl' => $plan['self_serve'], 'text-3xl text-ink' => ! $plan['self_serve']])>{{ $plan['name'] }}</h3>
     <p @class(['mt-1 text-sm', 'text-ink/65' => ! $featured, 'opacity-80' => $featured])>{{ $plan['tagline'] }}</p>
 
     <div class="mt-6">@include('marketing.partials.plan-meta', ['onDark' => $featured])</div>
