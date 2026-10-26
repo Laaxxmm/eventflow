@@ -14,7 +14,7 @@
         </p>
         <p class="mt-1">{{ __(':what Add it to this event for :price, or move to Club Season, which includes it for every event.', ['what' => __($addon['description']), 'price' => \App\Saas\Plans::inr($addon['price_inr'])]) }}</p>
         <div class="mt-3 flex flex-wrap items-center gap-4">
-            <a href="{{ \App\Saas\EventAddons::requestUrl($event, $addonKey) }}" class="inline-flex items-center rounded-lg bg-ink px-4 py-2 font-semibold text-white hover:bg-ink/90">{{ __('Unlock for :price', ['price' => \App\Saas\Plans::inr($addon['price_inr'])]) }}</a>
+            <a href="{{ \App\Saas\EventAddons::requestUrl($event, $addonKey) }}" class="inline-flex items-center rounded-full bg-ink px-4 py-2 min-h-[44px] inline-flex items-center justify-center font-semibold text-white hover:bg-ink/90">{{ __('Unlock for :price', ['price' => \App\Saas\Plans::inr($addon['price_inr'])]) }}</a>
             <a href="{{ route('account.plan') }}" class="font-semibold underline">{{ __('Upgrade plan') }}</a>
         </div>
         <p class="mt-2 text-xs text-[#6B4A12]/70">{{ \App\Billing\Checkout::ready() ? __('Pay online; it unlocks as soon as the payment is confirmed.') : __('Your request goes to Indefine and the add-on is switched on for you.') }}</p>

@@ -18,7 +18,7 @@
                         <div class="mt-2 flex flex-col gap-2 sm:flex-row">
                             <input id="share-url" readonly value="{{ $url }}" class="flex-1 rounded-xl border-mist bg-paper font-mono text-sm" @focus="$el.select()">
                             <button type="button" @click="navigator.clipboard.writeText('{{ $url }}'); copied = true; setTimeout(() => copied = false, 2000)" class="rounded-full px-4 py-2.5 text-sm font-semibold ring-1 ring-mist hover:bg-paper" x-text="copied ? '{{ __('Copied') }}' : '{{ __('Copy link') }}'"></button>
-                            <a href="{{ $url }}" target="_blank" class="rounded-xl bg-ink px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-ink/90">{{ __('View page') }} ↗</a>
+                            <a href="{{ $url }}" target="_blank" class="rounded-full bg-ink px-4 py-2.5 min-h-[44px] inline-flex items-center justify-center text-center text-sm font-semibold text-white hover:bg-ink/90">{{ __('View page') }}</a>
                         </div>
                     </div>
                 @else
@@ -45,7 +45,7 @@
                     <a href="{{ $href }}" class="rounded-2xl bg-white p-5 hover:ring-[#9AA2BA]">
                         <p class="font-bold">{{ $title }}</p>
                         <p class="mt-1 text-sm text-muted">{{ $body }}</p>
-                        <p class="mt-4 text-sm font-semibold">{{ $cta }} →</p>
+                        <p class="mt-4 text-sm font-semibold">{{ $cta }}</p>
                     </a>
                 @endif
             @endforeach
