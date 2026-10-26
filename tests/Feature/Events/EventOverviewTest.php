@@ -110,8 +110,13 @@ it('shows add-ons as included by the plan or bought for the event', function () 
         ->assertSee('Added to this event')->assertSee('₹799 · locked');
 
     $planned = ReportFixtures::event(); // org pass includes every module
-    $this->actingAs(ReportFixtures::owner($planned))->get(route('organiser.events.show', $planned))
-        ->assertSee('Included in your plan')->assertDontSee('· locked');
+    $html = $this->actingAs(ReportFixtures::owner($planned))->get(route('organiser.events.show', $planned))
+        ->assertSee('Included in your plan')->getContent();
+    // Race sheet and certificates come with the modules; the custom domain is a plan feature (Session P1).
+    foreach (['race_sheet', 'certificates'] as $key) {
+        preg_match('#data-event-addon="'.$key.'".*?</li>#s', $html, $row);
+        expect($row[0])->toContain('Included in your plan')->not->toContain('locked');
+    }
 });
 
 it('links the overview from the events list, the dashboard and the published page', function () {
