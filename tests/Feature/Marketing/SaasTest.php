@@ -35,36 +35,56 @@ function organiserOf(string $name = 'Trail Runners'): User
     return User::factory()->create(['org_id' => $org->id, 'role' => Role::Owner, 'email_verified_at' => now()]);
 }
 
-it('serves a slim homepage: hero, one featured template, quiet pricing, one CTA', function () {
+it('serves the homepage bands: hero, sports, how it works, templates, pricing, one CTA', function () {
     $html = $this->get('/')
         ->assertOk()
         ->assertSee('>by Indefine<', false)
-        ->assertSee('online in')
-        ->assertSee('No ticket % · Own SMTP free · Razorpay-ready') // one proof line, not a chip pile
+        ->assertSee('Put your race online in an hour.')
+        ->assertSee('14 days free. No card, no call, and we never take a cut of your entry fees.') // the one proof line
         ->assertSee('href="'.route('register').'"', false)
-        ->assertSee('See templates')
-        ->assertSee('href="'.route('templates.index').'"', false)
-        ->assertSee('data-device-mock', false)
-        ->assertSee('Featured template')->assertSee('Stadium Split')->assertSee('Browse all templates')
+        ->assertSee('See the templates')
+        ->assertSee('data-track-stage', false) // the 3D track hero
+        ->assertSee('What happens after you press Publish')
         ->assertSeeInOrder(['Single Event', '₹3,999', 'Club Season', '₹12,999', 'Circuit Season', '₹29,999'])
-        ->assertSee('Race sheet ₹599')->assertSee('Certificates ₹799')->assertSee('Platform mail')->assertSee('WhatsApp')
-        ->assertSee('Custom for federations and series')
+        ->assertSee('Race sheet ₹599')->assertSee('Certificates ₹799')->assertSee('platform mail')->assertSee('WhatsApp')
+        ->assertSee('Custom plans for federations and series')
         ->assertDontSee('Talk to Indefine') // Contact is never a primary CTA
-        ->assertDontSee('data-template-card', false) // no template grid on /
         ->getContent();
 
-    // Four bands below the nav, in order, and nothing else.
+    // Six bands below the nav, in order.
     preg_match_all('/data-band="([a-z-]+)"/', $html, $bands);
-    expect($bands[1])->toBe(['hero', 'featured-template', 'pricing', 'cta']);
+    expect($bands[1])->toBe(['hero', 'sports', 'how-it-works', 'templates', 'pricing', 'cta']);
     // The final band has exactly one button and no contact link.
     $cta = (string) str($html)->after('data-band="cta"')->before('</section>');
-    expect(substr_count($cta, '</a>'))->toBe(1)->and($cta)->toContain('Start free trial')->not->toContain('mailto:');
+    expect(substr_count($cta, '</a>'))->toBe(1)->and($cta)->toContain('Start your free trial')->not->toContain('mailto:');
+    // Single Event is the highlighted bib.
+    expect((string) str($html)->after('data-band="pricing"')->before('data-plan="single_event"'))->toContain('bg-track text-white');
 });
 
-it('keeps the nav to Pricing, Templates, Login and Free trial', function () {
+it('shows the templates as a 3D fan on / and keeps the full gallery on /templates', function () {
+    $html = $this->get('/')->getContent();
+    $band = (string) str($html)->after('data-band="templates"')->before('</section>');
+
+    foreach (config('eventflow.landing_templates') as $key => $tpl) {
+        expect($band)->toContain($tpl['label'])->toContain(route('templates.show', $key));
+    }
+    expect($band)->toContain('aria-pressed')->toContain(route('templates.index'))
+        ->and($html)->not->toContain('data-template-card'); // the gallery cards live on /templates
+});
+
+it('keeps the nav to Templates, Pricing, Log in and Start free trial', function () {
     $nav = str($this->get('/')->getContent())->between('<header', '</header>');
     expect((string) $nav)->not->toContain('>Product<');
-    $this->get('/')->assertSeeInOrder(['Pricing', 'Templates', 'Login', 'Free trial']);
+    $this->get('/')->assertSeeInOrder(['Templates', 'Pricing', 'Log in', 'Start free trial']);
+});
+
+it('stops every homepage animation under prefers-reduced-motion', function () {
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($css)->toContain('@media (prefers-reduced-motion: reduce)')
+        ->toContain('.ef-spin, [data-motion] { animation: none !important;')
+        ->toContain('.ef-float, .ef-runner, .ef-medal, .ef-sway, .ef-lane, .ef-seal, .ef-scan { animation: none !important; }');
+    $this->get('/')->assertSee('ef-spin', false)->assertSee('data-motion', false);
 });
 
 it('keeps the full template gallery on /templates', function () {
