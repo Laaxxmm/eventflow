@@ -260,7 +260,7 @@ it('checks out a priced participant pack on the platform gateway and raises the 
     Fulfilment::paid($purchase->fresh());
 
     expect($purchase->fresh()->status)->toBe('paid')
-        ->and(ParticipantPack::where('event_id', $event->id)->sum('participants'))->toBe(250)
+        ->and((int) ParticipantPack::where('event_id', $event->id)->sum('participants'))->toBe(250) // MySQL SUM is a string
         ->and(PlanLimits::participantCap($event))->toBe($capBefore + 250);
 });
 
@@ -424,9 +424,10 @@ it('saves countdown, closing time and footer contact from Edit event', function 
     ]))->assertSessionHasNoErrors();
 
     $config = $event->fresh()->config;
-    expect($config['countdown'])->toBe(['enabled' => true, 'target' => 'event_start'])
+    // MySQL JSON columns reorder object keys, so compare as maps.
+    expect($config['countdown'])->toEqual(['enabled' => true, 'target' => 'event_start'])
         ->and($config['registration_closes'])->toStartWith('2027-01-10T23:59:00+05:30')
-        ->and($config['contact'])->toBe(['email' => 'help@bcm.in', 'website' => 'https://bcm.in', 'instagram' => 'https://instagram.com/bcmruns']);
+        ->and($config['contact'])->toEqual(['email' => 'help@bcm.in', 'website' => 'https://bcm.in', 'instagram' => 'https://instagram.com/bcmruns']);
 
     $this->get(route('organiser.events.edit', $event))->assertSee('data-countdown-settings', false)->assertSee('https://instagram.com/bcmruns');
 });
