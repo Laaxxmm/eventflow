@@ -16,7 +16,7 @@
     @csrf
 
     @if ($errors->any())
-        <div class="border-l-4 border-red-600 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert">
+        <div class="border-l-4 border-red-600 bg-[#FBE4E4] p-4 text-sm font-medium text-[#6E1414]" role="alert">
             {{ __('Please fix the highlighted fields.') }}
         </div>
     @endif

@@ -32,6 +32,6 @@
             </script>
         @endif
 
-        <p class="mt-4 text-sm text-gray-500">You will be redirected after payment. Status is confirmed via webhook, not this page.</p>
+        <p class="mt-4 text-sm text-muted">You will be redirected after payment. Status is confirmed via webhook, not this page.</p>
     </div>
 </x-guest-layout>

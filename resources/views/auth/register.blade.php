@@ -16,7 +16,7 @@
 
         <!-- The plan the trial converts to. Changeable later in Plan & billing. -->
         <fieldset class="mb-6">
-            <legend class="block text-sm font-medium text-ink">{{ __('Plan after your trial') }}</legend>
+            <legend class="block text-sm font-semibold text-ink">{{ __('Plan after your trial') }}</legend>
             <div class="mt-2 space-y-2">
                 @foreach ($plans as $key => $plan)
                     <label class="flex cursor-pointer items-start gap-3 border-2 border-ink/15 p-3 has-[:checked]:border-ink">
@@ -90,7 +90,7 @@
 
         {{-- Phones: one full-width button, the login link below it. --}}
         <div class="mt-6 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-end">
-            <a class="text-center text-sm text-gray-600 underline hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+            <a class="text-center text-sm text-muted underline hover:text-ink rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-track" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
 

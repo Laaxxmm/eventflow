@@ -17,10 +17,10 @@
         <script>document.documentElement.classList.add('js')</script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-gray-50" style="{{ $theme->style() }}">
+    <body class="font-sans text-ink antialiased bg-paper" style="{{ $theme->style() }}">
         @yield('content')
 
-        <footer class="py-8 text-center text-xs text-gray-500">
+        <footer class="py-8 text-center text-xs text-muted">
             {{ __('Registrations powered by :app', ['app' => config('app.name', 'EventFlow')]) }}
         </footer>
     </body>

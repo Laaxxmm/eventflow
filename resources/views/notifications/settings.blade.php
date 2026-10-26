@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-ink leading-tight">
             {{ __('Email and WhatsApp') }}
         </h2>
     </x-slot>
 
     @php
-        $control = 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full';
+        $control = 'border-mist focus:border-track focus:ring-track rounded-md shadow-sm mt-1 block w-full';
         $statusMessages = [
             'platform-saved' => __('Saved.'),
             'platform-tested' => __('Test email sent through the platform mailer.'),
@@ -15,7 +15,7 @@
             'whatsapp-saved' => __('WhatsApp settings saved.'),
             'whatsapp-verified' => __('Test message sent. Check the phone.'),
         ];
-        $badge = fn (bool $ok) => $ok ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700';
+        $badge = fn (bool $ok) => $ok ? 'bg-green-100 text-green-800' : 'bg-paper text-ink';
         $paymentTemplateHelp = __('Used by event payment reminders: body {{1}} name, {{2}} event, {{3}} date, {{4}} payment link. Leave blank to send reminders by email only.');
     @endphp
 
@@ -29,16 +29,16 @@
                 $contactEmail = config('plans.brand.contact_email');
             @endphp
             <nav class="px-4 sm:px-0 flex flex-wrap gap-4 text-sm font-medium" aria-label="{{ __('Sections') }}">
-                <a href="#email" class="text-gray-700 underline hover:text-gray-900">{{ __('Email') }}</a>
-                <a href="#whatsapp" class="text-gray-700 underline hover:text-gray-900">{{ __('WhatsApp') }}</a>
-                <a href="#deliveries" class="text-gray-700 underline hover:text-gray-900">{{ __('Delivery status') }}</a>
+                <a href="#email" class="text-ink underline hover:text-ink">{{ __('Email') }}</a>
+                <a href="#whatsapp" class="text-ink underline hover:text-ink">{{ __('WhatsApp') }}</a>
+                <a href="#deliveries" class="text-ink underline hover:text-ink">{{ __('Delivery status') }}</a>
             </nav>
 
             {{-- How participant email goes out right now --}}
             <section id="email" @class([
                 'p-4 sm:p-6 shadow sm:rounded-lg ring-1',
                 'bg-green-50 ring-green-200 text-green-900' => $settings->canSendParticipantMail($org),
-                'bg-amber-50 ring-amber-200 text-amber-900' => ! $settings->canSendParticipantMail($org),
+                'bg-[#FDF0DA] ring-[#F3D9A8] text-[#6B4A12]' => ! $settings->canSendParticipantMail($org),
             ]) role="status">
                 @if ($settings->usesCustomSmtp($org))
                     <p class="font-semibold">{{ __('Participant emails go through your SMTP server (:from).', ['from' => $settings->smtp_from_email]) }}</p>
@@ -56,11 +56,11 @@
             </section>
 
             {{-- Sender details, used by both email paths --}}
-            <section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section class="rounded-[28px] bg-white p-5 sm:p-8">
                 <div class="max-w-xl">
                     <header>
-                        <h2 class="text-lg font-medium text-gray-900">{{ __('Participant emails') }}</h2>
-                        <p class="mt-1 text-sm text-gray-600">
+                        <h2 class="text-lg font-semibold text-ink">{{ __('Participant emails') }}</h2>
+                        <p class="mt-1 text-sm text-muted">
                             {{ __('Email is included in every plan. These details apply whichever way your mail is sent.') }}
                         </p>
                     </header>
@@ -81,44 +81,44 @@
                         @foreach (['send_reminders' => __('Send a reminder email 24 hours before the event'), 'send_checkin_confirmation' => __('Email participants when they are checked in')] as $key => $label)
                             <label for="{{ $key }}" class="flex items-center gap-3">
                                 <input type="hidden" name="{{ $key }}" value="0">
-                                <input id="{{ $key }}" type="checkbox" name="{{ $key }}" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old($key, $settings->{$key}))>
-                                <span class="text-sm text-gray-700">{{ $label }}</span>
+                                <input id="{{ $key }}" type="checkbox" name="{{ $key }}" value="1" class="rounded border-mist text-track shadow-sm focus:ring-track" @checked(old($key, $settings->{$key}))>
+                                <span class="text-sm text-ink">{{ $label }}</span>
                             </label>
                         @endforeach
                         <x-primary-button>{{ __('Save') }}</x-primary-button>
                     </form>
 
 
-                    <h3 class="mt-8 font-medium text-gray-900">{{ __('Preview emails') }}</h3>
+                    <h3 class="mt-8 font-semibold text-ink">{{ __('Preview emails') }}</h3>
                     @if ($hasRegistration)
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Shown with your latest registration and your event branding.') }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ __('Shown with your latest registration and your event branding.') }}</p>
                         <ul class="mt-2 flex flex-wrap gap-4 text-sm">
                             @foreach (['registration-confirmed' => __('Registration confirmed'), 'event-reminder' => __('Event reminder'), 'checkin-confirmed' => __('Check-in confirmed')] as $type => $label)
-                                <li><a href="{{ route('settings.notifications.preview', $type) }}" target="_blank" class="underline text-gray-600 hover:text-gray-900">{{ $label }}</a></li>
+                                <li><a href="{{ route('settings.notifications.preview', $type) }}" target="_blank" class="underline text-muted hover:text-ink">{{ $label }}</a></li>
                             @endforeach
                         </ul>
                     @else
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Previews appear once your first registration comes in.') }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ __('Previews appear once your first registration comes in.') }}</p>
                     @endif
                 </div>
             </section>
 
             {{-- Own SMTP (free) --}}
-            <section id="smtp" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section id="smtp" class="rounded-[28px] bg-white p-5 sm:p-8">
                 <div class="max-w-xl">
                     <header>
-                        <h2 class="text-lg font-medium text-gray-900">
+                        <h2 class="text-lg font-semibold text-ink">
                             {{ __('Use my SMTP') }}
                             <span class="ms-2 inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">{{ __('Free') }}</span>
                             <span class="ms-1 inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $badge($settings->usesCustomSmtp($org)) }}">
                                 {{ $settings->usesCustomSmtp($org) ? __('In use') : ($settings->smtp_enabled ? __('Not verified') : __('Off')) }}
                             </span>
                         </h2>
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Send participant emails from your own mailbox or domain, at no extra charge. Mail goes through your server only after a test email succeeds, and it is used ahead of Platform mail.') }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ __('Send participant emails from your own mailbox or domain, at no extra charge. Mail goes through your server only after a test email succeeds, and it is used ahead of Platform mail.') }}</p>
                     </header>
 
-                    <details class="mt-4 rounded-md bg-gray-50 p-4 text-sm text-gray-700">
-                        <summary class="cursor-pointer font-medium text-gray-900">{{ __('What to enter') }}</summary>
+                    <details class="mt-4 rounded-md bg-paper p-4 text-sm text-ink">
+                        <summary class="cursor-pointer font-semibold text-ink">{{ __('What to enter') }}</summary>
                         <dl class="mt-3 space-y-2">
                             <div><dt class="font-medium">{{ __('Host and port') }}</dt><dd>{{ __('From your email provider. Google Workspace or Gmail: smtp.gmail.com, port 587, STARTTLS. Microsoft 365: smtp.office365.com, 587, STARTTLS. Zoho Mail India: smtp.zoho.in, 465, SSL/TLS.') }}</dd></div>
                             <div><dt class="font-medium">{{ __('Encryption') }}</dt><dd>{{ __('STARTTLS for port 587, SSL/TLS for port 465. Use None only on a private relay.') }}</dd></div>
@@ -132,8 +132,8 @@
                             @method('put')
                             <label for="smtp_enabled" class="flex items-center gap-3">
                                 <input type="hidden" name="smtp_enabled" value="0">
-                                <input id="smtp_enabled" type="checkbox" name="smtp_enabled" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('smtp_enabled', $settings->smtp_enabled))>
-                                <span class="text-sm text-gray-700">{{ __('Use my SMTP server') }}</span>
+                                <input id="smtp_enabled" type="checkbox" name="smtp_enabled" value="1" class="rounded border-mist text-track shadow-sm focus:ring-track" @checked(old('smtp_enabled', $settings->smtp_enabled))>
+                                <span class="text-sm text-ink">{{ __('Use my SMTP server') }}</span>
                             </label>
                             <div class="grid gap-6 sm:grid-cols-3">
                                 <div class="sm:col-span-2">
@@ -175,7 +175,7 @@
                                     <x-text-input id="smtp_from_name" name="smtp_from_name" type="text" class="mt-1 block w-full" :value="old('smtp_from_name', $settings->smtp_from_name)" :placeholder="$org->name" />
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500">{{ __('The password is stored encrypted. Changing the server details turns your SMTP off until a new test succeeds.') }}</p>
+                            <p class="text-xs text-muted">{{ __('The password is stored encrypted. Changing the server details turns your SMTP off until a new test succeeds.') }}</p>
                             <x-primary-button>{{ __('Save SMTP') }}</x-primary-button>
                         </form>
 
@@ -192,19 +192,19 @@
             </section>
 
             {{-- Platform mail (paid add-on) --}}
-            <section id="platform-mail" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section id="platform-mail" class="rounded-[28px] bg-white p-5 sm:p-8">
                 <div class="max-w-xl">
                     <header>
-                        <h2 class="text-lg font-medium text-gray-900">
+                        <h2 class="text-lg font-semibold text-ink">
                             {{ __('Platform mail') }}
-                            <span class="ms-2 inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">{{ __('Add-on') }}</span>
+                            <span class="ms-2 inline-flex rounded-full bg-lilac px-2 py-0.5 text-xs font-medium text-track-deep">{{ __('Add-on') }}</span>
                             @if ($platformMailIncluded)
                                 <span class="ms-1 inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $badge($settings->usesPlatformMail($org)) }}">
                                     {{ $settings->usesPlatformMail($org) ? __('In use') : __('Standby (your SMTP is in use)') }}
                                 </span>
                             @endif
                         </h2>
-                        <p class="mt-1 text-sm text-gray-600">{{ __('No SMTP of your own? Indefine sends participant emails for you (Brevo or Amazon SES) from :address, with your sender name, and replies come to you.', ['address' => $platformFrom->getAddress()]) }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ __('No SMTP of your own? Indefine sends participant emails for you (Brevo or Amazon SES) from :address, with your sender name, and replies come to you.', ['address' => $platformFrom->getAddress()]) }}</p>
                     </header>
 
                     @if ($platformMailIncluded)
@@ -218,7 +218,7 @@
                         </form>
                         <x-input-error class="mt-2" :messages="$errors->get('platform_test')" />
                     @else
-                        <div class="mt-6 rounded-md bg-indigo-50 p-4 text-sm text-indigo-900">
+                        <div class="mt-6 rounded-md bg-lilac p-4 text-sm text-track-deep">
                             <p>{{ __('Platform mail is a paid add-on and is not on your plan.') }}</p>
                             <a href="{{ \App\Support\Contact::url(__('Platform mail add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add Platform mail') }}</a>
                         </div>
@@ -227,23 +227,23 @@
             </section>
 
             {{-- WhatsApp (paid add-on) --}}
-            <section id="whatsapp" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section id="whatsapp" class="rounded-[28px] bg-white p-5 sm:p-8">
                 <div class="max-w-xl">
                     <header>
-                        <h2 class="text-lg font-medium text-gray-900">
+                        <h2 class="text-lg font-semibold text-ink">
                             {{ __('WhatsApp notifications') }}
-                            <span class="ms-2 inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800">{{ __('Add-on') }}</span>
+                            <span class="ms-2 inline-flex rounded-full bg-lilac px-2 py-0.5 text-xs font-medium text-track-deep">{{ __('Add-on') }}</span>
                             @if ($whatsappModule)
                                 <span class="ms-2 inline-flex rounded-full px-2 py-0.5 text-xs font-medium {{ $badge($settings->usesWhatsApp($org)) }}">
                                     {{ $settings->usesWhatsApp($org) ? __('On') : __('Off') }}
                                 </span>
                             @endif
                         </h2>
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Send the confirmation (with a link to the pass PDF) and the event reminder on WhatsApp through your own WhatsApp Business number (Meta Cloud API). Email is sent as well when your email is set up.') }}</p>
+                        <p class="mt-1 text-sm text-muted">{{ __('Send the confirmation (with a link to the pass PDF) and the event reminder on WhatsApp through your own WhatsApp Business number (Meta Cloud API). Email is sent as well when your email is set up.') }}</p>
                     </header>
 
                     @if (! $whatsappModule)
-                        <div class="mt-6 rounded-md bg-indigo-50 p-4 text-sm text-indigo-900">
+                        <div class="mt-6 rounded-md bg-lilac p-4 text-sm text-track-deep">
                             <p>{{ __('WhatsApp is a paid add-on and is not on your plan, so nothing is sent on WhatsApp.') }}</p>
                             <a href="{{ \App\Support\Contact::url(__('WhatsApp add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add WhatsApp') }}</a>
                         </div>
@@ -258,9 +258,9 @@
                             ];
                         @endphp
                         @unless ($settings->usesWhatsApp($org))
-                            <div class="mt-6 rounded-md bg-gray-50 p-4">
-                                <h3 class="text-sm font-medium text-gray-900">{{ __('Setup checklist') }}</h3>
-                                <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                            <div class="mt-6 rounded-md bg-paper p-4">
+                                <h3 class="text-sm font-semibold text-ink">{{ __('Setup checklist') }}</h3>
+                                <ul class="mt-2 space-y-1 text-sm text-ink">
                                     @foreach ($checklist as $step => $done)
                                         <li class="flex gap-2"><span aria-hidden="true">{{ $done ? '✓' : '○' }}</span><span>{{ $step }}</span></li>
                                     @endforeach
@@ -273,8 +273,8 @@
                             @method('put')
                             <label for="whatsapp_enabled" class="flex items-center gap-3">
                                 <input type="hidden" name="whatsapp_enabled" value="0">
-                                <input id="whatsapp_enabled" type="checkbox" name="whatsapp_enabled" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked(old('whatsapp_enabled', $settings->whatsapp_enabled))>
-                                <span class="text-sm text-gray-700">{{ __('Send WhatsApp notifications') }}</span>
+                                <input id="whatsapp_enabled" type="checkbox" name="whatsapp_enabled" value="1" class="rounded border-mist text-track shadow-sm focus:ring-track" @checked(old('whatsapp_enabled', $settings->whatsapp_enabled))>
+                                <span class="text-sm text-ink">{{ __('Send WhatsApp notifications') }}</span>
                             </label>
                             <div>
                                 <x-input-label for="whatsapp_provider" :value="__('Provider')" />
@@ -308,7 +308,7 @@
                                 <div>
                                     <x-input-label for="whatsapp_template_payment" :value="__('Payment reminder template (optional)')" />
                                     <x-text-input id="whatsapp_template_payment" name="whatsapp_template_payment" type="text" class="mt-1 block w-full" :value="old('whatsapp_template_payment', $settings->whatsapp_template_payment)" placeholder="payment_reminder" />
-                                    <p class="mt-1 text-xs text-gray-500">{{ $paymentTemplateHelp }}</p>
+                                    <p class="mt-1 text-xs text-muted">{{ $paymentTemplateHelp }}</p>
                                     <x-input-error class="mt-2" :messages="$errors->get('whatsapp_template_payment')" />
                                 </div>
                                 <div>
@@ -317,7 +317,7 @@
                                     <x-input-error class="mt-2" :messages="$errors->get('whatsapp_language')" />
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500">{{ __('The token is stored encrypted. If WhatsApp fails, registrations and emails are not affected.') }}</p>
+                            <p class="text-xs text-muted">{{ __('The token is stored encrypted. If WhatsApp fails, registrations and emails are not affected.') }}</p>
                             <x-primary-button>{{ __('Save WhatsApp') }}</x-primary-button>
                         </form>
 
@@ -335,24 +335,24 @@
             </section>
 
             {{-- Delivery log --}}
-            <section id="deliveries" class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+            <section id="deliveries" class="rounded-[28px] bg-white p-5 sm:p-8">
                 <header>
-                    <h2 class="text-lg font-medium text-gray-900">{{ __('Delivery status') }}</h2>
-                    <p class="mt-1 text-sm text-gray-600">
+                    <h2 class="text-lg font-semibold text-ink">{{ __('Delivery status') }}</h2>
+                    <p class="mt-1 text-sm text-muted">
                         {{ __('Latest participant notifications. Failed sends are retried automatically for about 40 minutes.') }}
                         @if ($failedCount)
-                            <span class="font-medium text-red-600">{{ trans_choice(':count failed in the last 30 days.|:count failed in the last 30 days.', $failedCount) }}</span>
+                            <span class="font-medium text-danger">{{ trans_choice(':count failed in the last 30 days.|:count failed in the last 30 days.', $failedCount) }}</span>
                         @endif
                     </p>
                 </header>
 
                 @if ($deliveries->isEmpty())
-                    <p class="mt-6 text-sm text-gray-600">{{ __('Nothing sent yet.') }}</p>
+                    <p class="mt-6 text-sm text-muted">{{ __('Nothing sent yet.') }}</p>
                 @else
                     <div class="mt-6 overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead>
-                                <tr class="text-left text-gray-600 border-b">
+                                <tr class="text-left text-muted border-b">
                                     <th class="py-2 pe-4 font-medium">{{ __('Participant') }}</th>
                                     <th class="py-2 pe-4 font-medium">{{ __('Message') }}</th>
                                     <th class="py-2 pe-4 font-medium">{{ __('Channel') }}</th>
@@ -365,7 +365,7 @@
                                     <tr>
                                         <td class="py-3 pe-4">
                                             <span class="block">{{ $delivery->registration?->participant_name ?? '—' }}</span>
-                                            <span class="block text-gray-500">{{ $delivery->recipient }}</span>
+                                            <span class="block text-muted">{{ $delivery->recipient }}</span>
                                         </td>
                                         <td class="py-3 pe-4">{{ __(ucfirst(str_replace('_', ' ', $delivery->type))) }}</td>
                                         <td class="py-3 pe-4">{{ $delivery->channel === 'whatsapp' ? 'WhatsApp' : __('Email') }}</td>
@@ -373,8 +373,8 @@
                                             <span @class([
                                                 'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
                                                 'bg-green-100 text-green-800' => $delivery->status === 'sent',
-                                                'bg-red-100 text-red-800' => $delivery->status === 'failed',
-                                                'bg-gray-100 text-gray-700' => in_array($delivery->status, ['queued', 'skipped'], true),
+                                                'bg-[#FBE4E4] text-[#6E1414]' => $delivery->status === 'failed',
+                                                'bg-paper text-ink' => in_array($delivery->status, ['queued', 'skipped'], true),
                                             ]) @if ($delivery->error) title="{{ $delivery->error }}" @endif>{{ __(ucfirst($delivery->status)) }}</span>
                                         </td>
                                         <td class="py-3 whitespace-nowrap">{{ $delivery->updated_at->setTimezone('Asia/Kolkata')->format('j M, g:i A') }}</td>

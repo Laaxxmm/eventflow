@@ -3,23 +3,27 @@
     Same registration as an online entry; payment Paid (offline) / Unpaid / Complimentary.
 --}}
 @php
-    $control = 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+    $control = 'ri-input';
     $oldEvent = (int) old('event', $selected->id);
 @endphp
 
 <x-app-layout>
+    <x-slot name="title">{{ __('Add participant') }}</x-slot>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Add participant') }}</h2>
+        <div class="space-y-2">
+            <nav aria-label="{{ __('Breadcrumb') }}" class="text-sm text-muted"><a href="{{ route('dashboard.participants') }}" class="hover:text-ink">{{ __('Participants') }}</a> / {{ __('Add') }}</nav>
+            <h2>{{ __('Add participant') }}</h2>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-3xl space-y-6 sm:px-6 lg:px-8">
-            <form method="POST" action="{{ route('dashboard.participants.store') }}" class="space-y-6 bg-white p-4 shadow sm:rounded-lg sm:p-8"
+    <div class="pb-12 pt-4">
+        <div class="mx-auto max-w-[1180px] space-y-6 px-4 sm:px-6 lg:px-10">
+            <form method="POST" action="{{ route('dashboard.participants.store') }}" class="max-w-3xl space-y-6 rounded-[28px] bg-white p-5 sm:p-8"
                   x-data="{ event: @js((string) $oldEvent), payment: @js(old('payment', 'paid')) }"
                   data-manual-registration>
                 @csrf
                 <header>
-                    <p class="text-sm text-gray-600">{{ __('For entries taken by phone, at the desk, or free places. They appear in Participants with the same paid / unpaid filters, and paid or complimentary entries get their pass by email.') }}</p>
+                    <p class="text-sm text-muted">{{ __('For entries taken by phone, at the desk, or free places. They appear in Participants with the same paid / unpaid filters, and paid or complimentary entries get their pass by email.') }}</p>
                 </header>
 
                 <div class="grid gap-6 sm:grid-cols-2">
@@ -56,7 +60,7 @@
                     <div>
                         <x-input-label for="email" :value="__('Email')" />
                         <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email')" maxlength="255" autocomplete="off" />
-                        <p class="mt-1 text-xs text-gray-500">{{ __('The pass is emailed here.') }}</p>
+                        <p class="mt-1 text-xs text-muted">{{ __('The pass is emailed here.') }}</p>
                         <x-input-error class="mt-2" :messages="$errors->get('email')" />
                     </div>
                     <div>
@@ -67,14 +71,14 @@
                 </div>
 
                 <fieldset>
-                    <legend class="text-sm font-medium text-gray-700">{{ __('Payment') }}</legend>
+                    <legend class="text-sm font-semibold text-ink">{{ __('Payment') }}</legend>
                     <div class="mt-2 grid gap-2 sm:grid-cols-3">
                         @foreach ([
                             'paid' => [__('Paid'), __('Paid outside EventFlow (cash, UPI, bank).')],
                             'unpaid' => [__('Unpaid'), __('Owes the entry fee. Can get payment reminders.')],
                             'complimentary' => [__('Complimentary'), __('A free place: ₹0, pass issued.')],
                         ] as $value => [$label, $hint])
-                            <label class="cursor-pointer rounded-lg p-3 ring-1 ring-gray-200 has-[:checked]:bg-gray-900 has-[:checked]:text-white has-[:checked]:ring-gray-900">
+                            <label class="cursor-pointer rounded-[18px] border-2 border-[#EEF0F6] p-3 has-[:checked]:border-track has-[:checked]:bg-lilac has-[:checked]:text-track-deep has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-[#F2A93B]">
                                 <input type="radio" name="payment" value="{{ $value }}" x-model="payment" class="sr-only" @checked(old('payment', 'paid') === $value)>
                                 <span class="block text-sm font-semibold">{{ $label }}</span>
                                 <span class="mt-0.5 block text-xs opacity-75">{{ $hint }}</span>
@@ -88,7 +92,7 @@
                     <div x-show="payment !== 'complimentary'">
                         <x-input-label for="amount_inr" :value="__('Amount (₹, optional)')" />
                         <x-text-input id="amount_inr" name="amount_inr" type="number" min="0" step="1" class="mt-1 block w-full" :value="old('amount_inr')" />
-                        <p class="mt-1 text-xs text-gray-500">{{ __('Blank = the distance price.') }}</p>
+                        <p class="mt-1 text-xs text-muted">{{ __('Blank = the distance price.') }}</p>
                         <x-input-error class="mt-2" :messages="$errors->get('amount_inr')" />
                     </div>
                     <div class="sm:col-span-2">
@@ -98,8 +102,8 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <a href="{{ route('dashboard.participants') }}" class="text-center text-sm text-gray-600 underline hover:text-gray-900">{{ __('Cancel') }}</a>
+                <div class="flex flex-col-reverse gap-3 border-t border-[#EEF0F6] pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <a href="{{ route('dashboard.participants') }}" class="text-center text-sm text-muted underline hover:text-ink">{{ __('Cancel') }}</a>
                     <x-primary-button class="w-full justify-center py-3 sm:w-auto">{{ __('Add participant') }}</x-primary-button>
                 </div>
             </form>
