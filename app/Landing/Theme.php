@@ -40,7 +40,16 @@ final class Theme
         return $vars;
     }
 
-    public const RI_INK = '#0e1320';
+    public const RI_INK = '#121a33'; // Daylight Track navy
+
+    /** Daylight Track defaults: indigo track, marigold heat, chalk paper, dusk midnight. */
+    public const RI_TRACK = '#4b3fe0';
+
+    public const RI_HEAT = '#f2a93b';
+
+    public const RI_PAPER = '#f3f5fa';
+
+    public const RI_MIDNIGHT = '#1b2244';
 
     /**
      * Race Ink tokens tinted by the organiser's colours, contrast-checked:
@@ -55,21 +64,21 @@ final class Theme
     public function raceInk(): array
     {
         // Only vivid brand colours tint the tokens; greys and near-blacks keep Race Ink's own.
-        [$track, $onTrack] = self::panel(self::vivid($this->primary, 0.25) ? $this->primary : '#5b4cff', 4.5);
-        [$heat, $onHeat] = self::panel(self::vivid($this->secondary, 0.45) ? $this->secondary : '#ff5a3c', 3.0);
+        [$track, $onTrack] = self::panel(self::vivid($this->primary, 0.25) ? $this->primary : self::RI_TRACK, 4.5);
+        [$heat, $onHeat] = self::panel(self::vivid($this->secondary, 0.45) ? $this->secondary : self::RI_HEAT, 3.0);
 
-        $volt = '#c8f531';
+        $volt = self::RI_HEAT; // volt is retired: falls back to marigold
         foreach ([$this->primary, $this->secondary] as $colour) {
-            if (self::contrast($colour, '#12161f') >= 7.0) {
+            if (self::contrast($colour, self::RI_MIDNIGHT) >= 7.0) {
                 $volt = strtolower($colour);
                 break;
             }
         }
 
         // Track used as text (numerals, rules) on paper: darkened until it reads at 4.5:1.
-        $trackText = self::vivid($this->primary, 0.25) ? $this->primary : '#5b4cff';
-        for ($t = 0.0; self::contrast($trackText, '#f6f3ec') < 4.5 && $t <= 1.0; $t += 0.05) {
-            $trackText = self::mix(self::vivid($this->primary, 0.25) ? $this->primary : '#5b4cff', self::RI_INK, $t);
+        $trackText = self::vivid($this->primary, 0.25) ? $this->primary : self::RI_TRACK;
+        for ($t = 0.0; self::contrast($trackText, self::RI_PAPER) < 4.5 && $t <= 1.0; $t += 0.05) {
+            $trackText = self::mix(self::vivid($this->primary, 0.25) ? $this->primary : self::RI_TRACK, self::RI_INK, $t);
         }
 
         return ['track' => $track, 'on-track' => $onTrack, 'track-text' => $trackText, 'heat' => $heat, 'on-heat' => $onHeat, 'volt' => $volt];
@@ -165,7 +174,7 @@ final class Theme
         $luminance = 0.2126 * $r + 0.7152 * $g + 0.0722 * $b;
 
         // Contrast against #0f172a (L≈0.0099) vs white (L=1).
-        return ($luminance + 0.05) / 0.0599 >= 1.05 / ($luminance + 0.05) ? '#0f172a' : '#ffffff';
+        return ($luminance + 0.05) / 0.0599 >= 1.05 / ($luminance + 0.05) ? self::RI_INK : '#ffffff';
     }
 
     /** Public URL for a logo/hero path from config: absolute URLs pass through, others live on the public disk. */

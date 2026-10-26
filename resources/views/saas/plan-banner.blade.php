@@ -4,7 +4,7 @@
     $mailHeld = ! \App\Notifications\NotificationSettings::for($org)->canSendParticipantMail($org);
 @endphp
 @foreach ($pressure as $row)
-    <div @class(['rounded-lg p-4 text-sm ring-1', 'bg-red-50 text-red-900 ring-red-200' => $row['full'], 'bg-amber-50 text-amber-900 ring-amber-200' => ! $row['full']]) role="status">
+    <div @class(['rounded-[22px] p-5 text-sm', 'bg-[#FBE4E4] text-[#6E1414]' => $row['full'], 'bg-[#FDF0DA] text-[#6B4A12]' => ! $row['full']]) role="status">
         <p class="font-semibold">
             @if ($row['full'])
                 {{ __(':race has reached its plan limit (:taken of :cap participants). New registrations are paused.', ['race' => $row['event']->name, 'taken' => number_format($row['taken']), 'cap' => number_format($row['cap'])]) }}
@@ -16,11 +16,11 @@
     </div>
 @endforeach
 @if ($mailHeld)
-    <div class="rounded-lg bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-200" role="status">
+    <div class="rounded-[22px] bg-[#FDF0DA] p-5 text-sm text-[#6B4A12]" role="status">
         <p class="font-semibold">{{ __('Participant emails are on hold.') }}</p>
         <p class="mt-1">{{ __('Connect your own SMTP (free) or add Platform mail so passes and reminders reach participants. Passes can still be downloaded after payment.') }}</p>
         @can('manage-org')
-            <a href="{{ route('settings.notifications.show') }}" class="mt-2 inline-block font-semibold underline">{{ __('Set up email') }}</a>
+            <a href="{{ route('settings.notifications.show') }}" class="mt-2 inline-block font-semibold text-ink underline">{{ __('Set up email') }}</a>
         @endcan
     </div>
 @endif

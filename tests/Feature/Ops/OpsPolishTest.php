@@ -337,7 +337,7 @@ it('connects, verifies and serves a custom domain, with TLS only for verified ho
 });
 
 it('shows the custom domain rules on pricing and Plan & billing', function () {
-    $this->get('/pricing')->assertOk()->assertSee('Custom domain')->assertSee('Add-on ₹599 / event')->assertSee('Included')
+    $this->get('/pricing')->assertOk()->assertSee('Custom domain')->assertSee('Add-on, ₹599 per event')->assertSee('Included')
         ->assertSee('Included in Club Season, Circuit Season');
 
     $event = opsEvent('club_season');

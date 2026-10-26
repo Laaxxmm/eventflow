@@ -1,7 +1,7 @@
 {{-- Event setup (port of the prototype's create-event screen). $input: App\Landing\EventForm::toInput() --}}
 @php
     $v = fn (string $key, $default = null) => old($key, data_get($input, $key, $default));
-    $control = 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm mt-1 block w-full';
+    $control = 'ri-input';
     $rows = fn (string $list, int $min) => max($min, count((array) $v($list, [])) + 2);
     $standardLabels = [
         'age' => __('Age'), 'gender' => __('Gender'), 'city' => __('City'),
@@ -12,10 +12,10 @@
 
 <input type="hidden" name="sport" value="{{ $v('sport', 'generic') }}">
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Event details') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('The landing page link is created from the event name.') }} {{ __('Sport pack:') }} {{ __(ucfirst($v('sport', 'generic'))) }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Event details') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('The landing page link is created from the event name.') }} {{ __('Sport pack:') }} {{ __(ucfirst($v('sport', 'generic'))) }}</p>
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
@@ -46,10 +46,10 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Landing page design') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Brand colours theme the whole landing page.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Landing page design') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Brand colours theme the whole landing page.') }}</p>
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
@@ -60,7 +60,7 @@
                     <option value="{{ $key }}" @selected($v('template') === $key)>{{ $tpl['label'] }} — {{ $tpl['description'] }}</option>
                 @endforeach
             </select>
-            <p class="mt-1 text-xs text-gray-500">{{ __('Need a custom template?') }} <a href="{{ \App\Support\Contact::customDesign(__('Custom event page template for :org', ['org' => $org->name])) }}" class="font-semibold underline" data-contact-indefine>{{ __('Contact Indefine') }}</a></p>
+            <p class="mt-1 text-xs text-muted">{{ __('Need a custom template?') }} <a href="{{ \App\Support\Contact::customDesign(__('Custom event page template for :org', ['org' => $org->name])) }}" class="font-semibold underline" data-contact-indefine>{{ __('Contact Indefine') }}</a></p>
             <x-input-error class="mt-2" :messages="$errors->get('template')" />
         </div>
         <div>
@@ -94,29 +94,29 @@
                 $url = \App\Landing\Theme::url($current);
                 $id = str_replace('.', '_', $slot['key']);
             @endphp
-            <div class="sm:col-span-2 rounded-lg border border-gray-200 p-4" data-upload-slot="{{ $slot['file'] }}">
+            <div class="sm:col-span-2 rounded-[20px] bg-paper p-4" data-upload-slot="{{ $slot['file'] }}">
                 <div class="grid gap-4 sm:grid-cols-[12rem_1fr] sm:items-start">
-                    <div class="{{ $slot['ratio'] }} w-full overflow-hidden rounded-md bg-gray-100 ring-1 ring-gray-200">
+                    <div class="{{ $slot['ratio'] }} w-full overflow-hidden rounded-[14px] bg-lilac">
                         @if ($url)
                             <img src="{{ $url }}" alt="" class="h-full w-full {{ $slot['file'] === 'logo_upload' ? 'object-contain p-2' : 'object-cover' }}">
                         @else
-                            <div class="flex h-full items-center justify-center text-xs text-gray-400">{{ __('None yet') }}</div>
+                            <div class="flex h-full items-center justify-center text-xs text-[#8A92AB]">{{ __('None yet') }}</div>
                         @endif
                     </div>
                     <div>
                         <x-input-label :for="$slot['file']" :value="$slot['label']" />
-                        <input id="{{ $slot['file'] }}" name="{{ $slot['file'] }}" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700 file:me-3 file:rounded-md file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-700">
-                        <p class="mt-1 text-xs text-gray-500">{{ $slot['hint'] }}</p>
+                        <input id="{{ $slot['file'] }}" name="{{ $slot['file'] }}" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-ink file:me-3 file:min-h-[40px] file:rounded-full file:border-0 file:bg-ink file:px-4 file:text-sm file:font-semibold file:text-white hover:file:bg-ink/90">
+                        <p class="mt-1 text-xs text-muted">{{ $slot['hint'] }}</p>
                         <x-input-error class="mt-2" :messages="$errors->get($slot['file'])" />
                         <div class="mt-2 flex flex-wrap items-center gap-4">
                             @if ($current)
-                                <label class="inline-flex items-center gap-2 text-xs text-gray-600">
+                                <label class="inline-flex items-center gap-2 text-xs text-muted">
                                     <input type="hidden" name="remove[{{ $id }}]" value="0">
-                                    <input type="checkbox" name="remove[{{ $id }}]" value="1" class="rounded border-gray-300">
+                                    <input type="checkbox" name="remove[{{ $id }}]" value="1" class="rounded border-[#C5CBDB] text-track focus:ring-track">
                                     {{ __('Remove') }}
                                 </label>
                             @endif
-                            <details class="text-xs text-gray-500">
+                            <details class="text-xs text-muted">
                                 <summary class="cursor-pointer">{{ __('Use a path or URL instead') }}</summary>
                                 <input id="{{ $id }}" name="{{ \Illuminate\Support\Str::of($slot['key'])->replaceFirst('.', '[')->append(']') }}" type="text" value="{{ $current }}" class="{{ $control }} text-sm">
                             </details>
@@ -129,18 +129,18 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" data-countdown-settings>
+<section class="rounded-[28px] bg-white p-5 sm:p-8" data-countdown-settings>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Countdown and closing time') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('A big Race Ink timer under the hero builds urgency. It switches to “Registration closed” and “We’re live” on its own.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Countdown and closing time') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('A big Race Ink timer under the hero builds urgency. It switches to “Registration closed” and “We’re live” on its own.') }}</p>
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
         <div class="sm:col-span-2">
             <label for="countdown_enabled" class="inline-flex items-center gap-3">
                 <input type="hidden" name="countdown[enabled]" value="0">
-                <input id="countdown_enabled" type="checkbox" name="countdown[enabled]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked($v('countdown.enabled'))>
-                <span class="text-sm font-medium text-gray-700">{{ __('Show a countdown on the event page') }}</span>
+                <input id="countdown_enabled" type="checkbox" name="countdown[enabled]" value="1" class="rounded border-[#C5CBDB] text-track focus:ring-track" @checked($v('countdown.enabled'))>
+                <span class="text-sm font-semibold text-ink">{{ __('Show a countdown on the event page') }}</span>
             </label>
         </div>
         <div>
@@ -154,16 +154,16 @@
         <div>
             <x-input-label for="registration_closes" :value="__('Registration closes (IST, optional)')" />
             <x-text-input id="registration_closes" name="registration_closes" type="datetime-local" class="mt-1 block w-full" :value="$v('registration_closes')" />
-            <p class="mt-1 text-xs text-gray-500">{{ __('Blank = entries stay open until the start time.') }}</p>
+            <p class="mt-1 text-xs text-muted">{{ __('Blank = entries stay open until the start time.') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('registration_closes')" />
         </div>
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" data-footer-settings>
+<section class="rounded-[28px] bg-white p-5 sm:p-8" data-footer-settings>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Page footer') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Your logo and name always show. Add a support contact, socials and your terms so runners know who to ask.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Page footer') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Your logo and name always show. Add a support contact, socials and your terms so runners know who to ask.') }}</p>
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-2">
@@ -187,10 +187,10 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Race categories') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Each distance has its own price and place limit. Leave a row blank to skip it.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Race categories') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Each distance has its own price and place limit. Leave a row blank to skip it.') }}</p>
     </header>
     <x-input-error class="mt-4" :messages="$errors->get('distances')" />
 
@@ -219,10 +219,10 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Age categories') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Registrants give their date of birth; their age on race day must fall in one category. Leave all blank for no age limit.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Age categories') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Registrants give their date of birth; their age on race day must fall in one category. Leave all blank for no age limit.') }}</p>
     </header>
     <x-input-error class="mt-4" :messages="$errors->get('age_bands')" />
 
@@ -247,29 +247,29 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Registration form') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Name, email, mobile number and distance are always asked. Choose what else to collect.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Registration form') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Name, email, mobile number and distance are always asked. Choose what else to collect.') }}</p>
     </header>
 
     <div class="mt-6 grid gap-3 sm:grid-cols-2">
         @foreach (\App\Landing\EventForm::STANDARD_FIELDS as $key => $definition)
-            <label for="show_{{ $key }}" class="flex items-center gap-3 rounded-md border border-gray-200 p-3">
+            <label for="show_{{ $key }}" class="flex items-center gap-3 rounded-[20px] bg-paper p-3">
                 <input type="hidden" name="show[{{ $key }}]" value="0">
-                <input id="show_{{ $key }}" type="checkbox" name="show[{{ $key }}]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked($v('show.'.$key))>
-                <span class="text-sm text-gray-700">{{ $standardLabels[$key] }}</span>
+                <input id="show_{{ $key }}" type="checkbox" name="show[{{ $key }}]" value="1" class="rounded border-[#C5CBDB] text-track focus:ring-track" @checked($v('show.'.$key))>
+                <span class="text-sm text-ink">{{ $standardLabels[$key] }}</span>
             </label>
         @endforeach
     </div>
 
-    <h3 class="mt-8 font-medium text-gray-900">{{ __('Custom questions') }}</h3>
-    <p class="mt-1 text-sm text-gray-600">{{ __('For dropdown, radio and checkbox questions, list the choices separated by commas.') }}</p>
+    <h3 class="mt-8 font-semibold text-ink">{{ __('Custom questions') }}</h3>
+    <p class="mt-1 text-sm text-muted">{{ __('For dropdown, radio and checkbox questions, list the choices separated by commas.') }}</p>
     <x-input-error class="mt-4" :messages="$errors->get('custom')" />
 
     <div class="mt-4 space-y-6">
         @for ($i = 0; $i < $rows('custom', \App\Landing\EventForm::ROWS['custom']); $i++)
-            <div class="grid gap-3 sm:grid-cols-4 rounded-md border border-gray-200 p-3">
+            <div class="grid gap-3 sm:grid-cols-4 rounded-[20px] bg-paper p-3">
                 <input type="hidden" name="custom[{{ $i }}][key]" value="{{ $v('custom.'.$i.'.key') }}">
                 <div class="sm:col-span-2">
                     <x-input-label for="custom_{{ $i }}_label" :value="__('Question')" />
@@ -286,8 +286,8 @@
                 <div class="flex items-end pb-2">
                     <label for="custom_{{ $i }}_required" class="inline-flex items-center gap-2">
                         <input type="hidden" name="custom[{{ $i }}][required]" value="0">
-                        <input id="custom_{{ $i }}_required" type="checkbox" name="custom[{{ $i }}][required]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked($v('custom.'.$i.'.required'))>
-                        <span class="text-sm text-gray-700">{{ __('Required') }}</span>
+                        <input id="custom_{{ $i }}_required" type="checkbox" name="custom[{{ $i }}][required]" value="1" class="rounded border-[#C5CBDB] text-track focus:ring-track" @checked($v('custom.'.$i.'.required'))>
+                        <span class="text-sm text-ink">{{ __('Required') }}</span>
                     </label>
                 </div>
                 <div class="sm:col-span-4">
@@ -300,10 +300,10 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('FAQ') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Shown at the bottom of the landing page.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('FAQ') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Shown at the bottom of the landing page.') }}</p>
     </header>
 
     <div class="mt-6 space-y-4">
@@ -323,10 +323,10 @@
     </div>
 </section>
 
-<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+<section class="rounded-[28px] bg-white p-5 sm:p-8">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">{{ __('Race sheets and certificates') }}</h2>
-        <p class="mt-1 text-sm text-gray-600">{{ __('Used when these modules are on in your Season Pass.') }}</p>
+        <h2 class="text-lg font-semibold text-ink">{{ __('Race sheets and certificates') }}</h2>
+        <p class="mt-1 text-sm text-muted">{{ __('Used when these modules are on in your Season Pass.') }}</p>
     </header>
 
     <div class="mt-6 grid gap-6 sm:grid-cols-3">
@@ -338,7 +338,7 @@
                     <option value="{{ $preset }}"></option>
                 @endforeach
             </datalist>
-            <p class="mt-1 text-xs text-gray-500">{{ __('6, 8 or 10, or any number from 2 to 64. Blank = mass start.') }}</p>
+            <p class="mt-1 text-xs text-muted">{{ __('6, 8 or 10, or any number from 2 to 64. Blank = mass start.') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('race_sheet.heat_size')" />
         </div>
         <div>
@@ -371,7 +371,7 @@
                 <option value="portrait" @selected($v('certificate.orientation') === 'portrait')>{{ __('Portrait') }}</option>
             </select>
         </div>
-        <p class="sm:col-span-3 text-sm text-gray-600">
+        <p class="sm:col-span-3 text-sm text-muted">
             {{ __('Need a custom certificate layout?') }} <a href="{{ \App\Support\Contact::customDesign(__('Custom certificate layout for :org', ['org' => $org->name])) }}" class="font-semibold underline" data-contact-indefine>{{ __('Contact Indefine') }}</a>
         </p>
     </div>

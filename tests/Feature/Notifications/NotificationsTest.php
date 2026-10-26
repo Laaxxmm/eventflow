@@ -106,8 +106,8 @@ it('emails a branded confirmation with the pass PDF after payment', function () 
         ->and($mail->getReplyTo()[0]->getAddress())->toBe('owner@runners.test')
         ->and($mail->getSubject())->toContain('Bengaluru City Marathon 2027')->toContain($registration->pass_no)
         ->and(collect($mail->getAttachments())->map->getContentType()->sort()->values()->all())->toBe(['application/pdf', 'image/png'])
-        ->and($html)->toContain('#ff6e61') // event secondary (header)
-        ->toContain('#d9ff45') // event primary (accent + button)
+        ->and($html)->toContain('#f2a93b') // event secondary (header)
+        ->toContain('#4b3fe0') // event primary (accent + button)
         ->toContain($registration->pass_no)
         ->toContain('Half Marathon (21.1K)')
         ->toContain('Sree Kanteerava Stadium')
@@ -335,7 +335,7 @@ it('lets owners manage notification settings and test SMTP', function () {
     expect($settings->fresh()->smtp_password)->toBe('secret')->and($settings->fresh()->smtp_verified_at)->toBeNull();
 
     $this->actingAs($owner)->get('/dashboard/settings/notifications/preview/registration-confirmed')
-        ->assertOk()->assertSee('#ff6e61', false)->assertSee($registration->pass_no);
+        ->assertOk()->assertSee('#f2a93b', false)->assertSee($registration->pass_no);
 });
 
 it('reports a failed SMTP test without saving it as verified', function () {

@@ -16,9 +16,10 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
-                display: ['"Barlow Condensed"', 'Inter', ...defaultTheme.fontFamily.sans],
+                display: ['"Archivo Variable"', 'Archivo', 'Inter', ...defaultTheme.fontFamily.sans],
+                serif: ['"Cormorant Garamond"', ...defaultTheme.fontFamily.serif],
             },
-            // Race Ink tokens (resources/css/app.css). Landings override them per event (App\Landing\Theme).
+            // Daylight Track tokens (Race Ink names kept) (resources/css/app.css). Landings override them per event (App\Landing\Theme).
             colors: {
                 ink: token('ink'),
                 track: token('track'),
@@ -30,7 +31,15 @@ export default {
                 mist: token('mist'),
                 midnight: token('midnight'),
                 volt: token('volt'),
+                muted: token('muted'),
+                'track-deep': token('track-deep'),
+                lilac: token('lilac'),
+                success: token('success'),
+                warning: token('warning'),
+                danger: token('danger'),
             },
+            borderRadius: { card: '24px', field: '12px' },
+            transitionTimingFunction: { track: 'cubic-bezier(.2,.7,.2,1)' },
         },
     },
 

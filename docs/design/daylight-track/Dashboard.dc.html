@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EventFlow home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1300px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="home" hint-size="248px,1300px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 24px">
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><p style="margin: 0; font-size: 14px; color: #4A5372">Monday 26 October</p><h1 class="d" style="margin: 4px 0 0; font-size: 40px">Hi Priya</h1></div>
+<a href="Participants.dc.html" style="border: 1px solid #C5CBDB; color: #121A33; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px; background: #FFFFFF">All participants</a>
+</div>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 14px; display: flex; flex-wrap: wrap; gap: 24px">
+<div style="flex: 0 1 340px; min-height: 230px; border-radius: 20px; position: relative; overflow: hidden; background: linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)"><span style="position: absolute; left: 14px; top: 14px; font-size: 12px; font-weight: 700; background: #F2A93B; color: #121A33; padding: 5px 10px; border-radius: 999px">Live</span><span style="position: absolute; left: 14px; bottom: 14px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.88); padding: 5px 9px; border-radius: 999px">Your hero photo</span></div>
+<div style="flex: 1 1 360px; padding: 10px 10px 10px 0; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px"><div><p style="margin: 0; font-size: 14px; color: #4A5372">Next race, Sat 26 Dec 2026</p><h2 class="d" style="margin: 4px 0 0; font-size: 30px; line-height: 1.05">Bengaluru City Marathon 2027</h2></div><span style="align-self: flex-start; text-align: center; background: #ECEAFF; color: #2B2390; border-radius: 18px; padding: 10px 16px"><span class="d" style="display: block; font-size: 28px; line-height: 1">61</span><span style="font-size: 12px; font-weight: 600">days to go</span></span></div>
+<div><div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px"><span><strong>1,011</strong> of 1,500 places paid for</span><span style="color: #4A5372">67%</span></div><div aria-hidden="true" style="height: 10px; border-radius: 5px; background: #ECEAFF"><div style="width: 67%; height: 100%; border-radius: 5px; background: #4B3FE0"></div></div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto"><a href="Overview.dc.html" style="background: #121A33; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Open overview</a><a href="#copy" style="background: #F3F5FA; color: #121A33; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Copy public link</a><a href="GunLap.dc.html" style="background: #F3F5FA; color: #121A33; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">View page</a></div>
+</div>
+</section>
+
+<section aria-label="Totals" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; color: #4A5372">Registrations</span><span class="d" style="font-size: 34px">1,302</span><span style="font-size: 13px; color: #1E7A5C; font-weight: 600">46 this week</span></div>
+<div style="background: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; color: #4A5372">Paid</span><span class="d" style="font-size: 34px">1,209</span><span style="font-size: 13px; color: #8A5300; font-weight: 600">93 waiting to pay</span></div>
+<div style="background: #4B3FE0; color: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; color: #E4E1FF">Collected</span><span class="d" style="font-size: 34px">₹15,74,389</span><span style="font-size: 13px; color: #E4E1FF">Paid into your Razorpay</span></div>
+<div style="background: #FFFFFF; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; color: #4A5372">Checked in</span><span class="d" style="font-size: 34px">0</span><span style="font-size: 13px; color: #4A5372">Opens on race day</span></div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<section style="flex: 2 1 480px; background: #FFFFFF; border-radius: 28px; padding: 26px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 18px">Registrations, last 30 days</h2><span style="font-size: 13px; color: #4A5372">All events</span></div>
+<div role="img" aria-label="Daily registrations bar chart, rising towards the end of the month" style="margin-top: 22px; height: 200px; display: flex; align-items: flex-end; gap: 6px">
+<sc-for list="{{ bars }}" as="b" hint-placeholder-count="30"><span style="flex: 1; height: {{ b.h }}; background: {{ b.c }}; border-radius: 6px 6px 2px 2px"></span></sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: #4A5372"><span>27 Sep</span><span>Today</span></div>
+</section>
+<section style="flex: 1 1 300px; background: #FFFFFF; border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Worth doing next</h2>
+<a href="Participants.dc.html" style="text-decoration: none; color: #121A33; background: #FDF0DA; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><strong>Remind 93 runners to pay</strong><span style="font-size: 13px; color: #6B4A12">Their places are held but not paid.</span></a>
+<a href="#domain" style="text-decoration: none; color: #121A33; background: #F3F5FA; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><strong>Connect your own domain</strong><span style="font-size: 13px; color: #4A5372">Included in Club Season.</span></a>
+<a href="Certificates.dc.html" style="text-decoration: none; color: #121A33; background: #F3F5FA; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><strong>Pick a certificate design</strong><span style="font-size: 13px; color: #4A5372">Ready to send after race day.</span></a>
+</section>
+</div>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 10px 26px 16px">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0"><h2 style="margin: 0; font-size: 18px">Upcoming</h2><a href="Events.dc.html" style="font-size: 14px; font-weight: 600">All events</a></div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 15px">
+<thead><tr style="text-align: left; color: #4A5372; font-size: 13px"><th scope="col" style="padding: 10px 0; font-weight: 600">Event</th><th scope="col" style="font-weight: 600">Date</th><th scope="col" style="font-weight: 600">Entries</th><th scope="col" style="font-weight: 600">Paid</th><th scope="col" style="font-weight: 600; text-align: right">Collected</th></tr></thead>
+<tbody>
+<tr style="border-top: 1px solid #EEF0F6"><td style="padding: 14px 0"><a href="Overview.dc.html" style="color: #121A33; font-weight: 600; text-decoration: none">Bengaluru City Marathon 2027</a></td><td>26 Dec 2026</td><td>1,089</td><td>1,011</td><td style="text-align: right">₹13,37,089</td></tr>
+<tr style="border-top: 1px solid #EEF0F6"><td style="padding: 14px 0"><a href="Overview.dc.html" style="color: #121A33; font-weight: 600; text-decoration: none">Nandi Hills Night Ride 2027</a></td><td>16 Jan 2027</td><td>213</td><td>198</td><td style="text-align: right">₹2,37,300</td></tr>
+<tr style="border-top: 1px solid #EEF0F6"><td style="padding: 14px 0"><a href="Overview.dc.html" style="color: #121A33; font-weight: 600; text-decoration: none">Cubbon Park 10K</a></td><td>14 Feb 2027</td><td style="color: #4A5372">Draft</td><td style="color: #4A5372">-</td><td style="text-align: right; color: #4A5372">-</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = [12,18,9,22,15,30,26,14,19,33,28,41,22,17,36,44,31,27,48,39,52,35,29,57,46,61,38,49,66,58];
+    const max = 66;
+    return { bars: v.map((n, i) => ({ h: Math.round(n / max * 100) + '%', c: i >= 23 ? '#4B3FE0' : '#C9C5FA' })) };
+  }
+}
+</script>
+</body>
+</html>

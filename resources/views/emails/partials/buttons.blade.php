@@ -12,7 +12,7 @@
                 @endif
                 @if (! empty($secondaryUrl))
                     <td style="border-radius:999px; border:1px solid #d1d5db;">
-                        <a href="{{ $secondaryUrl }}" style="display:inline-block; padding:12px 22px; font-family:{{ $font }}; font-size:15px; font-weight:600; color:#0f172a; text-decoration:none; border-radius:999px;">{{ $secondaryLabel }}</a>
+                        <a href="{{ $secondaryUrl }}" style="display:inline-block; padding:12px 22px; font-family:{{ $font }}; font-size:15px; font-weight:600; color:#121A33; text-decoration:none; border-radius:999px;">{{ $secondaryLabel }}</a>
                     </td>
                 @endif
             </tr>

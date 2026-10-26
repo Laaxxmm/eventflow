@@ -1,9 +1,12 @@
-{{-- Copyable webhook URL with setup steps. $url, $steps --}}
-<div class="rounded-2xl bg-slate-50 p-4" x-data="{ copied: false }">
-    <p class="text-sm font-medium text-slate-700">{{ __('Webhook URL') }}</p>
-    <div class="mt-2 flex flex-col gap-2 sm:flex-row">
-        <input readonly value="{{ $url }}" class="flex-1 rounded-xl border-slate-300 bg-white font-mono text-xs" @focus="$el.select()" aria-label="{{ __('Webhook URL') }}">
-        <button type="button" @click="navigator.clipboard.writeText(@js($url)); copied = true; setTimeout(() => copied = false, 2000)" class="rounded-xl px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 hover:bg-white" x-text="copied ? @js(__('Copied')) : @js(__('Copy'))"></button>
+{{-- Copyable webhook URL with setup steps. $url, $steps, $provider --}}
+<div class="space-y-3 rounded-[18px] bg-paper px-[18px] py-4" x-data="{ copied: false }">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <span class="flex min-w-0 flex-col gap-1">
+            <strong class="text-sm text-ink">{{ __('Webhook URL to paste into :provider', ['provider' => $provider]) }}</strong>
+            <code class="break-all text-[13px] text-[#3B4463]" aria-label="{{ __('Webhook URL') }}">{{ $url }}</code>
+        </span>
+        <button type="button" @click="navigator.clipboard.writeText(@js($url)); copied = true; setTimeout(() => copied = false, 2000)" x-text="copied ? @js(__('Copied')) : @js(__('Copy'))"
+                class="inline-flex min-h-[44px] items-center rounded-full bg-white px-4 text-sm font-semibold text-ink ring-1 ring-inset ring-[#C5CBDB] transition duration-200 ease-track hover:ring-ink/40">{{ __('Copy') }}</button>
     </div>
-    <p class="mt-2 text-xs text-slate-500">{{ $steps }} {{ __('Payments are confirmed through this webhook, so add it before taking registrations.') }}</p>
+    <p class="text-[13px] text-muted">{{ $steps }} {{ __('Payments are confirmed through this webhook, so add it before taking registrations.') }}</p>
 </div>

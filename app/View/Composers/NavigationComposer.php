@@ -17,20 +17,20 @@ use Illuminate\View\View;
  */
 class NavigationComposer
 {
-    /** Heroicon-style outline paths (24x24). */
+    /** Outline icon paths (24x24), from docs/design/daylight-track/Sidebar.dc.html. */
     public const ICONS = [
-        'home' => 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
-        'events' => 'M8 3v3m8-3v3M4 8h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z',
-        'people' => 'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm13 9v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8',
-        'scan' => 'M4 8V5a1 1 0 0 1 1-1h3m8 0h3a1 1 0 0 1 1 1v3m0 8v3a1 1 0 0 1-1 1h-3m-8 0H5a1 1 0 0 1-1-1v-3M7 12h10',
-        'sheet' => 'M9 4h6M5 6h14v14H5zM9 10h6M9 14h6M9 18h3',
-        'award' => 'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zm-3.5 4.5L7 22l5-2 5 2-1.5-2.5M9 14.5 8 22m8-7.5 1 7.5',
-        'bell' => 'M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0',
-        'settings' => 'M10.3 4.3a1.7 1.7 0 0 1 3.4 0 1.7 1.7 0 0 0 2.6 1.1 1.7 1.7 0 0 1 2.4 2.4 1.7 1.7 0 0 0 1.1 2.6 1.7 1.7 0 0 1 0 3.4 1.7 1.7 0 0 0-1.1 2.6 1.7 1.7 0 0 1-2.4 2.4 1.7 1.7 0 0 0-2.6 1.1 1.7 1.7 0 0 1-3.4 0 1.7 1.7 0 0 0-2.6-1.1 1.7 1.7 0 0 1-2.4-2.4 1.7 1.7 0 0 0-1.1-2.6 1.7 1.7 0 0 1 0-3.4 1.7 1.7 0 0 0 1.1-2.6 1.7 1.7 0 0 1 2.4-2.4 1.7 1.7 0 0 0 2.6-1.1zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-        'card' => 'M3 6h18v12H3zM3 10h18M7 15h3',
-        'wallet' => 'M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4zM4 7V6a2 2 0 0 1 2-2h10M16 13h2',
-        'shield' => 'M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6z',
-        'globe' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
+        'home' => 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+        'events' => 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+        'people' => 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-5-5.5',
+        'scan' => 'M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4M4 12h16',
+        'sheet' => 'M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h3',
+        'award' => 'M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.5 14L7 22l5-3 5 3-1.5-8',
+        'bell' => 'M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4',
+        'settings' => 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M14 4v4M8 10v4M16 16v4',
+        'card' => 'M3 6h18v12H3zM3 10h18M7 15h4',
+        'wallet' => 'M3 7h15a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l12-4 2 4M16 14h2',
+        'shield' => 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
+        'globe' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18',
     ];
 
     public function compose(View $view): void
@@ -74,7 +74,7 @@ class NavigationComposer
                     $settings[] = $this->item(__('Modules'), 'settings.edit', 'settings', 'settings.edit');
                 }
                 if (Route::has('settings.notifications.show')) {
-                    $settings[] = $this->item(__('Email & WhatsApp'), 'settings.notifications.show', 'bell', 'settings.notifications.*');
+                    $settings[] = $this->item(__('Email and WhatsApp'), 'settings.notifications.show', 'bell', 'settings.notifications.*');
                 }
                 if (Route::has('settings.payments.show')) {
                     $settings[] = $this->item(__('Payments'), 'settings.payments.show', 'wallet', 'settings.payments.*');
@@ -84,7 +84,7 @@ class NavigationComposer
                 }
             }
             if (Route::has('account.plan')) {
-                $settings[] = $this->item(__('Plan & billing'), 'account.plan', 'card', 'account.plan');
+                $settings[] = $this->item(__('Plan and billing'), 'account.plan', 'card', ['account.plan', 'billing.*']);
             }
             $groups[] = ['label' => __('Settings'), 'items' => $settings];
         }
@@ -104,13 +104,13 @@ class NavigationComposer
     }
 
     /** @return array{label: string, href: string, icon: string, active: bool} */
-    private function item(string $label, string $routeOrUrl, string $icon, string $activePattern): array
+    private function item(string $label, string $routeOrUrl, string $icon, string|array $activePattern): array
     {
         return [
             'label' => $label,
             'href' => str_starts_with($routeOrUrl, 'http') ? $routeOrUrl : route($routeOrUrl),
             'icon' => self::ICONS[$icon],
-            'active' => request()->routeIs($activePattern),
+            'active' => request()->routeIs(...(array) $activePattern),
         ];
     }
 }

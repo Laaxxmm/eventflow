@@ -1,22 +1,28 @@
-{{-- Sponsor / partner strip. $page, $dark (bool), $center (bool). Falls back to "Organised by". --}}
-@php($sponsors = $page->sponsors())
-<div @class(['flex flex-wrap items-center gap-x-10 gap-y-6', 'justify-center text-center' => $center ?? false])>
+{{-- Race partners as small cards. $page, $dark (cards on a dark panel), $center. Falls back to "Organised by". --}}
+@php
+    $sponsors = $page->sponsors();
+    $card = $cardClass ?? (($dark ?? false) ? 'bg-white/10 text-white' : 'bg-paper text-ink');
+    $sub = ($dark ?? false) ? 'text-white/70' : 'text-muted';
+@endphp
+<div @class(['grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]', 'text-center' => $center ?? false])>
     @forelse ($sponsors as $sponsor)
-        @php($tag = $sponsor['url'] ? 'a' : 'div')
-        <{{ $tag }} @if ($sponsor['url']) href="{{ $sponsor['url'] }}" rel="noopener" target="_blank" @endif class="group">
+        @php
+            $tag = $sponsor['url'] ? 'a' : 'div';
+        @endphp
+        <{{ $tag }} @if ($sponsor['url']) href="{{ $sponsor['url'] }}" rel="noopener" target="_blank" @endif class="flex flex-col gap-1 rounded-[18px] p-[18px] {{ $card }}">
             @if ($sponsor['tier'])
-                <p @class(['text-[0.65rem] font-semibold uppercase tracking-[0.18em]', 'text-paper/50' => $dark ?? false, 'text-ink/50' => ! ($dark ?? false)])>{{ $sponsor['tier'] }}</p>
+                <span class="text-[13px] {{ $sub }}">{{ $sponsor['tier'] }}</span>
             @endif
             @if ($sponsor['logo'])
-                <img src="{{ $sponsor['logo'] }}" alt="{{ $sponsor['name'] }}" class="mt-1 h-8 w-auto {{ ($dark ?? false) ? 'brightness-0 invert' : 'grayscale' }} opacity-80 transition group-hover:opacity-100">
+                <img src="{{ $sponsor['logo'] }}" alt="{{ $sponsor['name'] }}" @class(['mt-1 h-8 w-auto self-start object-contain', 'self-center' => $center ?? false, 'brightness-0 invert' => $dark ?? false])>
             @else
-                <p class="mt-1 font-display text-2xl font-bold uppercase tracking-wide">{{ $sponsor['name'] }}</p>
+                <strong>{{ $sponsor['name'] }}</strong>
             @endif
         </{{ $tag }}>
     @empty
-        <div>
-            <p @class(['text-[0.65rem] font-semibold uppercase tracking-[0.18em]', 'text-paper/50' => $dark ?? false, 'text-ink/50' => ! ($dark ?? false)])>{{ __('Organised by') }}</p>
-            <p class="mt-1 font-display text-2xl font-bold uppercase tracking-wide">{{ $page->orgName }}</p>
+        <div class="flex flex-col gap-1 rounded-[18px] p-[18px] {{ $card }}">
+            <span class="text-[13px] {{ $sub }}">{{ __('Organised by') }}</span>
+            <strong>{{ $page->orgName }}</strong>
         </div>
     @endforelse
 </div>

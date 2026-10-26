@@ -32,6 +32,8 @@ class DashboardController extends Controller
             ->orderByDesc('date')
             ->get();
 
+        $next = $events->filter(fn (Event $e) => $e->date->isAfter(now()->subDay()))->sortBy('date')->first();
+
         return view('dashboard.index', [
             'events' => $events,
             'totals' => [
@@ -40,26 +42,61 @@ class DashboardController extends Controller
                 'paid_total_paise' => (int) $events->sum('paid_total_paise'),
                 'checked_in' => (int) $events->sum('checked_in_count'),
             ],
+            // Daylight Track dashboard: next race card, week trend, 30-day bars, "worth doing next".
+            'next' => $next,
+            'nextPlaces' => $next ? $this->places($next) : null,
+            'thisWeek' => Registration::query()->where('created_at', '>=', now()->subDays(7))->count(),
+            'unpaid' => Registration::query()->whereIn('status', ReminderSchedule::UNPAID)
+                ->whereHas('event', fn (Builder $q) => $q->where('date', '>', now()))->count(),
+            'daily' => $this->daily(30),
         ]);
+    }
+
+    /** Registrations per day for the last $days days (oldest first), IST dates. */
+    private function daily(int $days): array
+    {
+        $from = now('Asia/Kolkata')->startOfDay()->subDays($days - 1);
+        $counts = Registration::query()->where('created_at', '>=', $from->copy()->utc())->pluck('created_at')
+            ->countBy(fn ($at) => $at->setTimezone('Asia/Kolkata')->toDateString());
+
+        return collect(range(0, $days - 1))->map(fn (int $i) => [
+            'date' => $from->copy()->addDays($i),
+            'count' => (int) ($counts[$from->copy()->addDays($i)->toDateString()] ?? 0),
+        ])->all();
+    }
+
+    /** Paid places vs the race's capacity (event capacity, else the sum of capped distances). */
+    private function places(Event $event): array
+    {
+        $capacity = $event->capacity ?: (collect($event->config['distances'] ?? [])->every(fn ($d) => ! empty($d['capacity']))
+            ? (int) collect($event->config['distances'] ?? [])->sum('capacity') : null);
+
+        return ['paid' => (int) $event->paid_count, 'capacity' => $capacity ?: null];
     }
 
     public function participants(Request $request): View
     {
-        [$event, $status] = $this->filters($request);
+        [$event, $status, $search] = $this->filters($request);
 
         return view('dashboard.participants', [
+            'search' => $search,
+            'counts' => [
+                '' => $this->participantsQuery($event, null, $search)->count(),
+                'paid' => $this->participantsQuery($event, PaymentStatus::Paid, $search)->count(),
+                'unpaid' => $this->participantsQuery($event, 'unpaid', $search)->count(),
+            ],
             'events' => Event::orderByDesc('date')->get(['id', 'name']),
             'event' => $event,
             'status' => $status,
             'statuses' => PaymentStatus::cases(),
-            'registrations' => $this->participantsQuery($event, $status)->with('reminderLogs', 'event:id,name,date,payment_reminders')->paginate(50)->withQueryString(),
+            'registrations' => $this->participantsQuery($event, $status, $search)->with('reminderLogs', 'event:id,name,date,payment_reminders')->paginate(50)->withQueryString(),
         ]);
     }
 
     public function export(Request $request): StreamedResponse
     {
-        [$event, $status] = $this->filters($request);
-        $query = $this->participantsQuery($event, $status);
+        [$event, $status, $search] = $this->filters($request);
+        $query = $this->participantsQuery($event, $status, $search);
 
         // Custom answer columns: every key any exported registration answered.
         $answerKeys = $query->clone()->pluck('answers')
@@ -101,18 +138,25 @@ class DashboardController extends Controller
             'event' => ['nullable', 'integer'],
             // "unpaid" = pending or failed (Session N2 payment reminders).
             'status' => ['nullable', Rule::in([...array_column(PaymentStatus::cases(), 'value'), 'unpaid'])],
+            'q' => ['nullable', 'string', 'max:100'],
         ]);
 
         return [
             $request->filled('event') ? Event::findOrFail($request->integer('event')) : null,
             $request->input('status') === 'unpaid' ? 'unpaid' : $request->enum('status', PaymentStatus::class),
+            trim((string) $request->input('q')) ?: null,
         ];
     }
 
-    private function participantsQuery(?Event $event, PaymentStatus|string|null $status): Builder
+    private function participantsQuery(?Event $event, PaymentStatus|string|null $status, ?string $search = null): Builder
     {
         return Registration::query()
             ->with('event:id,name')
+            ->when($search, fn (Builder $q) => $q->where(fn (Builder $q) => $q
+                ->where('participant_name', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('pass_no', 'like', "%{$search}%")))
             ->when($event, fn (Builder $q) => $q->whereBelongsTo($event))
             ->when($status === 'unpaid', fn (Builder $q) => $q->whereIn('status', ReminderSchedule::UNPAID))
             ->when($status instanceof PaymentStatus, fn (Builder $q) => $q->where('status', $status))

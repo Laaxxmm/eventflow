@@ -3,196 +3,161 @@
 @section('title', __('Pricing · :brand', ['brand' => \App\Saas\Plans::brandName()]))
 @section('description', __('Single Event, Club Season and Circuit Season passes with no ticket percentage, plus Custom for federations. Start a free trial.'))
 
+{{-- /pricing, Daylight Track (Pricing.dc.html). Every price, cap and row value comes from config/plans.php. --}}
 @php
     use App\Saas\Plans;
+
     $quote = __('Quoted');
-    $paid = fn (array $p, string $module) => in_array($module, $p['modules'], true) ?: __('Paid add-on');
     $eventAddons = Plans::eventAddons();
-    $perEvent = fn (string $key) => __('Add-on :price / event', ['price' => Plans::inr($eventAddons[$key]['price_inr'])]);
-    // Plans that include a module for every event (so its per-event add-on is not needed).
-    $includedIn = fn (string $module) => collect($plans)->filter(fn ($p) => in_array($module, $p['modules'], true))->pluck('name')->implode(', ');
-    // Custom domain (Session P1): a ₹599 add-on on Single Event, included on Club and Circuit.
-    $domainIncludedIn = collect($plans)->filter(fn ($p) => $p['custom_domain'] ?? false)->pluck('name')->implode(', ');
+    $addOn = fn (string $key) => [__('Add-on, :price per event', ['price' => Plans::inr($eventAddons[$key]['price_inr'])]), 'muted'];
+    $included = [__('Included'), null];
+    $has = fn (array $p, string $module) => in_array($module, $p['modules'], true);
+    $term = function (array $p) use ($quote) {
+        if (! $p['term']) {
+            return $quote;
+        }
+        $length = isset($p['term']['days'])
+            ? __(':count days', ['count' => $p['term']['days']])
+            : __(':count months', ['count' => $p['term']['months']]);
+
+        return $length.($p['renews'] ? __(', renews yearly') : __(', one-off'));
+    };
+
+    // Comparison rows: label => fn (plan) => [text, tone]. tone: null | 'muted' | 'strong'.
     $rows = [
-        __('Price (+ GST)') => fn ($p) => Plans::inr($p['price_inr']) ?? $quote,
-        __('Races') => fn ($p) => $p['max_events'] === null ? $quote : number_format($p['max_events']),
-        __('Duration') => fn ($p) => $p['term_label'] ? __($p['term_label']).($p['renews'] ? __(', renews yearly') : __(', one-off')) : $quote,
-        __('Participants per race') => fn ($p) => $p['max_participants_per_event'] === null ? $quote : number_format($p['max_participants_per_event']),
-        __('Ticket percentage') => fn ($p) => __('None'),
-        __('Event page, payments, QR passes') => fn ($p) => true,
-        __('Volunteer QR check-in') => fn ($p) => in_array('checkin', $p['modules'], true),
-        __('Race sheets and heats') => fn ($p) => in_array('race_sheets', $p['modules'], true) ?: $perEvent('race_sheet'),
-        __('Finisher certificates') => fn ($p) => in_array('certificates', $p['modules'], true) ?: $perEvent('certificates'),
-        __('Custom domain') => fn ($p) => ($p['custom_domain'] ?? false) ? __('Included') : $perEvent('custom_domain'),
-        __('Email · own SMTP') => fn ($p) => __('Included · free'),
-        __('Platform mail') => fn ($p) => $paid($p, 'email_branding'),
-        __('WhatsApp') => fn ($p) => $paid($p, 'sms_whatsapp'),
-        __('Support') => fn ($p) => __($p['support'] ?? 'Email'),
+        __('Races') => fn ($p) => [match (true) {
+            $p['max_events'] === null => __('To suit you'),
+            $p['max_events'] === 1 => '1',
+            default => __('Up to :count', ['count' => number_format($p['max_events'])]),
+        }, null],
+        __('Duration') => fn ($p) => [$term($p), null],
+        __('Participants per race') => fn ($p) => [$p['max_participants_per_event'] === null ? $quote : number_format($p['max_participants_per_event']), null],
+        __('Ticket percentage') => fn ($p) => [__('None'), 'strong'],
+        __('Event page, payments, QR passes') => fn ($p) => $included,
+        __('Volunteer QR check-in') => fn ($p) => $has($p, 'checkin') ? $included : [__('Not included'), 'muted'],
+        __('Race sheets and heats') => fn ($p) => $has($p, 'race_sheets') ? $included : $addOn('race_sheet'),
+        __('Finisher certificates') => fn ($p) => match (true) {
+            ! $has($p, 'certificates') => $addOn('certificates'),
+            ! $p['self_serve'] => [__('Custom layouts by Indefine'), null],
+            default => $included,
+        },
+        __('Custom domain') => fn ($p) => ($p['custom_domain'] ?? false) ? $included : $addOn('custom_domain'),
+        __('Email with your own SMTP') => fn ($p) => [__('Free'), null],
+        __('Platform mail and WhatsApp') => fn ($p) => $has($p, 'email_branding') && $has($p, 'sms_whatsapp') ? $included : [__('Add-ons'), 'muted'],
+        __('Support') => fn ($p) => [__($p['support'] ?? 'Email'), null],
     ];
+
+    $includedIn = fn (string $module) => collect($plans)->filter(fn ($p) => in_array($module, $p['modules'], true))->pluck('name')->implode(', ');
+    $domainIncludedIn = collect($plans)->filter(fn ($p) => $p['custom_domain'] ?? false)->pluck('name')->implode(', ');
     $addonRows = [];
     foreach ($eventAddons as $key => $addon) {
         $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']).' '.__('per event'), 'what' => $addon['description'], 'note' => __('Included in :plans', ['plans' => $addon['module'] ? $includedIn($addon['module']) : $domainIncludedIn])];
     }
     foreach ($addons as $key => $addon) {
-        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']) ?? __('Paid add-on'), 'what' => $addon['description'], 'note' => null];
+        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']) ?? __('Quoted by Indefine'), 'what' => $addon['description'], 'note' => null];
     }
     $pack = config('plans.overage.participant_pack');
 @endphp
 
 @section('content')
-    <section class="bg-ink text-paper">
-        <div class="mx-auto max-w-7xl px-5 pb-36 pt-14 sm:px-6 sm:pb-40 sm:pt-20 lg:px-8">
-            <p class="ri-kicker text-heat">{{ __('Pricing') }}</p>
-            <h1 class="ri-headline mt-5 max-w-5xl text-[3.4rem] leading-[0.92] sm:text-9xl">{{ __('One race or') }} <span class="text-heat">{{ __('a whole season.') }}</span></h1>
-            <p class="mt-6 max-w-2xl text-base text-paper/75 sm:mt-8 sm:text-lg">{{ __('A flat price per pass and no percentage on tickets. Entry fees go straight to your own Razorpay or Cashfree account.') }}</p>
-            <p class="mt-4 text-sm text-paper/55">{{ __(':days-day free trial · no card · prices exclude GST', ['days' => $trialDays]) }}</p>
-        </div>
+    <section class="mx-auto flex max-w-[1280px] flex-col items-center gap-[18px] px-5 pb-10 pt-8 text-center sm:px-10 sm:pt-12">
+        <h1 class="ri-headline max-w-[52rem] text-[clamp(2.4rem,5vw,4.5rem)]">{{ __('A flat price per race or per season') }}</h1>
+        <p class="max-w-[40rem] text-lg leading-relaxed text-muted sm:text-[19px]">{{ __('Every plan starts with a :days-day free trial. Prices are in rupees and exclusive of GST. We never take a percentage of your entry fees.', ['days' => $trialDays]) }}</p>
     </section>
 
-    <section class="mx-auto -mt-28 max-w-7xl sm:px-6 lg:px-8">
-        {{-- Phones: swipe between plans (next card peeks); tablet and up: grid. --}}
-        <div class="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-6 pt-2 [scrollbar-width:none] md:grid md:snap-none md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,0.8fr)] lg:items-stretch" data-plan-swipe>
-            @foreach ($plans as $key => $plan)
-                <div class="flex w-[84%] shrink-0 snap-start flex-col md:w-auto">@include('marketing.partials.plan-card')</div>
-            @endforeach
-        </div>
-        <p class="px-5 text-center text-xs font-semibold uppercase tracking-[0.18em] text-ink/45 md:hidden" aria-hidden="true">{{ __('Swipe to compare plans') }} →</p>
-        <div class="px-5 md:px-0">@include('marketing.partials.messaging-line', ['class' => 'mt-8 text-ink/75'])</div>
+    <section class="mx-auto grid max-w-[1280px] gap-5 px-5 pb-16 pt-6 sm:grid-cols-2 sm:px-10 sm:pb-20 xl:grid-cols-4">
+        @foreach ($plans as $key => $plan)
+            @include('marketing.partials.plan-card')
+        @endforeach
     </section>
 
-    <section class="mx-auto max-w-7xl px-5 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <h2 class="ri-headline text-5xl sm:text-6xl">{{ __('Compare plans.') }}</h2>
+    <section class="mx-auto max-w-[1280px] px-5 pb-16 sm:px-10 sm:pb-20">
+        <h2 class="ri-headline mb-6 text-3xl sm:text-4xl">{{ __('Compare plans') }}</h2>
 
-        <div class="mt-8 md:hidden" x-data="{ plan: @js(array_key_first($plans)) }" data-compare-mobile>
-            <div class="flex gap-1 overflow-x-auto bg-mist p-1 [scrollbar-width:none]" role="tablist" aria-label="{{ __('Plan') }}">
+        {{-- Phones: one plan at a time. --}}
+        <div class="md:hidden" x-data="{ plan: @js(array_key_first($plans)) }" data-compare-mobile>
+            <div class="grid grid-cols-2 gap-1 rounded-[26px] bg-white p-1" role="tablist" aria-label="{{ __('Plan') }}">
                 @foreach ($plans as $key => $plan)
-                    <button type="button" role="tab" class="shrink-0 px-3.5 py-2 text-sm font-semibold transition" :class="plan === @js($key) ? 'bg-ink text-paper' : 'text-ink/60'" :aria-selected="plan === @js($key)" @click="plan = @js($key)">{{ $plan['name'] }}</button>
+                    <button type="button" role="tab" id="compare-tab-{{ $key }}" aria-controls="compare-{{ $key }}"
+                            class="min-h-[44px] rounded-full px-3 text-sm font-semibold transition duration-200 ease-track"
+                            :class="plan === @js($key) ? 'bg-track text-white' : 'text-muted hover:text-ink'"
+                            :aria-selected="(plan === @js($key)).toString()" aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                            @click="plan = @js($key)">{{ $plan['name'] }}</button>
                 @endforeach
             </div>
             @foreach ($plans as $key => $plan)
-                <dl class="mt-4 divide-y divide-ink/10 bg-white px-4 ring-1 ring-ink/10" x-show="plan === @js($key)" @unless ($loop->first) x-cloak @endunless>
+                <dl id="compare-{{ $key }}" role="tabpanel" aria-labelledby="compare-tab-{{ $key }}" class="mt-3 divide-y divide-[#EEF0F6] rounded-[24px] bg-white px-5" x-show="plan === @js($key)" @unless ($loop->first) x-cloak @endunless>
                     @foreach ($rows as $label => $value)
-                        @php($v = $value($plan))
-                        <div class="flex items-start justify-between gap-6 py-3.5 text-sm">
-                            <dt class="text-ink/65">{{ $label }}</dt>
-                            <dd class="text-right font-semibold">
-                                @if ($v === true)
-                                    <span class="inline-flex" aria-label="{{ __('Included') }}">@include('marketing.partials.tick')</span>
-                                @elseif ($v === false)
-                                    <span class="text-ink/30" aria-label="{{ __('Not included') }}">—</span>
-                                @else
-                                    {{ $v }}
-                                @endif
-                            </dd>
+                        @php
+                            [$text, $tone] = $value($plan);
+                        @endphp
+                        <div class="flex items-start justify-between gap-6 py-3.5 text-[15px]">
+                            <dt class="font-semibold">{{ $label }}</dt>
+                            <dd @class(['text-right', 'text-muted' => $tone === 'muted', 'font-bold' => $tone === 'strong'])>{{ $text }}</dd>
                         </div>
                     @endforeach
                 </dl>
             @endforeach
         </div>
 
-        <div class="mt-10 hidden overflow-x-auto border-2 border-ink bg-white md:block">
-            <table class="min-w-full text-sm" data-compare>
+        <div class="hidden overflow-x-auto rounded-[28px] bg-white md:block">
+            <table class="w-full min-w-[860px] border-collapse text-[15px]" data-compare>
                 <thead>
-                    <tr class="border-b-2 border-ink text-left">
-                        <th scope="col" class="p-4 text-xs font-semibold uppercase tracking-[0.16em] text-ink/60">{{ __('Per pass') }}</th>
+                    <tr class="text-left">
+                        <th scope="col" class="w-[28%] px-7 py-[22px] font-semibold text-muted">{{ __('Prices exclude GST') }}</th>
                         @foreach ($plans as $plan)
-                            <th scope="col" @class(['p-4 font-display text-2xl font-extrabold uppercase', 'text-ink/55' => ! $plan['self_serve']])>{{ $plan['name'] }}</th>
+                            <th scope="col" @class(['px-4 py-[22px] font-bold', 'bg-lilac text-track-deep' => $plan['highlight'] ?? false])>{{ $plan['name'] }}</th>
                         @endforeach
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ink/10">
+                <tbody>
                     @foreach ($rows as $label => $value)
-                        <tr>
-                            <th scope="row" class="p-4 text-left font-medium">{{ $label }}</th>
+                        <tr class="border-t border-[#EEF0F6]">
+                            <th scope="row" class="px-7 py-[18px] text-left font-semibold">{{ $label }}</th>
                             @foreach ($plans as $plan)
-                                @php($v = $value($plan))
-                                <td @class(['p-4', 'text-ink/60' => ! $plan['self_serve']])>
-                                    @if ($v === true)
-                                        <span class="inline-flex" aria-label="{{ __('Included') }}">@include('marketing.partials.tick')</span>
-                                    @elseif ($v === false)
-                                        <span class="text-ink/30" aria-label="{{ __('Not included') }}">—</span>
-                                    @else
-                                        {{ $v }}
-                                    @endif
-                                </td>
+                                @php
+                                    [$text, $tone] = $value($plan);
+                                @endphp
+                                <td @class(['px-4 py-[18px]', 'bg-[#F6F5FF]' => $plan['highlight'] ?? false, 'text-muted' => $tone === 'muted', 'font-bold' => $tone === 'strong'])>{{ $text }}</td>
                             @endforeach
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+    </section>
 
-        {{-- Overage: soft-block, three ways forward --}}
-        <div class="mt-24 grid gap-10 lg:grid-cols-[0.8fr_1.2fr]" data-overage>
-            <div>
-                <p class="ri-kicker text-heat">{{ __('Outgrowing your plan') }}</p>
-                <h2 class="ri-headline mt-4 text-5xl sm:text-6xl">{{ __('A nudge, not a locked door.') }}</h2>
-                <p class="mt-6 text-ink/70">{{ __('When a race reaches its plan\'s participant limit, new registrations pause with a clear message for runners and for you — never silently going over. Then you choose how to carry on from Plan & billing.') }}</p>
-            </div>
-            <ol class="grid gap-px border-2 border-ink bg-ink sm:grid-cols-3">
-                @foreach ([
-                    [__('Upgrade'), __('Move to Club or Circuit for more races and bigger caps per race.')],
-                    [__('Buy a participant pack'), __('Add places to just the race that sold out, without changing plan.')],
-                    [__('Contact Indefine'), __('For a federation series or a city marathon, we will quote a Custom plan.')],
-                ] as $i => [$title, $body])
-                    <li class="bg-paper p-6">
-                        <span class="font-display text-5xl font-extrabold text-heat">{{ $i + 1 }}</span>
-                        <h3 class="mt-3 font-display text-2xl font-bold uppercase">{{ $title }}</h3>
-                        <p class="mt-2 text-sm text-ink/70">{{ $body }}</p>
-                    </li>
-                @endforeach
-            </ol>
-        </div>
-        @if (\App\Saas\Trial::stubbed())
-            <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Plan upgrades go to Indefine as a request, and nothing is charged automatically. Participant packs and add-ons are bought from Plan & billing.') }}</p>
-        @endif
-
-        <h2 id="add-ons" class="ri-headline mt-24 scroll-mt-20 text-5xl sm:text-6xl">{{ __('Add-ons.') }}</h2>
-        <p class="mt-4 max-w-2xl text-ink/70">{{ __('Attach what an event needs. Buy them from the event\'s Overview in your dashboard; until an add-on is active, its downloads stay locked with an unlock button.') }}</p>
-        {{-- Phones: one card per add-on. --}}
-        <ul class="mt-8 space-y-3 md:hidden" data-addons-mobile>
+    <section class="mx-auto max-w-[1280px] px-5 pb-16 sm:px-10 sm:pb-20">
+        <h2 id="add-ons" class="ri-headline scroll-mt-24 text-3xl sm:text-4xl">{{ __('Add-ons') }}</h2>
+        <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted">{{ __('Attach what an event needs. Buy them from the event\'s Overview in your dashboard; until an add-on is active, its downloads stay locked with an unlock button.') }}</p>
+        <ul class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($addonRows as $row)
-                <li class="bg-white p-5 ring-1 ring-ink/10">
-                    <div class="flex items-baseline justify-between gap-4">
-                        <p class="font-display text-xl font-bold uppercase leading-tight">{{ __($row['name']) }}</p>
-                        <p class="shrink-0 font-display text-lg font-extrabold text-heat">{{ $row['price'] }}</p>
-                    </div>
-                    <p class="mt-2 text-sm text-ink/70">{{ __($row['what']) }}</p>
+                <li class="flex flex-col gap-2 rounded-[24px] bg-white p-[26px]" data-addon="{{ $row['key'] }}">
+                    <h3 class="text-lg font-bold">{{ __($row['name']) }}</h3>
+                    <p class="ri-headline text-2xl text-track">{{ $row['price'] }}</p>
+                    <p class="text-[15px] leading-relaxed text-muted">{{ __($row['what']) }}</p>
                     @if ($row['note'])
-                        <p class="mt-2 text-xs text-ink/50">{{ $row['note'] }}</p>
+                        <p class="text-sm font-semibold text-track-deep">{{ $row['note'] }}</p>
                     @endif
                 </li>
             @endforeach
         </ul>
-        <div class="mt-10 hidden overflow-x-auto border-2 border-ink bg-white md:block">
-            <table class="min-w-full text-sm" data-addons-table>
-                <thead>
-                    <tr class="border-b-2 border-ink text-left text-xs font-semibold uppercase tracking-[0.16em] text-ink/60">
-                        <th scope="col" class="p-4">{{ __('Add-on') }}</th>
-                        <th scope="col" class="p-4">{{ __('Price') }}</th>
-                        <th scope="col" class="p-4">{{ __('What you get') }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-ink/10">
-                    @foreach ($addonRows as $row)
-                        <tr data-addon="{{ $row['key'] }}">
-                            <th scope="row" class="p-4 text-left font-display text-xl font-bold uppercase">{{ __($row['name']) }}</th>
-                            <td class="whitespace-nowrap p-4 font-display text-xl font-extrabold text-heat">{{ $row['price'] }}</td>
-                            <td class="p-4 text-ink/75">
-                                {{ __($row['what']) }}
-                                @if ($row['note'])
-                                    <span class="mt-1 block text-xs text-ink/50">{{ $row['note'] }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @if ($pack)
-            <p class="mt-4 text-sm text-ink/60">{{ __(':name: :what Quoted by Indefine.', ['name' => __($pack['name']), 'what' => __($pack['description'])]) }}</p>
-        @endif
     </section>
 
-    @include('marketing.partials.cta-band')
+    <section class="mx-auto grid max-w-[1280px] gap-5 px-5 pb-20 sm:px-10 md:grid-cols-2">
+        <div class="flex flex-col gap-2 rounded-[24px] bg-white p-[26px]" data-overage>
+            <h3 class="text-lg font-bold">{{ __('Need more places?') }}</h3>
+            <p class="text-[15px] leading-relaxed text-muted">{{ __('Buy a participant pack for one race when entries go past your plan’s cap. Your page keeps taking entries.') }}</p>
+            @if ($pack)
+                <p class="text-[15px] leading-relaxed text-muted">{{ __('Or upgrade to a season plan for more races and bigger caps, or ask Indefine for a Custom quote.') }}</p>
+            @endif
+        </div>
+        <div class="flex flex-col gap-2 rounded-[24px] bg-white p-[26px]">
+            <h3 class="text-lg font-bold">{{ __('What happens after the trial?') }}</h3>
+            <p class="text-[15px] leading-relaxed text-muted">{{ __('Pick a plan and pay once. Nothing is charged during the trial, and you don’t need a card to start.') }}</p>
+            @if (\App\Saas\Trial::stubbed())
+                <p class="text-[15px] leading-relaxed text-muted">{{ __('Plan upgrades go to Indefine as a request, and nothing is charged automatically. Participant packs and add-ons are bought from Plan & billing.') }}</p>
+            @endif
+        </div>
+    </section>
 @endsection

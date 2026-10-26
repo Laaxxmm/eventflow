@@ -81,7 +81,7 @@ beforeEach(fn () => Storage::fake('public'));
 it('shows the five-step wizard with sport packs and template previews', function () {
     $this->actingAs(organiser())->get('/organiser/events/create')
         ->assertOk()
-        ->assertSeeInOrder(['1. Basics', '2. Sport pack', '3. Page design', '4. Branding', '5. Publish'])
+        ->assertSeeInOrder(['1. Basics', '2. Sport pack', '3. Page design', '4. Logo, photo and colours', '5. Review and publish'])
         ->assertSee('Gun Lap')->assertSee('Stadium Split')->assertSee('Equipment Close')->assertSee('Night Circuit')->assertSee('Heritage Crest')
         ->assertSee('Need a custom template?')
         ->assertSee('transparent background');

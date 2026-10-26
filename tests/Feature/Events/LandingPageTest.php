@@ -11,7 +11,7 @@ it('renders the branded marathon landing', function () {
 
     $this->get('/demo-runners/bengaluru-city-marathon-2027')
         ->assertOk()
-        ->assertSee('--brand-primary:#d9ff45', false)
+        ->assertSee('--brand-primary:#4b3fe0', false)
         ->assertSee('Run the Garden City')
         ->assertSee('Half Marathon (21.1K)')
         ->assertSee('₹1,499')

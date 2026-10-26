@@ -22,7 +22,7 @@ function signupPayload(array $overrides = []): array
 test('registration screen can be rendered', function () {
     $this->get('/register')
         ->assertOk()
-        ->assertSee('Organization name');
+        ->assertSee('Organisation name');
 });
 
 test('signup creates an org with a slug and makes the organiser its owner', function () {

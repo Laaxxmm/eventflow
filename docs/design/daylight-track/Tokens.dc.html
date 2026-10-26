@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Daylight Track tokens and components</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Cormorant+Garamond:wght@700&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #121A33; background: #F3F5FA">
+<div style="max-width: 1280px; margin: 0 auto; padding: 48px 40px 80px; display: flex; flex-direction: column; gap: 48px">
+
+<header style="display: flex; flex-direction: column; gap: 10px">
+<h1 class="d" style="margin: 0; font-size: 56px">Daylight Track</h1>
+<p style="margin: 0; max-width: 48rem; font-size: 18px; line-height: 1.55; color: #4A5372">The replacement values for Race Ink. Swap them into the <code>--ri-*</code> variables in <code>resources/css/app.css</code>; the Tailwind names (<code>bg-heat</code>, <code>text-ink</code>) keep working. Every value here is a proposal until you approve it.</p>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<h2 class="d" style="margin: 0; font-size: 30px">Colour</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px">
+<sc-for list="{{ colors }}" as="c" hint-placeholder-count="12">
+<div style="background: #FFFFFF; border-radius: 22px; padding: 10px; display: flex; flex-direction: column; gap: 10px">
+<div style="height: 90px; border-radius: 14px; background: {{ c.hex }}; box-shadow: inset 0 0 0 1px rgba(18,26,51,.08)"></div>
+<div style="padding: 0 6px 6px; display: flex; flex-direction: column; gap: 3px">
+<strong style="font-size: 15px">{{ c.name }}</strong>
+<code style="color: #3B4463">{{ c.hex }} · {{ c.token }}</code>
+<span style="font-size: 13px; line-height: 1.45; color: #4A5372">{{ c.use }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 22px; overflow-x: auto">
+<h3 style="margin: 0 0 12px; font-size: 16px">Contrast of the pairs we use (WCAG 2.1)</h3>
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #4A5372; font-size: 13px"><th scope="col" style="padding: 8px 0; font-weight: 600">Text on background</th><th scope="col" style="font-weight: 600">Ratio</th><th scope="col" style="font-weight: 600">Where</th></tr></thead>
+<tbody>
+<sc-for list="{{ pairs }}" as="p" hint-placeholder-count="10">
+<tr style="border-top: 1px solid #EEF0F6"><td style="padding: 10px 0"><span style="display: inline-block; padding: 4px 10px; border-radius: 8px; font-weight: 600; background: {{ p.bg }}; color: {{ p.fg }}">{{ p.label }}</span></td><td style="font-weight: 700">{{ p.ratio }}</td><td style="color: #4A5372">{{ p.where }}</td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<h2 class="d" style="margin: 0; font-size: 30px">Type</h2>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 18px">
+<p style="margin: 0; font-size: 15px; color: #4A5372">Archivo, width axis 118, weight 800, letter-spacing −0.02em, sentence case, for headings and numbers. Inter 400 to 700 for everything else. Self-host both through <code>@fontsource</code> as today (Archivo variable replaces Barlow Condensed). Heritage Crest and two certificate designs use Cormorant Garamond 700.</p>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">Hero, clamp 46–80px</code><span class="d" style="font-size: 64px; line-height: 1">Your race online</span></div>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">Section, 34–52px</code><span class="d" style="font-size: 44px; line-height: 1.05">Pick your distance</span></div>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">App page title, 40px</code><span class="d" style="font-size: 40px">Participants</span></div>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">Card title, Inter 18/700</code><span style="font-size: 18px; font-weight: 700">Change template</span></div>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">Body, Inter 15–19/400</code><span style="font-size: 17px; line-height: 1.55">Runners pay by UPI or card. The money goes to your account.</span></div>
+<div style="display: flex; align-items: baseline; gap: 24px; border-top: 1px solid #EEF0F6; padding-top: 14px"><code style="width: 160px; flex: none; color: #4A5372">Small, Inter 13/500</code><span style="font-size: 13px; font-weight: 500; color: #4A5372">412 places left</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<h2 class="d" style="margin: 0; font-size: 30px">Shape and space</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+<div style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px"><strong>Corner radius</strong>
+<div style="display: flex; gap: 12px; align-items: flex-end"><span style="width: 56px; height: 56px; border-radius: 12px; background: #ECEAFF"></span><span style="width: 56px; height: 56px; border-radius: 22px; background: #ECEAFF"></span><span style="width: 56px; height: 56px; border-radius: 28px; background: #ECEAFF"></span><span style="width: 80px; height: 44px; border-radius: 999px; background: #4B3FE0"></span></div>
+<span style="font-size: 13px; color: #4A5372; line-height: 1.5">12 inputs and rows · 22 to 24 cards · 28 to 36 big panels · pill for every button, tab and badge</span></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px"><strong>Spacing</strong>
+<span style="font-size: 13px; color: #4A5372; line-height: 1.5">4-point scale. Gaps 8, 12, 16, 20, 24. Card padding 22 to 28. Page gutter 40 desktop, 16 to 20 phone. Max content width 1280.</span></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px"><strong>Depth</strong>
+<span style="font-size: 13px; color: #4A5372; line-height: 1.5">Flat white cards on chalk, no border. Shadow only on things that float: the pass, primary buttons, phone frames. <code>0 30px 60px -30px rgba(18,26,51,.5)</code></span></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 22px; display: flex; flex-direction: column; gap: 12px"><strong>Motion</strong>
+<span style="font-size: 13px; color: #4A5372; line-height: 1.5">One moment per page: the hero track, medal or seal. Easing <code>cubic-bezier(.2,.7,.2,1)</code>, 350 to 700 ms. All of it stops under prefers-reduced-motion.</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<h2 class="d" style="margin: 0; font-size: 30px">Components</h2>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><code style="width: 160px; color: #4A5372">x-ri.button</code>
+<span style="background: #4B3FE0; color: #FFFFFF; padding: 14px 22px; border-radius: 999px; font-weight: 700">Primary</span>
+<span style="background: #121A33; color: #FFFFFF; padding: 14px 22px; border-radius: 999px; font-weight: 600">Ink</span>
+<span style="background: #F2A93B; color: #121A33; padding: 14px 22px; border-radius: 999px; font-weight: 700">Race-page Register</span>
+<span style="border: 1px solid #C5CBDB; color: #121A33; padding: 13px 22px; border-radius: 999px; font-weight: 600">Secondary</span>
+<span style="background: #F3F5FA; color: #121A33; padding: 14px 22px; border-radius: 999px; font-weight: 600">Quiet</span>
+<span style="color: #A12A2A; padding: 14px 8px; font-weight: 600">Danger text</span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><code style="width: 160px; color: #4A5372">x-ri.chip (status)</code>
+<span style="font-size: 12px; font-weight: 700; background: #F2A93B; color: #121A33; padding: 5px 12px; border-radius: 999px">Live</span>
+<span style="font-size: 12px; font-weight: 700; background: #E3F4EE; color: #0B4A38; padding: 5px 12px; border-radius: 999px">Paid</span>
+<span style="font-size: 12px; font-weight: 700; background: #FDF0DA; color: #6B4A12; padding: 5px 12px; border-radius: 999px">Unpaid</span>
+<span style="font-size: 12px; font-weight: 700; background: #ECEAFF; color: #2B2390; padding: 5px 12px; border-radius: 999px">Trial</span>
+<span style="font-size: 12px; font-weight: 700; background: #DDE2EE; color: #3B4463; padding: 5px 12px; border-radius: 999px">Ended</span>
+<span style="font-size: 12px; font-weight: 700; background: #FBE4E4; color: #6E1414; padding: 5px 12px; border-radius: 999px">Suspended</span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><code style="width: 160px; color: #4A5372">Places-left bar</code><div style="flex: 1; max-width: 360px"><div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px"><strong>Half marathon</strong><span style="color: #8A5300; font-weight: 600">9 left</span></div><div aria-hidden="true" style="height: 8px; border-radius: 4px; background: #ECEAFF"><div style="width: 98%; height: 100%; border-radius: 4px; background: #F2A93B"></div></div></div><span style="font-size: 13px; color: #4A5372">Indigo fill, marigold once 10 or fewer are left, grey when full.</span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px"><code style="width: 160px; color: #4A5372">Photo slot</code><div style="position: relative; width: 260px; height: 140px; border-radius: 22px; background: linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)"><span style="position: absolute; left: 12px; bottom: 12px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.88); padding: 5px 9px; border-radius: 999px">Photo: brief here</span></div><span style="font-size: 13px; color: #4A5372; max-width: 30rem; line-height: 1.5">Extends <code>x-ri.photo</code>. Organiser upload first, then the sport set, then this tinted fallback. Bottom scrim <code>rgba(18,26,51,.55)</code> under any text on a photo.</span></div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 18px">
+<h2 class="d" style="margin: 0; font-size: 30px">Template palettes</h2>
+<p style="margin: -6px 0 0; font-size: 15px; color: #4A5372">Defaults before an organiser’s brand colours are applied. <code>App\Landing\Theme</code> keeps doing the contrast fixes it does today.</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px">
+<sc-for list="{{ tpls }}" as="t" hint-placeholder-count="5">
+<div style="background: #FFFFFF; border-radius: 22px; padding: 10px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; height: 70px; border-radius: 14px; overflow: hidden"><span style="flex: 2; background: {{ t.a }}"></span><span style="flex: 1; background: {{ t.b }}"></span><span style="flex: 1; background: {{ t.c }}"></span></div>
+<div style="padding: 0 6px 6px"><strong style="display: block; font-size: 15px">{{ t.name }}</strong><code style="color: #3B4463; font-size: 12px">{{ t.codes }}</code></div>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      colors: [
+        { name: 'Chalk', hex: '#F3F5FA', token: '--ri-paper', use: 'Page background everywhere. Replaces the cream paper.' },
+        { name: 'White', hex: '#FFFFFF', token: 'surface', use: 'Cards, tables, forms, sidebar.' },
+        { name: 'Navy ink', hex: '#121A33', token: '--ri-ink', use: 'Text, ink buttons. Replaces near-black.' },
+        { name: 'Slate', hex: '#4A5372', token: 'new --ri-muted', use: 'Secondary text and labels.' },
+        { name: 'Mist', hex: '#DDE2EE', token: '--ri-mist', use: 'Borders, empty bars, ended states.' },
+        { name: 'Indigo', hex: '#4B3FE0', token: '--ri-track', use: 'Brand, primary buttons, links, active progress.' },
+        { name: 'Deep indigo', hex: '#2B2390', token: 'new --ri-track-deep', use: 'Text on lilac, pressed states.' },
+        { name: 'Lilac', hex: '#ECEAFF', token: 'new --ri-lilac', use: 'Selected items, active nav, soft panels.' },
+        { name: 'Marigold', hex: '#F2A93B', token: '--ri-heat', use: 'Small highlights and race-page Register only. Always with navy text.' },
+        { name: 'Dusk', hex: '#1B2244', token: '--ri-midnight', use: 'Night Circuit hero and certificate only. Never a full page.' },
+        { name: 'Success', hex: '#1E7A5C', token: 'new, on #E3F4EE', use: 'Paid, connected, checked in.' },
+        { name: 'Danger', hex: '#A12A2A', token: 'new, on #FBE4E4', use: 'Destructive actions, rejected passes.' }
+      ],
+      pairs: [
+        { label: 'Navy on chalk', fg: '#121A33', bg: '#F3F5FA', ratio: '15.8 : 1', where: 'All body text' },
+        { label: 'Slate on chalk', fg: '#4A5372', bg: '#F3F5FA', ratio: '6.9 : 1', where: 'Secondary text' },
+        { label: 'Slate on white', fg: '#4A5372', bg: '#FFFFFF', ratio: '7.6 : 1', where: 'Labels in cards' },
+        { label: 'White on indigo', fg: '#FFFFFF', bg: '#4B3FE0', ratio: '6.8 : 1', where: 'Primary buttons, hero panels' },
+        { label: 'Lavender on indigo', fg: '#E4E1FF', bg: '#4B3FE0', ratio: '5.3 : 1', where: 'Secondary text on indigo' },
+        { label: 'Navy on marigold', fg: '#121A33', bg: '#F2A93B', ratio: '8.6 : 1', where: 'Register, Live badge' },
+        { label: 'Deep indigo on lilac', fg: '#2B2390', bg: '#ECEAFF', ratio: '10.2 : 1', where: 'Active nav, selected' },
+        { label: 'Amber text on cream', fg: '#8A5300', bg: '#FDF0DA', ratio: '5.6 : 1', where: 'Places-left warnings' },
+        { label: 'Forest on mint', fg: '#0B4A38', bg: '#E3F4EE', ratio: '9.0 : 1', where: 'Paid, success' },
+        { label: 'Marigold on dusk', fg: '#F2A93B', bg: '#1B2244', ratio: '7.7 : 1', where: 'Night Circuit date' }
+      ],
+      tpls: [
+        { name: 'Gun Lap', a: '#4B3FE0', b: '#F2A93B', c: '#FFFFFF', codes: '#4B3FE0 #F2A93B #FFFFFF' },
+        { name: 'Stadium Split', a: '#F2A93B', b: '#4B3FE0', c: '#F3F5FA', codes: '#F2A93B #4B3FE0 #F3F5FA' },
+        { name: 'Equipment Close', a: '#0B4A38', b: '#6FC3A3', c: '#F4FAF7', codes: '#0B4A38 #6FC3A3 #F4FAF7' },
+        { name: 'Night Circuit', a: '#1B2244', b: '#F2A93B', c: '#F1F2F9', codes: '#1B2244 #F2A93B #F1F2F9' },
+        { name: 'Heritage Crest', a: '#7A1F2B', b: '#B79E73', c: '#FBFAF6', codes: '#7A1F2B #B79E73 #FBFAF6' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

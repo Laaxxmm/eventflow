@@ -16,8 +16,9 @@ it('marks the hero Register button and ships the sticky bar that waits for it', 
         ->toContain('.js .ri-sticky-register:not(.is-on)');
 })->with('landing templates');
 
-it('gives Gun Lap one quiet line of facts on phones instead of stacked boxes', function () {
+it('gives Gun Lap a medal card with one quiet line of facts on phones', function () {
     $this->get(route('templates.show', 'gun-lap'))->assertOk()
+        ->assertSee('Finisher medal')
         ->assertSee('data-hero-meta', false)
         ->assertSee('Entries from')
         ->assertSeeInOrder(['data-hero-meta', 'Limited bibs', 'hidden flex-wrap gap-2 sm:flex'], false);

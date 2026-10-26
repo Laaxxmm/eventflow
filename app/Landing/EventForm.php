@@ -228,7 +228,7 @@ final class EventForm
                 : '',
             'venue' => $config['venue'] ?? '',
             'status' => $status,
-            'branding' => ($config['branding'] ?? []) + ['primary' => '#d9ff45', 'secondary' => '#ff6e61', 'logo' => null],
+            'branding' => ($config['branding'] ?? []) + ['primary' => '#4b3fe0', 'secondary' => '#f2a93b', 'logo' => null],
             'hero' => ($config['hero'] ?? []) + ['title' => '', 'subtitle' => null, 'image' => null, 'og_image' => null],
             'registration_closes' => isset($config['registration_closes'])
                 ? CarbonImmutable::parse(ConfigCompiler::withOffset($config['registration_closes']))->setTimezone(ConfigCompiler::TIMEZONE)->format('Y-m-d\TH:i')

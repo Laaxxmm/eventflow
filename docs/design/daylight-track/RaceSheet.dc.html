@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Race sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1200px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="racesheets" hint-size="248px,1200px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><p style="margin: 0; font-size: 14px; color: #4A5372">Kanteerava Skate Fest, Sun 11 Oct 2026</p><h1 class="d" style="margin: 4px 0 0; font-size: 40px">Race sheet</h1><p style="margin: 6px 0 0; font-size: 15px; color: #4A5372">Heats of up to 8, grouped by category and gender. 316 paid entrants in 42 heats.</p></div>
+<div style="display: flex; gap: 8px"><a href="#csv" style="background: #FFFFFF; border: 1px solid #DDE2EE; color: #121A33; text-decoration: none; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Export CSV</a><a href="#pdf" style="background: #121A33; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px">Print PDF</a></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" aria-pressed="true" style="font: inherit; cursor: pointer; border: 0; background: #121A33; color: #FFFFFF; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">All categories</button>
+<button type="button" aria-pressed="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Under 8</button>
+<button type="button" aria-pressed="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">8 to 10</button>
+<button type="button" aria-pressed="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">11 to 14</button>
+<button type="button" aria-pressed="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Senior</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 16px">
+<sc-for list="{{ heats }}" as="h" hint-placeholder-count="2">
+<section style="background: #FFFFFF; border-radius: 24px; padding: 20px 22px">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px"><h2 style="margin: 0; display: flex; align-items: center; gap: 12px; font-size: 17px"><span class="d" style="width: 44px; height: 44px; border-radius: 14px; background: #ECEAFF; color: #2B2390; display: flex; align-items: center; justify-content: center; font-size: 18px">{{ h.no }}</span>{{ h.title }}</h2><span style="font-size: 13px; color: #4A5372">{{ h.count }}</span></div>
+<div style="overflow-x: auto">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #4A5372; font-size: 12px"><th scope="col" style="padding: 8px 0; font-weight: 600">Lane</th><th scope="col" style="font-weight: 600">Pass no</th><th scope="col" style="font-weight: 600">Name</th><th scope="col" style="font-weight: 600">Age</th><th scope="col" style="font-weight: 600; text-align: right">Checked in</th></tr></thead>
+<tbody>
+<sc-for list="{{ h.rows }}" as="r" hint-placeholder-count="8">
+<tr style="border-top: 1px solid #EEF0F6"><td class="d" style="padding: 10px 0; font-size: 16px; color: #4B3FE0">{{ r.lane }}</td><td style="color: #3B4463">{{ r.pass }}</td><td style="font-weight: 600">{{ r.name }}</td><td>{{ r.age }}</td><td style="text-align: right; font-weight: 600; color: {{ r.inInk }}">{{ r.in }}</td></tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+</sc-for>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (rows) => rows.map((r, i) => ({ lane: i + 1, pass: r[0], name: r[1], age: r[2], in: r[3] ? 'Yes' : 'No', inInk: r[3] ? '#1E7A5C' : '#8A5300' }));
+    return { heats: [
+      { no: '1', title: 'Under 8, girls, 200 m quad', count: '8 skaters', rows: mk([['EF-4K7P2D9Q', 'Aadya S', 7, 1], ['EF-1M3Z8R5T', 'Ira Joshi', 7, 1], ['EF-9C2V6B4N', 'Myra Reddy', 6, 1], ['EF-7L5Q1W8E', 'Tara Bhat', 7, 0], ['EF-3H8F2K6Y', 'Riya Kamath', 6, 1], ['EF-6D1N9S3J', 'Anvi Rao', 7, 1], ['EF-2B4X7G5U', 'Kiara M', 6, 1], ['EF-8T6R3P1A', 'Zoya Ali', 7, 1]]) },
+      { no: '2', title: 'Under 8, boys, 200 m quad', count: '7 skaters', rows: mk([['EF-5Q9K2L7M', 'Vihaan P', 7, 1], ['EF-0W3E8R6T', 'Arnav K', 6, 1], ['EF-4Y7U1I5O', 'Kabir S', 7, 1], ['EF-2P9A6S3D', 'Reyansh G', 7, 0], ['EF-8F1G4H7J', 'Advik N', 6, 1], ['EF-6K3L9Z2X', 'Ishaan V', 7, 1], ['EF-1C5V8B4N', 'Shaurya D', 6, 1]]) }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

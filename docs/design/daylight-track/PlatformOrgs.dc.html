@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Organisations (Indefine admin)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1100px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="orgs" hint-size="248px,1100px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><p style="margin: 0; font-size: 14px; color: #4A5372">Indefine only</p><h1 class="d" style="margin: 4px 0 0; font-size: 40px">Organisations</h1></div>
+<label><span style="position: absolute; left: -9999px">Search organisations</span><input type="search" placeholder="Name, slug or owner email" style="font: inherit; font-size: 14px; width: 280px; padding: 12px 16px; border-radius: 999px; border: 1px solid #DDE2EE; background: #FFFFFF"></label>
+</div>
+<section aria-label="Totals" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Organisations</span><p class="d" style="margin: 6px 0 0; font-size: 30px">[COUNT]</p></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">On trial</span><p class="d" style="margin: 6px 0 0; font-size: 30px">[COUNT]</p></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Paying</span><p class="d" style="margin: 6px 0 0; font-size: 30px">[COUNT]</p></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Open requests</span><p class="d" style="margin: 6px 0 0; font-size: 30px">[COUNT]</p></div>
+</section>
+<div style="background: #FFFFFF; border-radius: 24px; overflow-x: auto">
+<table style="width: 100%; min-width: 960px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #4A5372; font-size: 13px"><th scope="col" style="padding: 16px 20px; font-weight: 600">Organisation</th><th scope="col" style="font-weight: 600">Plan</th><th scope="col" style="font-weight: 600">Valid until</th><th scope="col" style="font-weight: 600">Races</th><th scope="col" style="font-weight: 600">Status</th><th scope="col" style="font-weight: 600; text-align: right; padding-right: 20px">Actions</th></tr></thead>
+<tbody>
+<sc-for list="{{ orgs }}" as="o" hint-placeholder-count="6">
+<tr style="border-top: 1px solid #EEF0F6">
+<td style="padding: 14px 20px"><strong style="display: block">{{ o.name }}</strong><span style="color: #4A5372; font-size: 13px">{{ o.owner }}</span></td>
+<td>{{ o.plan }}</td>
+<td style="color: #3B4463">{{ o.until }}</td>
+<td>{{ o.races }}</td>
+<td><span style="font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: {{ o.bg }}; color: {{ o.ink }}">{{ o.status }}</span></td>
+<td style="text-align: right; padding-right: 20px; white-space: nowrap"><a href="#plan" style="font-weight: 600; margin-right: 14px">Activate plan</a><a href="#pack" style="font-weight: 600; margin-right: 14px">Grant pack</a><a href="#suspend" style="font-weight: 600; color: #A12A2A">{{ o.toggle }}</a></td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const S = {
+      active: { status: 'Active', bg: '#E3F4EE', ink: '#0B4A38', toggle: 'Suspend' },
+      trial: { status: 'Trial', bg: '#ECEAFF', ink: '#2B2390', toggle: 'Suspend' },
+      ended: { status: 'Trial ended', bg: '#FDF0DA', ink: '#6B4A12', toggle: 'Suspend' },
+      off: { status: 'Suspended', bg: '#FBE4E4', ink: '#6E1414', toggle: 'Restore' }
+    };
+    return { orgs: [
+      Object.assign({ name: 'Demo Runners', owner: 'priya@demorunners.in', plan: 'Club Season', until: '14-Aug-2027', races: '3 of 5' }, S.active),
+      Object.assign({ name: 'Deccan Wheelers', owner: 'rides@deccanwheelers.in', plan: 'Single Event', until: '20-Jan-2027', races: '1 of 1' }, S.active),
+      Object.assign({ name: 'Rink Sports Academy', owner: 'coach@rinksports.in', plan: 'Circuit Season', until: '01-Mar-2027', races: '7 of 25' }, S.active),
+      Object.assign({ name: 'Mysuru Athletic Club', owner: 'secretary@mac.org.in', plan: 'Single Event', until: '05-Nov-2026', races: '0 of 1' }, S.trial),
+      Object.assign({ name: 'Sunrise Sports Club', owner: 'hello@sunrise.club', plan: 'Single Event', until: '18-Oct-2026', races: '1 of 1' }, S.ended),
+      Object.assign({ name: 'Test Org 4', owner: 'qa@indefine.in', plan: 'Single Event', until: '-', races: '0 of 1' }, S.off)
+    ] };
+  }
+}
+</script>
+</body>
+</html>

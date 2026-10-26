@@ -1,22 +1,25 @@
 {{--
     Registration form generated from fields + distances + age_bands. $form: App\Landing\RegistrationForm
-    Race Ink styling, phone first: numbered sections, distance cards with the price on the right,
-    16px inputs (no iOS zoom), uppercase micro-labels and one full-width pay button.
+    Daylight Track (docs/design/daylight-track/Review.dc.html), phone first: one white card, distance
+    cards with the price on the right, 16px inputs (no iOS zoom), sentence-case labels, and a pay bar
+    that sticks to the bottom of the screen while the form is in view.
 --}}
 @php
     $preview = $preview ?? false;
-    $control = 'mt-2 block h-12 w-full rounded-none border-0 bg-paper px-4 text-base text-ink ring-1 ring-inset ring-ink/15 placeholder:text-ink/35 transition focus:bg-white focus:ring-2 focus:ring-ink';
-    $label = 'block text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-ink/60';
+    $control = 'mt-1.5 block h-12 w-full rounded-[14px] border-0 bg-white px-4 text-base text-ink ring-1 ring-inset ring-[#C5CBDB] placeholder:text-[#8A92AB] transition focus:ring-2 focus:ring-track';
+    $label = 'block text-sm font-semibold text-ink';
     $optional = fn (bool $required) => $required ? '' : ' · '.__('optional');
-    $step = fn (string $n, string $title) => '<p class="flex items-baseline gap-3 font-display text-xl font-bold uppercase tracking-[0.04em]"><span class="text-heat">'.$n.'</span><span>'.e($title).'</span></p>';
+    $step = fn (string $n, string $title) => '<p class="ri-headline text-[22px]">'.e($title).'</p>';
+    $prices = collect($config->distances)->mapWithKeys(fn ($d) => [$d->code => \App\View\LandingPage::inr($d->price_inr)]);
     $custom = $form->fields();
 @endphp
 <form method="POST" action="{{ $preview ? '#' : route('registrations.store', [$config->org, $config->slug]) }}" @if ($preview) onsubmit="return false" @endif
-      class="mt-6 space-y-10 bg-white p-5 text-left text-ink ring-1 ring-ink/10 shadow-[0_30px_60px_-30px_rgb(var(--ri-ink)/0.35)] sm:p-8" data-registration-form>
+      class="mt-6 space-y-8 rounded-[24px] bg-white p-[18px] pb-0 text-left text-ink sm:p-8 sm:pb-0" data-registration-form
+      x-data="{ prices: @js($prices), picked: @js(old('distance')) }">
     @csrf
 
     @if ($errors->any())
-        <div class="border-l-4 border-red-600 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert">
+        <div class="rounded-[14px] bg-[#FBE4E4] p-4 text-sm font-medium text-[#6E1414]" role="alert">
             {{ __('Please fix the highlighted fields.') }}
         </div>
     @endif
@@ -29,18 +32,16 @@
                 @php($full = ($remaining[$distance->code] ?? null) === 0)
                 @php($left = $remaining[$distance->code] ?? null)
                 <label @class([
-                    'group relative flex items-center gap-4 p-4 ring-1 ring-inset ring-ink/15 transition',
-                    'has-[:checked]:bg-ink has-[:checked]:text-paper has-[:checked]:ring-ink has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-heat',
-                    'cursor-pointer hover:ring-ink/40' => ! $full,
-                    'opacity-45' => $full,
+                    'group relative flex items-center gap-3.5 rounded-[20px] p-4 ring-2 ring-inset transition duration-200 ease-track',
+                    'bg-paper ring-transparent has-[:checked]:bg-lilac has-[:checked]:ring-track has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-[#F2A93B]',
+                    'cursor-pointer hover:ring-mist' => ! $full,
+                    'opacity-55' => $full,
                 ])>
-                    <input type="radio" name="distance" value="{{ $distance->code }}" class="peer sr-only" @checked(old('distance') === $distance->code) @disabled($full) required>
-                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-ink/30 group-has-[:checked]:ring-heat" aria-hidden="true">
-                        <span class="h-2.5 w-2.5 rounded-full bg-heat opacity-0 transition group-has-[:checked]:opacity-100"></span>
-                    </span>
+                    <input type="radio" name="distance" value="{{ $distance->code }}" x-model="picked" class="peer sr-only" @checked(old('distance') === $distance->code) @disabled($full) required>
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[13px] font-bold text-track-deep group-has-[:checked]:bg-track group-has-[:checked]:text-on-track" aria-hidden="true">{{ \Illuminate\Support\Str::limit(\App\View\LandingPage::numeral($distance), 5, '') }}</span>
                     <span class="min-w-0 flex-1">
-                        <span class="block font-display text-lg font-bold uppercase leading-tight">{{ $distance->label }}</span>
-                        <span class="mt-0.5 block text-xs text-ink/55 group-has-[:checked]:text-paper/65">
+                        <span class="block font-bold leading-tight">{{ $distance->label }}</span>
+                        <span @class(['mt-0.5 block text-[13px]', 'font-semibold text-warning' => ! $full && $left !== null && $left <= 10, 'text-muted' => $full || $left === null || $left > 10])>
                             @if ($full)
                                 {{ __('Full') }}
                             @elseif ($left !== null && $left <= 50)
@@ -50,7 +51,7 @@
                             @endif
                         </span>
                     </span>
-                    <span class="font-display text-xl font-extrabold">₹{{ number_format($distance->price_inr) }}</span>
+                    <span class="ri-headline text-xl">₹{{ number_format($distance->price_inr) }}</span>
                 </label>
             @endforeach
         </div>
@@ -84,7 +85,7 @@
                     <label for="dob" class="{{ $label }}">{{ __('Date of birth') }}{{ $optional($form->dobRequired()) }}</label>
                     <input id="dob" name="dob" type="date" class="{{ $control }}" value="{{ old('dob') }}" @required($form->dobRequired()) autocomplete="bday" max="{{ now()->toDateString() }}">
                     @if ($config->ageBands)
-                        <p class="mt-2 text-xs text-ink/55">{{ __('Your category is set by your age on race day (:range).', ['range' => $form->ageRange()]) }}</p>
+                        <p class="mt-2 rounded-[12px] bg-lilac px-3 py-2.5 text-[13px] text-track-deep">{{ __('Your category is set by your age on race day (:range).', ['range' => $form->ageRange()]) }}</p>
                     @endif
                     <x-input-error class="mt-2" :messages="$errors->get('dob')" />
                 </div>
@@ -105,8 +106,8 @@
                         @if ($field->type === 'checkbox' && $field->options === [])
                             <label for="{{ $id }}" class="flex items-start gap-3">
                                 <input type="hidden" name="{{ $name }}" value="0">
-                                <input id="{{ $id }}" type="checkbox" name="{{ $name }}" value="1" class="mt-0.5 h-5 w-5 rounded-none border-ink/30 text-heat focus:ring-heat" @checked($old) @required($field->required)>
-                                <span class="text-sm text-ink/80">{{ $field->label }}</span>
+                                <input id="{{ $id }}" type="checkbox" name="{{ $name }}" value="1" class="mt-0.5 h-5 w-5 rounded-[6px] border-[#C5CBDB] text-track focus:ring-track" @checked($old) @required($field->required)>
+                                <span class="text-sm text-ink">{{ $field->label }}</span>
                             </label>
                         @elseif (in_array($field->type, ['radio', 'checkbox'], true))
                             <fieldset>
@@ -119,7 +120,7 @@
                                             @else
                                                 <input type="checkbox" name="{{ $name }}[]" value="{{ $option }}" class="peer sr-only" @checked(in_array($option, (array) $old, true))>
                                             @endif
-                                            <span class="inline-flex h-11 items-center px-4 text-sm font-medium ring-1 ring-inset ring-ink/15 transition peer-checked:bg-ink peer-checked:text-paper peer-checked:ring-ink peer-focus-visible:ring-2 peer-focus-visible:ring-heat">{{ $option }}</span>
+                                            <span class="inline-flex h-11 items-center rounded-full px-4 text-sm font-semibold ring-1 ring-inset ring-[#C5CBDB] transition peer-checked:bg-lilac peer-checked:text-track-deep peer-checked:ring-2 peer-checked:ring-track peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-[#F2A93B]">{{ $option }}</span>
                                         </label>
                                     @endforeach
                                 </div>
@@ -146,12 +147,16 @@
         </fieldset>
     @endif
 
-    <div class="space-y-3 border-t border-ink/10 pt-6">
-        <button type="submit" class="inline-flex w-full items-center justify-between gap-3 bg-heat px-6 py-4 font-display text-xl font-bold uppercase tracking-[0.06em] text-on-heat transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-heat focus-visible:ring-offset-2">
-            <span>{{ __('Continue to payment') }}</span>
-            <span aria-hidden="true">→</span>
-        </button>
-        <p class="flex items-center gap-2 text-xs text-ink/55">
+    {{-- Pay bar: sticks to the bottom of the screen while the form is on it. --}}
+    <div class="sticky bottom-0 z-10 sm:static -mx-[18px] space-y-2 rounded-b-[24px] border-t border-mist bg-white px-4 pb-4 pt-3.5 sm:-mx-8 sm:px-8" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+        <div class="flex items-center justify-between gap-3">
+            <span class="flex flex-col">
+                <span class="text-[13px] text-muted">{{ __('To pay') }}</span>
+                <span class="ri-headline text-2xl" x-text="prices[picked] ?? @js(__('from :price', ['price' => \App\View\LandingPage::inr(min(array_map(fn ($d) => $d->price_inr, $config->distances)))]))"></span>
+            </span>
+            <button type="submit" class="ri-glow inline-flex min-h-[52px] items-center justify-center rounded-full bg-track px-[22px] text-[15px] font-bold text-on-track transition duration-200 ease-track hover:brightness-95">{{ __('Continue to payment') }}</button>
+        </div>
+        <p class="flex items-center gap-2 text-xs text-muted">
             <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a4 4 0 0 0-4 4v2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V6a4 4 0 0 0-4-4Zm2 6V6a2 2 0 1 0-4 0v2h4Z" clip-rule="evenodd"/></svg>
             {{ __('Your place is held for :minutes minutes while you pay.', ['minutes' => \App\Landing\Capacity::PENDING_HOLD_MINUTES]) }}
         </p>

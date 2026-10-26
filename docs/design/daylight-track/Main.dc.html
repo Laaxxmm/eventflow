@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EventFlow homepage, Daylight Track</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.ef-display{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+@keyframes ef-spin{from{transform:rotateX(58deg) rotateZ(-20deg)}to{transform:rotateX(58deg) rotateZ(340deg)}}
+@keyframes ef-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes ef-run{from{offset-distance:0%}to{offset-distance:100%}}
+.ef-spin{animation:ef-spin 90s linear infinite}
+.ef-float{animation:ef-float 6s ease-in-out infinite}
+.ef-runner{animation:ef-run 14s linear infinite}
+.ef-bib{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.ef-bib:hover{transform:translateY(-8px) rotate(0deg) !important;box-shadow:0 30px 60px -28px rgba(43,35,144,.45)}
+.ef-tpl-btn:focus-visible,.ef-cta:focus-visible{outline:3px solid #F2A93B;outline-offset:3px}
+@media (max-width:760px){.ef-stage-scale{transform:scale(.56)}.ef-fan-scale{transform:scale(.7)}}
+@media (prefers-reduced-motion:reduce){.ef-spin,.ef-float,.ef-runner{animation:none}}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #121A33; background: #F3F5FA; overflow: hidden">
+
+<!-- Nav -->
+<header style="max-width: 1280px; margin: 0 auto; padding: 24px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="#top" style="display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: #121A33">
+<span class="ef-display" style="font-size: 24px">EventFlow</span>
+<span style="font-size: 13px; color: #4A5372">by Indefine</span>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 15px; font-weight: 500">
+<a href="Templates.dc.html" style="color: #121A33; text-decoration: none">Templates</a>
+<a href="Pricing.dc.html" style="color: #121A33; text-decoration: none">Pricing</a>
+<a href="Login.dc.html" style="color: #121A33; text-decoration: none">Log in</a>
+<a class="ef-cta" href="Signup.dc.html" style="background: #121A33; color: #FFFFFF; text-decoration: none; padding: 12px 20px; border-radius: 999px; font-weight: 600">Start free trial</a>
+</nav>
+</header>
+
+<!-- Hero -->
+<section id="top" style="max-width: 1280px; margin: 0 auto; padding: 40px 40px 56px; display: flex; flex-wrap: wrap; align-items: center; gap: 32px">
+<div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+<p style="margin: 0; display: inline-flex; align-self: flex-start; align-items: center; gap: 10px; padding: 8px 14px 8px 8px; background: #FFFFFF; border: 1px solid #DDE2EE; border-radius: 999px; font-size: 14px; color: #4A5372">
+<span style="width: 22px; height: 22px; border-radius: 999px; background: #ECEAFF; display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4B3FE0" stroke-width="2.5" stroke-linecap="round"><path d="M4 12h16M14 6l6 6-6 6"></path></svg>
+</span>
+Race sites for running, cycling and skating organisers in India
+</p>
+<h1 class="ef-display" style="margin: 0; font-size: clamp(46px, 5.4vw, 80px); line-height: 1.0">Put your race online in an hour.</h1>
+<p style="margin: 0; max-width: 34rem; font-size: 19px; line-height: 1.55; color: #4A5372">A race page runners trust, entries paid straight into your Razorpay or Cashfree account, and a QR pass in every runner’s inbox.</p>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px">
+<a class="ef-cta" href="#trial" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 18px 30px; border-radius: 999px; font-size: 17px; font-weight: 600; box-shadow: 0 16px 32px -16px rgba(75,63,224,.7)">Start your free trial</a>
+<a href="#templates" style="color: #121A33; font-weight: 600; font-size: 16px; text-decoration: underline; text-decoration-color: #F2A93B; text-decoration-thickness: 2px; text-underline-offset: 6px">See the templates</a>
+</div>
+<p style="margin: 0; font-size: 14px; color: #4A5372">14 days free. No card, no call, and we never take a cut of your entry fees.</p>
+</div>
+
+<!-- 3D stage -->
+<div onMouseMove="{{ onTilt }}" onMouseLeave="{{ onTiltReset }}" style="flex: 1 1 600px; min-width: 0; height: 620px; position: relative; display: flex; align-items: center; justify-content: center">
+<div class="ef-stage-scale" style="width: 600px; height: 340px; flex: none; perspective: 1600px">
+<div style="position: relative; width: 600px; height: 340px; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.2,.7,.2,1); transform: rotateX({{ rx }}deg) rotateY({{ ry }}deg)">
+
+<div class="ef-spin" style="position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(58deg) rotateZ(-20deg)">
+<div aria-hidden="true" style="position: absolute; inset: 10px; border-radius: 170px; background: rgba(43,35,144,.35); filter: blur(28px); transform: translateZ(-70px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #1E1870; transform: translateZ(-18px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #221B7E; transform: translateZ(-15px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #261F8C; transform: translateZ(-12px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #2B2390; transform: translateZ(-9px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #3027A0; transform: translateZ(-6px)"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; border-radius: 170px; background: #352CB4; transform: translateZ(-3px)"></div>
+<svg role="img" aria-label="A running track with runners moving round the lanes" width="600" height="340" viewBox="0 0 600 340" style="position: absolute; inset: 0; display: block">
+<rect x="0" y="0" width="600" height="340" rx="170" fill="#4B3FE0"></rect>
+<rect x="12" y="12" width="576" height="316" rx="158" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1.4"></rect>
+<rect x="24" y="24" width="552" height="292" rx="146" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1.4"></rect>
+<rect x="36" y="36" width="528" height="268" rx="134" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1.4"></rect>
+<rect x="48" y="48" width="504" height="244" rx="122" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1.4"></rect>
+<rect x="60" y="60" width="480" height="220" rx="110" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="1.4"></rect>
+<rect x="72" y="72" width="456" height="196" rx="98" fill="#F7F8FC"></rect>
+<rect x="150" y="104" width="300" height="132" rx="6" fill="none" stroke="#4B3FE0" stroke-opacity=".18" stroke-width="2"></rect>
+<line x1="300" y1="104" x2="300" y2="236" stroke="#4B3FE0" stroke-opacity=".18" stroke-width="2"></line>
+<circle cx="300" cy="170" r="26" fill="none" stroke="#4B3FE0" stroke-opacity=".18" stroke-width="2"></circle>
+<rect x="398" y="268" width="6" height="72" fill="#FFFFFF"></rect>
+<rect x="405" y="268" width="4" height="72" fill="#F2A93B"></rect>
+</svg>
+<div class="ef-runner" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 14px; height: 14px; border-radius: 999px; background: #F2A93B; box-shadow: 0 0 0 4px rgba(242,169,59,.3); offset-path: path('M 170 18 H 430 A 152 152 0 0 1 430 322 H 170 A 152 152 0 0 1 170 18 Z'); offset-rotate: 0deg; animation-duration: 13s; transform: translateZ(2px)"></div>
+<div class="ef-runner" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 14px; height: 14px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 0 0 4px rgba(255,255,255,.3); offset-path: path('M 170 30 H 430 A 140 140 0 0 1 430 310 H 170 A 140 140 0 0 1 170 30 Z'); offset-rotate: 0deg; animation-duration: 15s; animation-delay: -5s; transform: translateZ(2px)"></div>
+<div class="ef-runner" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 14px; height: 14px; border-radius: 999px; background: #F2A93B; box-shadow: 0 0 0 4px rgba(242,169,59,.3); offset-path: path('M 170 54 H 430 A 116 116 0 0 1 430 286 H 170 A 116 116 0 0 1 170 54 Z'); offset-rotate: 0deg; animation-duration: 11s; animation-delay: -8s; transform: translateZ(2px)"></div>
+</div>
+
+<!-- Floating chips -->
+<div style="position: absolute; left: -36px; top: -40px; transform: translateZ(90px); transform-style: preserve-3d">
+<div style="background: #FFFFFF; border: 1px solid #DDE2EE; border-radius: 16px; padding: 12px 16px; box-shadow: 0 20px 40px -24px rgba(18,26,51,.45); display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 13px; color: #4A5372">Half marathon 21.1K</span>
+<span style="font-size: 15px; font-weight: 700; color: #121A33">9 places left</span>
+</div>
+</div>
+<div style="position: absolute; left: 30px; top: 290px; transform: translateZ(70px); transform-style: preserve-3d">
+<div style="background: #121A33; color: #FFFFFF; border-radius: 999px; padding: 10px 16px 10px 10px; box-shadow: 0 20px 40px -20px rgba(18,26,51,.6); display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600">
+<span style="width: 24px; height: 24px; border-radius: 999px; background: #F2A93B; display: inline-flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#121A33" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
+</span>
+₹1,499 paid by UPI
+</div>
+</div>
+
+<!-- Floating pass -->
+<div style="position: absolute; left: 340px; top: -150px; transform: translateZ(150px) rotateY(-16deg) rotateX(10deg) rotateZ(4deg); transform-style: preserve-3d">
+<div class="ef-float">
+<div style="width: 236px; background: #FFFFFF; border-radius: 22px; overflow: hidden; box-shadow: 0 50px 80px -30px rgba(18,26,51,.5), 0 0 0 1px rgba(18,26,51,.06)">
+<div style="background: #4B3FE0; color: #FFFFFF; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; opacity: .8">Race pass</span>
+<span class="ef-display" style="font-size: 17px; line-height: 1.15">Bengaluru City Marathon 2027</span>
+</div>
+<div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; gap: 8px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; color: #4A5372">Runner</span>
+<span style="font-size: 15px; font-weight: 700">Ananya Rao</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; text-align: right">
+<span style="font-size: 12px; color: #4A5372">Distance</span>
+<span style="font-size: 15px; font-weight: 700">21.1K</span>
+</div>
+</div>
+<div style="align-self: center; padding: 10px; border-radius: 12px; border: 1px solid #DDE2EE">
+<div aria-label="Sample QR code" role="img" style="display: grid; grid-template-columns: repeat(21, 6px); grid-auto-rows: 6px">
+<sc-for list="{{ qr }}" as="c" hint-placeholder-count="441">
+<span style="width: 6px; height: 6px; background: {{ c.bg }}"></span>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #DDE2EE; padding-top: 12px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: .02em; color: #4A5372">EF-7K2Q9M4XB3TA</span>
+<span style="font-size: 12px; font-weight: 700; color: #2B2390">Sat 26 Dec</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+
+<!-- Sports photography -->
+<section style="max-width: 1280px; margin: 0 auto; padding: 40px 40px 24px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 class="ef-display" style="margin: 0; font-size: clamp(34px, 3.6vw, 52px); line-height: 1.05; max-width: 36rem">Made for race mornings</h2>
+<p style="margin: 0; max-width: 26rem; font-size: 17px; line-height: 1.55; color: #4A5372">Running, cycling and skating packs. Your page looks like your sport, and your own photos always come first.</p>
+</div>
+<div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<figure style="margin: 0; position: relative; height: 420px; border-radius: 28px; overflow: hidden; background: linear-gradient(160deg, #8C86F0 0%, #4B3FE0 55%, #2B2390 100%)">
+<svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0"><path d="M-20 330 C 150 280, 300 300, 620 220" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="2" fill="none"></path><path d="M-20 360 C 160 310, 320 330, 620 250" stroke="#FFFFFF" stroke-opacity=".18" stroke-width="2" fill="none"></path><circle cx="470" cy="110" r="60" fill="#F2A93B" fill-opacity=".55"></circle></svg>
+<figcaption style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; color: #FFFFFF"><span style="display: flex; flex-direction: column; gap: 4px"><span class="ef-display" style="font-size: 28px">Running</span><span style="font-size: 13px; opacity: .85">Photo: a crowded start line at first light, warm side light</span></span><span style="font-size: 12px; font-weight: 600; background: rgba(255,255,255,.18); padding: 6px 10px; border-radius: 999px">5K to 42.2K</span></figcaption>
+</figure>
+<figure style="margin: 0; position: relative; height: 420px; border-radius: 28px; overflow: hidden; background: linear-gradient(160deg, #FFD9A0 0%, #F2A93B 55%, #B8761A 100%)">
+<svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 400 420" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0"><path d="M-10 380 L 200 230 L 410 300" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="2" fill="none"></path><circle cx="110" cy="300" r="34" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="3" fill="none"></circle><circle cx="200" cy="300" r="34" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="3" fill="none"></circle></svg>
+<figcaption style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 4px; color: #121A33"><span class="ef-display" style="font-size: 28px">Cycling</span><span style="font-size: 13px">Photo: riders on a hill climb, golden hour</span></figcaption>
+</figure>
+<figure style="margin: 0; position: relative; height: 420px; border-radius: 28px; overflow: hidden; background: linear-gradient(160deg, #C9EEDF 0%, #6FC3A3 55%, #1E7A5C 100%)">
+<svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 400 420" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0"><ellipse cx="200" cy="210" rx="230" ry="120" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="2" fill="none"></ellipse><ellipse cx="200" cy="210" rx="190" ry="90" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="2" fill="none"></ellipse></svg>
+<figcaption style="position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 4px; color: #FFFFFF"><span class="ef-display" style="font-size: 28px">Skating</span><span style="font-size: 13px; opacity: .9">Photo: skate wheels on the rink, low angle</span></figcaption>
+</figure>
+</div>
+</section>
+
+<!-- How it works -->
+<section style="max-width: 1280px; margin: 0 auto; padding: 72px 40px 96px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 class="ef-display" style="margin: 0; font-size: clamp(34px, 3.6vw, 52px); line-height: 1.05; max-width: 40rem">What happens after you press Publish</h2>
+<p style="margin: 0; max-width: 26rem; font-size: 17px; line-height: 1.55; color: #4A5372">Four stops on one lane. You set it up once; EventFlow runs the rest until race morning.</p>
+</div>
+<div aria-hidden="true" style="margin-top: 48px; position: relative; height: 72px; border-radius: 36px; background: #4B3FE0; overflow: hidden">
+<div style="position: absolute; left: 0; right: 0; top: 23px; height: 1.4px; background: rgba(255,255,255,.5)"></div>
+<div style="position: absolute; left: 0; right: 0; top: 47px; height: 1.4px; background: rgba(255,255,255,.5)"></div>
+<div style="position: absolute; right: 64px; top: 0; bottom: 0; width: 6px; background: #FFFFFF"></div>
+<div style="position: absolute; right: 57px; top: 0; bottom: 0; width: 4px; background: #F2A93B"></div>
+<div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center">
+<div style="justify-self: center; width: 40px; height: 40px; border-radius: 999px; background: #FFFFFF; color: #4B3FE0; display: flex; align-items: center; justify-content: center; font-weight: 700">1</div>
+<div style="justify-self: center; width: 40px; height: 40px; border-radius: 999px; background: #FFFFFF; color: #4B3FE0; display: flex; align-items: center; justify-content: center; font-weight: 700">2</div>
+<div style="justify-self: center; width: 40px; height: 40px; border-radius: 999px; background: #FFFFFF; color: #4B3FE0; display: flex; align-items: center; justify-content: center; font-weight: 700">3</div>
+<div style="justify-self: center; width: 40px; height: 40px; border-radius: 999px; background: #F2A93B; color: #121A33; display: flex; align-items: center; justify-content: center; font-weight: 700">4</div>
+</div>
+</div>
+<ol style="list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px">
+<li style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 19px; font-weight: 700">Publish your race page</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #4A5372">Pick a template, add distances, prices and the run sheet, and go live on your own link.</p>
+</li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 19px; font-weight: 700">Take entries and payments</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #4A5372">Runners pay by UPI or card. The money goes to your Razorpay or Cashfree account, not ours.</p>
+</li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 19px; font-weight: 700">Send every runner a pass</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #4A5372">Each paid entry gets an EF- pass with a QR code, as an image and a PDF, by email.</p>
+</li>
+<li style="background: #FFFFFF; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 19px; font-weight: 700">Check runners in on race day</h3>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: #4A5372">Volunteers scan passes at the gate from any phone. No app to install.</p>
+</li>
+</ol>
+</section>
+
+<!-- Templates -->
+<section id="templates" style="background: #FFFFFF">
+<div style="max-width: 1280px; margin: 0 auto; padding: 104px 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px">
+<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+<h2 class="ef-display" style="margin: 0; font-size: clamp(34px, 3.6vw, 52px); line-height: 1.05">Five race pages, each with its own character</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.55; color: #4A5372">Every template takes your logo and colours, and checks the contrast for you so the Register button always reads.</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{ templates }}" as="t" hint-placeholder-count="5">
+<button class="ef-tpl-btn" type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="text-align: left; cursor: pointer; font: inherit; color: #121A33; border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; border: 1px solid {{ t.btnBorder }}; background: {{ t.btnBg }}">
+<span style="font-size: 16px; font-weight: 700">{{ t.name }}</span>
+<span style="font-size: 14px; color: #4A5372">{{ t.blurb }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="flex: 1 1 560px; min-width: 0; height: 520px; display: flex; align-items: center; justify-content: center">
+<div class="ef-fan-scale" style="position: relative; width: 300px; height: 420px; perspective: 1400px; transform-style: preserve-3d">
+<sc-for list="{{ templates }}" as="t" hint-placeholder-count="5">
+<div style="position: absolute; inset: 0; transition: transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s; transform: translateX({{ t.tx }}px) translateZ({{ t.tz }}px) rotateY({{ t.ry }}deg); z-index: {{ t.z }}; opacity: {{ t.op }}">
+<div style="width: 300px; height: 420px; border-radius: 22px; overflow: hidden; background: {{ t.bg }}; color: {{ t.ink }}; box-shadow: 0 40px 70px -34px rgba(18,26,51,.55), 0 0 0 1px rgba(18,26,51,.08); display: flex; flex-direction: column">
+<div style="padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700">
+<span>Demo Runners</span>
+<span style="background: {{ t.accent }}; color: {{ t.onAccent }}; padding: 5px 10px; border-radius: 999px">Register</span>
+</div>
+<div style="margin: 0 12px; border-radius: 14px; background: {{ t.panel }}; padding: 22px 18px; display: flex; flex-direction: column; gap: 10px; text-align: {{ t.align }}; color: {{ t.titleInk }}">
+<span style="font-size: 11px; opacity: .8">Sat 26 Dec 2026</span>
+<span class="ef-display" style="font-size: 26px; line-height: 1.02">Bengaluru City Marathon 2027</span>
+<span style="font-size: 11px; opacity: .8">5K, 10K, half and full marathon</span>
+</div>
+<div style="padding: 14px 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: {{ t.row }}; font-size: 12px; font-weight: 600"><span>5K fun run</span><span>₹599</span></div>
+<div style="display: flex; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: {{ t.row }}; font-size: 12px; font-weight: 600"><span>10K run</span><span>₹899</span></div>
+<div style="display: flex; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: {{ t.row }}; font-size: 12px; font-weight: 600"><span>Half marathon</span><span>₹1,499</span></div>
+</div>
+<div style="margin-top: auto; padding: 0 16px 14px; font-size: 13px; font-weight: 700">{{ t.name }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" style="max-width: 1280px; margin: 0 auto; padding: 104px 40px 96px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+<h2 class="ef-display" style="margin: 0; font-size: clamp(34px, 3.6vw, 52px); line-height: 1.05">Pay per race or per season</h2>
+<p style="margin: 0; max-width: 26rem; font-size: 17px; line-height: 1.55; color: #4A5372">Flat prices in rupees, exclusive of GST. Nothing taken from your runners’ entry fees.</p>
+</div>
+<div style="margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px">
+<article class="ef-bib" style="position: relative; background: #4B3FE0; color: #FFFFFF; border-radius: 18px; padding: 0 0 28px; transform: rotate(-1.5deg); box-shadow: 0 30px 60px -30px rgba(75,63,224,.7)">
+<span aria-hidden="true" style="position: absolute; left: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA; box-shadow: inset 0 1px 2px rgba(18,26,51,.25)"></span>
+<span aria-hidden="true" style="position: absolute; right: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA; box-shadow: inset 0 1px 2px rgba(18,26,51,.25)"></span>
+<div style="padding: 36px 32px 0; display: flex; flex-direction: column; gap: 6px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700">Single Event</h3>
+<p class="ef-display" style="margin: 8px 0 0; font-size: 60px; line-height: 1">₹3,999</p>
+</div>
+<div style="margin: 24px 32px 0; height: 8px; border-radius: 4px; background: #F2A93B"></div>
+<p style="margin: 20px 32px 0; font-size: 15px; line-height: 1.6; color: #E4E1FF">One race in a 90-day window, up to 500 participants.</p>
+</article>
+<article class="ef-bib" style="position: relative; background: #FFFFFF; border-radius: 18px; padding: 0 0 28px; transform: rotate(1deg); box-shadow: 0 24px 48px -32px rgba(18,26,51,.4)">
+<span aria-hidden="true" style="position: absolute; left: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA"></span>
+<span aria-hidden="true" style="position: absolute; right: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA"></span>
+<div style="padding: 36px 32px 0; display: flex; flex-direction: column; gap: 6px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700">Club Season</h3>
+<p class="ef-display" style="margin: 8px 0 0; font-size: 60px; line-height: 1; color: #121A33">₹12,999</p>
+</div>
+<div style="margin: 24px 32px 0; height: 8px; border-radius: 4px; background: #ECEAFF"></div>
+<p style="margin: 20px 32px 0; font-size: 15px; line-height: 1.6; color: #4A5372">Twelve months, up to 5 races, 1,500 participants per race.</p>
+</article>
+<article class="ef-bib" style="position: relative; background: #FFFFFF; border-radius: 18px; padding: 0 0 28px; transform: rotate(-.5deg); box-shadow: 0 24px 48px -32px rgba(18,26,51,.4)">
+<span aria-hidden="true" style="position: absolute; left: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA; box-shadow: inset 0 1px 2px rgba(18,26,51,.25)"></span>
+<span aria-hidden="true" style="position: absolute; right: 16px; top: 16px; width: 10px; height: 10px; border-radius: 999px; background: #F3F5FA; box-shadow: inset 0 1px 2px rgba(18,26,51,.25)"></span>
+<div style="padding: 36px 32px 0; display: flex; flex-direction: column; gap: 6px">
+<h3 style="margin: 0; font-size: 17px; font-weight: 700">Circuit Season</h3>
+<p class="ef-display" style="margin: 8px 0 0; font-size: 60px; line-height: 1; color: #121A33">₹29,999</p>
+</div>
+<div style="margin: 24px 32px 0; height: 8px; border-radius: 4px; background: #ECEAFF"></div>
+<p style="margin: 20px 32px 0; font-size: 15px; line-height: 1.6; color: #4A5372">Twelve months, up to 25 races, 5,000 participants per race.</p>
+</article>
+</div>
+<div style="margin-top: 40px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font-size: 15px; color: #4A5372">
+<p style="margin: 0">Add-ons when you need them: race sheets ₹599, certificates ₹799, platform mail and WhatsApp.</p>
+<a href="#custom" style="font-weight: 600">Custom plans for federations and series</a>
+</div>
+</section>
+
+<!-- Final CTA -->
+<section id="trial" style="max-width: 1280px; margin: 0 auto; padding: 0 40px 96px">
+<div style="position: relative; overflow: hidden; border-radius: 36px; background: #ECEAFF; padding: 72px 56px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 32px">
+<svg aria-hidden="true" width="620" height="620" viewBox="0 0 620 620" style="position: absolute; right: -180px; top: -140px">
+<circle cx="310" cy="310" r="300" fill="none" stroke="#4B3FE0" stroke-opacity=".14" stroke-width="2"></circle>
+<circle cx="310" cy="310" r="260" fill="none" stroke="#4B3FE0" stroke-opacity=".14" stroke-width="2"></circle>
+<circle cx="310" cy="310" r="220" fill="none" stroke="#4B3FE0" stroke-opacity=".14" stroke-width="2"></circle>
+<circle cx="310" cy="310" r="180" fill="none" stroke="#4B3FE0" stroke-opacity=".14" stroke-width="2"></circle>
+</svg>
+<div style="position: relative; display: flex; flex-direction: column; gap: 14px; max-width: 36rem">
+<h2 class="ef-display" style="margin: 0; font-size: clamp(36px, 4vw, 60px); line-height: 1.02">Your race, live today.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.55; color: #3B4463">A 14-day free trial. Publish one race and take up to 25 test entries before you pay anything.</p>
+</div>
+<a class="ef-cta" href="#signup" style="position: relative; background: #121A33; color: #FFFFFF; text-decoration: none; padding: 20px 32px; border-radius: 999px; font-size: 17px; font-weight: 600">Start your free trial</a>
+</div>
+</section>
+
+<!-- Footer -->
+<footer style="border-top: 1px solid #DDE2EE">
+<div style="max-width: 1280px; margin: 0 auto; padding: 56px 40px 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 32px; font-size: 15px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="ef-display" style="font-size: 22px">EventFlow</span>
+<span style="color: #4A5372; line-height: 1.55">Race sites, registrations, QR passes, check-in and certificates for Indian organisers.</span>
+</div>
+<nav aria-label="Product" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 700">Product</span>
+<a href="#templates" style="color: #4A5372; text-decoration: none">Templates</a>
+<a href="#pricing" style="color: #4A5372; text-decoration: none">Pricing</a>
+<a href="Login.dc.html" style="color: #4A5372; text-decoration: none">Log in</a>
+</nav>
+<nav aria-label="Resources" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 700">Resources</span>
+<a href="#status" style="color: #4A5372; text-decoration: none">Status</a>
+<a href="mailto:hello@indefine.in" style="color: #4A5372; text-decoration: none">hello@indefine.in</a>
+</nav>
+<nav aria-label="Company" style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-weight: 700">Company</span>
+<a href="https://indefine.in" style="color: #4A5372; text-decoration: none">Indefine</a>
+<a href="#terms" style="color: #4A5372; text-decoration: none">Terms and privacy</a>
+</nav>
+</div>
+<p style="max-width: 1280px; margin: 0 auto; padding: 0 40px 40px; font-size: 13px; color: #4A5372">© 2026 EventFlow by Indefine. Made in India.</p>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rx: 0, ry: 0, picked: 1 };
+    this.qrCells = this.buildQr();
+    this.onTilt = (e) => {
+      const r = e.currentTarget.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      this.setState({ rx: Math.round(-y * 12 * 10) / 10, ry: Math.round(x * 16 * 10) / 10 });
+    };
+    this.onTiltReset = () => this.setState({ rx: 0, ry: 0 });
+  }
+  buildQr() {
+    const n = 21, cells = [];
+    let seed = 7;
+    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    const finder = (r, c) => {
+      const spots = [[0, 0], [0, n - 7], [n - 7, 0]];
+      for (const s of spots) {
+        const rr = r - s[0], cc = c - s[1];
+        if (rr >= -1 && rr <= 7 && cc >= -1 && cc <= 7) {
+          if (rr < 0 || rr > 6 || cc < 0 || cc > 6) return 0;
+          if (rr === 0 || rr === 6 || cc === 0 || cc === 6) return 1;
+          if (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4) return 1;
+          return 0;
+        }
+      }
+      return -1;
+    };
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        const f = finder(r, c);
+        const on = f === -1 ? rand() > 0.52 : f === 1;
+        cells.push({ bg: on ? '#121A33' : 'transparent' });
+      }
+    }
+    return cells;
+  }
+  renderVals() {
+    const base = [
+      { name: 'Gun Lap', blurb: 'Big race photo, huge type, the start list straight after.', bg: '#FFFFFF', panel: '#4B3FE0', titleInk: '#FFFFFF', ink: '#121A33', accent: '#F2A93B', onAccent: '#121A33', row: '#F3F5FA', align: 'left' },
+      { name: 'Stadium Split', blurb: 'A solid colour panel beside an action photo, sponsors below.', bg: '#F3F5FA', panel: '#F2A93B', titleInk: '#121A33', ink: '#121A33', accent: '#4B3FE0', onAccent: '#FFFFFF', row: '#FFFFFF', align: 'left' },
+      { name: 'Equipment Close', blurb: 'A gear close-up and category cards that show places left.', bg: '#FFFFFF', panel: '#DDF2EA', titleInk: '#0B4A38', ink: '#0B4A38', accent: '#0B4A38', onAccent: '#FFFFFF', row: '#EEF8F4', align: 'left' },
+      { name: 'Night Circuit', blurb: 'A deep navy canvas with an oversized date, for evening races.', bg: '#1B2244', panel: '#283263', titleInk: '#FFFFFF', ink: '#FFFFFF', accent: '#F2A93B', onAccent: '#121A33', row: '#232C57', align: 'left' },
+      { name: 'Heritage Crest', blurb: 'A centred crest and ruled frames, for clubs with history.', bg: '#FBFAF6', panel: '#FBFAF6', titleInk: '#121A33', ink: '#121A33', accent: '#7A1F2B', onAccent: '#FFFFFF', row: '#F1EEE6', align: 'center' }
+    ];
+    const p = this.state.picked;
+    const templates = base.map((t, i) => {
+      const o = i - p, a = Math.abs(o);
+      return Object.assign({}, t, {
+        tx: o * 150, tz: -a * 140, ry: o * -24,
+        z: 10 - a, op: a > 2 ? 0 : 1 - a * 0.12,
+        pressed: i === p ? 'true' : 'false',
+        btnBg: i === p ? '#ECEAFF' : '#FFFFFF',
+        btnBorder: i === p ? '#4B3FE0' : '#DDE2EE',
+        pick: () => this.setState({ picked: i })
+      });
+    });
+    return {
+      rx: this.state.rx, ry: this.state.ry,
+      onTilt: this.onTilt, onTiltReset: this.onTiltReset,
+      qr: this.qrCells, templates
+    };
+  }
+}
+</script>
+</body>
+</html>

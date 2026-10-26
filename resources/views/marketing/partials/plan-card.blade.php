@@ -1,29 +1,35 @@
-{{-- One plan on /pricing. Self-serve plans start a trial; Custom is contact-only. $key, $plan, $trialDays, $contactEmail --}}
-@php($featured = $plan['highlight'] ?? false)
-<article id="{{ $key }}" data-reveal data-plan="{{ $key }}" @class([
-    'relative flex h-full scroll-mt-24 flex-col p-6 sm:p-8',
-    'bg-ink text-paper shadow-[8px_8px_0_0_rgb(var(--ri-heat))] md:shadow-[12px_12px_0_0_rgb(var(--ri-heat))]' => $featured,
-    'bg-white text-ink ring-2 ring-ink' => ! $featured && $plan['self_serve'],
-    'bg-mist text-ink/80 ring-1 ring-ink/20' => ! $plan['self_serve'],
+{{-- One plan on /pricing (Daylight Track). Self-serve plans start a trial; Custom is contact-only. $key, $plan --}}
+@php
+    $featured = $plan['highlight'] ?? false;
+    $price = \App\Saas\Plans::inr($plan['price_inr']);
+    $term = $plan['term_label']
+        ? __(':term, :renewal.', ['term' => __($plan['term_label']), 'renewal' => $plan['renews'] ? __('renews yearly') : __('one-off')])
+        : null;
+@endphp
+<article id="{{ $key }}" data-plan="{{ $key }}" @class([
+    'flex scroll-mt-24 flex-col gap-4 rounded-[28px] p-[30px]',
+    'bg-track text-white shadow-[0_30px_60px_-30px_rgb(75_63_224/.7)]' => $featured,
+    'bg-white' => ! $featured && $plan['self_serve'],
+    'bg-[#E9ECF4]' => ! $plan['self_serve'],
 ])>
-    @if ($featured)
-        <x-ri.chip tone="heat" class="mb-3 self-start">{{ __('Start here') }}</x-ri.chip>
-    @endif
-    <h3 @class(['font-display font-extrabold uppercase leading-none tracking-wide', 'text-4xl' => $plan['self_serve'], 'text-3xl text-ink' => ! $plan['self_serve']])>{{ $plan['name'] }}</h3>
-    <p @class(['mt-1 text-sm', 'text-ink/65' => ! $featured, 'opacity-80' => $featured])>{{ $plan['tagline'] }}</p>
-
-    <div class="mt-6">@include('marketing.partials.plan-meta', ['onDark' => $featured])</div>
-
-    <ul class="mt-6 flex-1 space-y-3 text-sm">
-        @foreach ($plan['features'] as $feature)
-            <li class="flex gap-3">@include('marketing.partials.tick')<span>{{ __($feature) }}</span></li>
-        @endforeach
-    </ul>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-lg font-bold">{{ $plan['name'] }}</h2>
+        @if ($featured)
+            <span class="rounded-full bg-heat px-2.5 py-1 text-xs font-bold text-on-heat">{{ __('Most organisers start here') }}</span>
+        @endif
+    </div>
+    <p class="ri-headline text-[52px] leading-none">{{ $price ?? __('Quoted') }}</p>
+    <p @class(['text-[15px] leading-relaxed', 'text-[#E4E1FF]' => $featured, 'text-muted' => ! $featured])>{{ __($plan['tagline']) }} {{ $term }}</p>
+    <p @class(['text-sm font-semibold', 'text-white' => $featured, 'text-ink' => ! $featured])>{{ \App\Saas\Plans::limitsLabel($plan) }}</p>
 
     @if ($plan['self_serve'])
-        <x-ri.button :variant="$featured ? 'heat' : 'ink'" size="md" class="mt-8 w-full" :href="route('register', ['plan' => $key])">{{ __('Start free trial') }}</x-ri.button>
-        <p @class(['mt-2 text-center text-xs', 'text-ink/55' => ! $featured, 'opacity-70' => $featured])>{{ __(':days days free · no card', ['days' => $trialDays]) }}</p>
+        <a href="{{ route('register', ['plan' => $key]) }}" @class([
+            'mt-auto flex min-h-[48px] items-center justify-center rounded-full px-4 py-3.5 text-center font-bold transition duration-200 ease-track',
+            'bg-white text-track-deep hover:bg-lilac' => $featured,
+            'bg-lilac text-track-deep hover:bg-[#DCD8FF]' => ! $featured,
+        ])>{{ __('Start free trial') }}</a>
     @else
-        <a href="{{ \App\Support\Contact::url(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}" data-contact-indefine class="mt-8 text-sm font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }} →</a>
+        <a href="{{ \App\Support\Contact::url(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}" data-contact-indefine
+           class="mt-auto flex min-h-[48px] items-center justify-center rounded-full px-4 py-[13px] text-center font-bold text-ink ring-1 ring-inset ring-[#C5CBDB] transition duration-200 ease-track hover:ring-ink/40">{{ __('Talk to Indefine') }}</a>
     @endif
 </article>

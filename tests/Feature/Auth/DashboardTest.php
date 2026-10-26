@@ -27,7 +27,7 @@ test('dashboard shows registrations, paid total and checked-in counts', function
             'checked_in' => 1,
         ])
         ->assertSee('City 10K')
-        ->assertSee('₹1,797.00');
+        ->assertSee('₹1,797'); // Daylight Track shows whole rupees
 });
 
 test('staff can see the dashboard and export', function () {

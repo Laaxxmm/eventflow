@@ -44,4 +44,8 @@ return [
         ],
     ],
 
+    // Stock photo APIs for `php artisan imagery:fetch` (Daylight Track brief §5). Optional.
+    'unsplash' => ['key' => env('UNSPLASH_ACCESS_KEY')],
+    'pexels' => ['key' => env('PEXELS_API_KEY')],
+
 ];

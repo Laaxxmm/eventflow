@@ -69,11 +69,11 @@ return [
      * Custom layouts are not built in-app: organisers are pointed to Indefine.
      */
     'landing_templates' => [
-        'gun-lap' => ['label' => 'Gun Lap', 'tone' => 'dark', 'description' => 'Full-bleed race photo, giant type, sticky Register. Pure race energy.'],
-        'stadium-split' => ['label' => 'Stadium Split', 'tone' => 'light', 'description' => 'Solid brand panel beside a big action photo; sponsors, accordions, FAQ.'],
-        'equipment-close' => ['label' => 'Equipment Close', 'tone' => 'light', 'description' => 'Sport-gear hero, “Limited bibs” urgency and category cards.'],
-        'night-circuit' => ['label' => 'Night Circuit', 'tone' => 'dark', 'description' => 'Dark canvas, volt accents, oversized date, one bright Register.'],
-        'heritage-crest' => ['label' => 'Heritage Crest', 'tone' => 'light', 'description' => 'Federation-formal: centred crest, paper, framed sections, sponsor row.'],
+        'gun-lap' => ['label' => 'Gun Lap', 'tone' => 'dark', 'swatch' => 'linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)', 'sport' => 'Running', 'blurb' => 'Big photo, huge type. Best for running.', 'description' => 'A full-width race photo with huge type, and the start list right below.'],
+        'stadium-split' => ['label' => 'Stadium Split', 'tone' => 'light', 'swatch' => 'linear-gradient(90deg, #F2A93B 0%, #F2A93B 55%, #6F67E8 55%, #2B2390 100%)', 'sport' => 'Any sport', 'blurb' => 'Colour panel and action photo. Fits any sport.', 'description' => 'A solid colour panel beside a big action photo, with sponsors and FAQ below.'],
+        'equipment-close' => ['label' => 'Equipment Close', 'tone' => 'light', 'swatch' => 'linear-gradient(160deg, #C9EEDF, #6FC3A3 60%, #1E7A5C)', 'sport' => 'Skating', 'blurb' => 'Gear close-up and places-left cards.', 'description' => 'A gear close-up, a limited-places badge, and category cards that show places left.'],
+        'night-circuit' => ['label' => 'Night Circuit', 'tone' => 'dark', 'swatch' => 'linear-gradient(180deg, #3B4A8C, #1B2244)', 'sport' => 'Cycling', 'blurb' => 'Dusk-blue hero and a giant date.', 'description' => 'A dusk-blue hero with an oversized date, for evening races and rides.'],
+        'heritage-crest' => ['label' => 'Heritage Crest', 'tone' => 'light', 'swatch' => 'linear-gradient(170deg, #E9DFC8, #B79E73 60%, #6E5634)', 'sport' => 'Club classics', 'blurb' => 'Crest, ruled frames, a classic feel.', 'description' => 'A centred crest, ruled frames and an order of events, for races with history.'],
     ],
 
     // Earlier template keys still stored on events; they render as their Race Ink successor.
