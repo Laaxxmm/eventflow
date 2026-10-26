@@ -134,7 +134,7 @@ it('carries the chosen template from signup into the create wizard', function ()
     $this->get('/register?template=equipment-close')
         ->assertOk()
         ->assertSee('name="template" value="equipment-close"', false)
-        ->assertSee('Template: Equipment Close');
+        ->assertSee('Equipment Close will be ready when you create your first event.');
 
     $this->post('/register', [
         'organization_name' => 'Sunrise Sports Club', 'name' => 'Meera Iyer', 'email' => 'meera@sunrise.test',

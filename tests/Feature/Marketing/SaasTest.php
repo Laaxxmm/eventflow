@@ -99,7 +99,7 @@ it('keeps the full template gallery on /templates', function () {
 it('prices the race sheet and certificate add-ons on /pricing', function () {
     $this->get('/pricing')->assertOk()
         ->assertSeeInOrder(['Race sheet download', '₹599 per event', 'Certificates', '₹799 per event', 'Platform mail', 'WhatsApp'])
-        ->assertSee('Add-on ₹599 / event') // Single Event row in the comparison
+        ->assertSee('Add-on, ₹599 per event') // Single Event row in the comparison
         ->assertSee('Included in Club Season, Circuit Season');
 });
 
@@ -127,15 +127,14 @@ it('lists Single, Club, Circuit and a contact-only Custom on /pricing', function
 it('compares races, duration, pax, mail, WhatsApp and support, and explains overage', function () {
     $html = $this->get('/pricing')
         ->assertSee('data-compare', false)
-        ->assertSeeInOrder(['Races', 'Duration', 'Participants per race', 'Ticket percentage', 'Email · own SMTP', 'Platform mail', 'WhatsApp', 'Support'])
+        ->assertSeeInOrder(['Races', 'Duration', 'Participants per race', 'Ticket percentage', 'Email with your own SMTP', 'Platform mail and WhatsApp', 'Support'])
         ->assertSee('data-overage', false)
-        ->assertSeeInOrder(['Upgrade', 'Buy a participant pack', 'Contact Indefine'])
+        ->assertSee('Need more places?')
+        ->assertSee('Buy a participant pack')
         ->getContent();
 
     // Platform mail and WhatsApp are never shown as included on any plan.
-    foreach (['Platform mail', 'WhatsApp'] as $row) {
-        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4[^"]*">\s*Paid add-on\s*</td>){4}\s*</tr>#');
-    }
+    expect($html)->toMatch('#>Platform mail and WhatsApp</th>(\s*<td class="[^"]*">\s*Add-ons\s*</td>){4}\s*</tr>#');
 });
 
 it('locks plan prices, terms and caps in config', function () {
@@ -158,7 +157,7 @@ it('registers an organiser on a free trial of the chosen plan', function () {
     $this->get('/register?plan=club_season')
         ->assertOk()
         ->assertSee('Start your free trial')
-        ->assertSee('14 days · 1 event you can publish · up to 25 test registrations · no card.')
+        ->assertSee('Your 14-day trial includes 1 event you can publish and up to 25 test registrations.')
         ->assertSee('value="club_season"', false)
         ->assertDontSee('% on paid registrations');
 

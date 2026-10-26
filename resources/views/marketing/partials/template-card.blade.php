@@ -1,22 +1,36 @@
-{{-- One landing template as a card linking to its public preview. $key, $tpl, $index, $large --}}
+{{--
+    One landing template on /templates (Daylight Track). The preview is drawn from the template's
+    swatch gradient: public/images/templates/*.jpg are Race Ink-era screenshots and would clash.
+    $key, $tpl (label, tone, swatch, sport, blurb, description), $sampleName, $sampleDate
+--}}
 @php
-    $thumb = file_exists(public_path("images/templates/{$key}.jpg")) ? asset("images/templates/{$key}.jpg") : null;
-    $large = $large ?? false;
+    $dark = ($tpl['tone'] ?? 'light') === 'dark';
+    $sampleName ??= \Symfony\Component\Yaml\Yaml::parseFile(base_path(\App\View\SampleEvent::YAML))['name'] ?? __('Your race');
+    $sampleDate ??= now()->addMonths(2)->isoFormat('ddd D MMM YYYY');
 @endphp
-<a href="{{ route('templates.show', $key) }}" data-template-card="{{ $key }}" data-reveal class="group flex flex-col bg-paper text-ink">
-    <div @class(['relative overflow-hidden ring-2 ring-ink', 'aspect-[16/10]' => $large, 'aspect-[4/3]' => ! $large])>
-        @if ($thumb)
-            <img src="{{ $thumb }}" alt="{{ __(':name template preview', ['name' => $tpl['label']]) }}" loading="{{ $large ? 'eager' : 'lazy' }}" decoding="async" class="absolute inset-0 h-full w-full object-cover object-left-top transition duration-500 group-hover:scale-[1.03]">
-        @else
-            <div @class(['absolute inset-0', 'bg-midnight' => $tpl['tone'] === 'dark', 'bg-mist' => $tpl['tone'] !== 'dark'])></div>
-        @endif
-        <span class="absolute left-3 top-3 bg-ink px-2 py-1 font-display text-sm font-bold text-paper">{{ str_pad($index, 2, '0', STR_PAD_LEFT) }}</span>
+<article data-template-card="{{ $key }}" class="flex flex-col gap-[18px] rounded-[32px] bg-white p-3.5">
+    <a href="{{ route('templates.show', $key) }}" class="relative block h-[240px] overflow-hidden rounded-[22px] sm:h-[340px]" style="background: {{ $tpl['swatch'] }}" tabindex="-1" aria-hidden="true">
+        <span class="absolute inset-0 bg-[linear-gradient(180deg,rgb(18_26_51/.3)_0%,rgb(18_26_51/0)_25%,rgb(18_26_51/0)_40%,rgb(18_26_51/.55)_100%)]"></span>
+        <span class="absolute inset-x-0 top-0 flex items-center justify-between px-[18px] py-3.5 text-xs font-bold text-white">
+            <span>{{ __('Demo Runners') }}</span>
+            <span @class(['rounded-full px-3 py-1.5', 'bg-heat text-on-heat' => $dark, 'bg-white text-ink' => ! $dark])>{{ __('Register') }}</span>
+        </span>
+        <span class="absolute inset-x-6 bottom-6 flex flex-col gap-2 text-white">
+            <span class="text-xs font-semibold opacity-90">{{ $sampleDate }}</span>
+            <span class="ri-headline text-[28px] leading-none sm:text-[38px]">{{ $sampleName }}</span>
+        </span>
+    </a>
+    <div class="flex flex-wrap items-center justify-between gap-4 px-3 pb-3 pt-1">
+        <div class="flex max-w-[26rem] flex-col gap-1">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <h2 id="template-{{ $key }}" class="text-[22px] font-bold">{{ $tpl['label'] }}</h2>
+                <span class="rounded-full bg-lilac px-2.5 py-1 text-xs font-semibold text-track-deep">{{ __($tpl['sport']) }}</span>
+            </div>
+            <p class="text-[15px] leading-normal text-muted">{{ __($tpl['description']) }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2.5">
+            <x-ri.button variant="secondary" size="md" :href="route('templates.show', $key)" aria-describedby="template-{{ $key }}">{{ __('Live preview') }}</x-ri.button>
+            <x-ri.button variant="primary" size="md" :href="\App\Http\Controllers\Marketing\TemplateGalleryController::useUrl($key)" aria-describedby="template-{{ $key }}">{{ __('Use this template') }}</x-ri.button>
+        </div>
     </div>
-    <div class="flex items-baseline justify-between gap-3 pt-4">
-        <p @class(['font-display font-extrabold uppercase leading-none', 'text-4xl' => $large, 'text-2xl' => ! $large])>{{ $tpl['label'] }}</p>
-        <span class="text-sm font-semibold text-ink/60 group-hover:text-ink">{{ __('Preview') }} →</span>
-    </div>
-    @if ($large)
-        <p class="mt-2 text-ink/70">{{ $tpl['description'] }}</p>
-    @endif
-</a>
+</article>
