@@ -9,7 +9,7 @@
 
 @push('head')
     <style>
-        .gl-outline { -webkit-text-stroke: 2px rgb(var(--ri-paper)); color: transparent; }
+        .gl-outline { -webkit-text-stroke: 1.5px rgb(var(--ri-paper)); color: transparent; }
         @media (min-width: 640px) { .gl-outline { -webkit-text-stroke-width: 3px; } }
     </style>
 @endpush
@@ -19,26 +19,39 @@
     @php($split = max(1, (int) ceil(count($words) / 2)))
     @include('landings.partials.header', ['dark' => true])
 
-    <section id="top" class="relative isolate flex min-h-[100svh] items-end overflow-hidden">
+    <section id="top" class="relative isolate flex min-h-[86svh] items-end overflow-hidden sm:min-h-[100svh]">
         <x-ri.photo :src="$page->heroPhoto(0)" :sport="$page->config->sport->value" kenburns class="absolute inset-0 -z-20" :alt="$page->config->hero->title" position="center 30%" />
-        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/40 to-ink/10" aria-hidden="true"></div>
+        <div class="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/55 to-ink/10" aria-hidden="true"></div>
 
-        <div class="mx-auto w-full max-w-7xl px-4 pb-28 pt-32 sm:px-6 sm:pb-16 lg:px-8">
-            <div class="flex flex-wrap gap-2" data-reveal>
+        <div class="mx-auto w-full max-w-7xl px-5 pb-10 pt-28 sm:px-6 sm:pb-16 sm:pt-32 lg:px-8">
+            {{-- Phones: one quiet line of facts instead of a stack of boxes. --}}
+            <div class="sm:hidden" data-reveal data-hero-meta>
+                <p class="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-paper">
+                    <span class="h-px w-6 bg-heat" aria-hidden="true"></span>{{ $page->date->format('j M Y') }}
+                    @if ($page->limited())
+                        <span class="text-heat">· {{ __('Limited bibs') }}</span>
+                    @endif
+                </p>
+                <p class="mt-2 text-sm text-paper/65">{{ $page->config->venue }}</p>
+            </div>
+            <div class="hidden flex-wrap gap-2 sm:flex" data-reveal>
                 <x-ri.chip tone="heat">{{ $page->date->format('j M Y') }}</x-ri.chip>
                 <x-ri.chip tone="outline-light">{{ $page->config->venue }}</x-ri.chip>
                 @if ($page->limited())
                     <x-ri.chip tone="paper">{{ __('Limited bibs') }}</x-ri.chip>
                 @endif
             </div>
-            <h1 class="ri-headline mt-6 text-[17vw] sm:text-[12vw] lg:text-[10.5rem]" data-reveal>
+            <h1 class="ri-headline mt-5 text-[13vw] leading-[0.92] sm:mt-6 sm:text-[12vw] sm:leading-[0.9] lg:text-[10.5rem]" data-reveal>
                 <span class="gl-outline block">{{ implode(' ', array_slice($words, 0, $split)) }}</span>
                 <span class="block">{{ implode(' ', array_slice($words, $split)) ?: $page->config->hero->title }}</span>
             </h1>
-            <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between" data-reveal>
-                <p class="max-w-xl text-lg text-paper/80">{{ $page->config->hero->subtitle ?? $page->config->hero->title }}</p>
+            <div class="mt-6 flex flex-col gap-7 sm:mt-8 sm:flex-row sm:items-end sm:justify-between" data-reveal>
+                <p class="max-w-xl text-base leading-relaxed text-paper/75 sm:text-lg">{{ $page->config->hero->subtitle ?? $page->config->hero->title }}</p>
                 @if ($page->open)
-                    <a href="{{ $page->registerUrl() }}" class="inline-flex items-center justify-center gap-3 bg-heat px-9 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ $page->registerLabel() }} <span aria-hidden="true">→</span></a>
+                    <a href="{{ $page->registerUrl() }}" data-hero-cta class="inline-flex w-full items-center justify-between gap-3 bg-heat px-6 py-4 font-display text-xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95 sm:w-auto sm:justify-center sm:px-9 sm:text-2xl">
+                        <span>{{ __('Register') }}</span>
+                        <span class="text-base sm:text-2xl"><span class="sm:hidden">{{ __('from :price', ['price' => $page->fromPrice()]) }}</span><span class="hidden sm:inline">— {{ __('from :price', ['price' => $page->fromPrice()]) }}</span> <span aria-hidden="true">→</span></span>
+                    </a>
                 @else
                     <p class="font-display text-2xl font-bold uppercase text-paper/60">{{ $page->closedLabel() }}</p>
                 @endif
@@ -53,12 +66,13 @@
             <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('Choose your race.') }}</h2>
             <ul class="mt-10 border-t border-paper/15">
                 @foreach ($page->distances as $row)
-                    <li data-reveal @class(['grid grid-cols-[auto_1fr] items-center gap-x-6 gap-y-2 border-b border-paper/15 py-6 sm:grid-cols-[10rem_1fr_auto_auto] sm:gap-8', 'opacity-50' => $row['full']])>
-                        <span class="row-span-2 font-display text-6xl font-extrabold leading-none text-heat sm:row-span-1 sm:text-7xl">{{ \App\View\LandingPage::numeral($row['distance']) }}</span>
-                        <span class="font-display text-2xl font-bold uppercase">{{ \App\View\LandingPage::title($row['distance']) }}</span>
-                        <span class="text-sm text-paper/60 sm:text-right">{{ $row['full'] ? '' : $page->placesLabel($row['left']) }}</span>
-                        <span class="flex items-center gap-4 sm:justify-end">
-                            <span class="font-display text-3xl font-extrabold">{{ $row['full'] ? __('Full') : $row['price'] }}</span>
+                    {{-- Phones: numeral | name + places | price, one tidy row per distance. --}}
+                    <li data-reveal @class(['grid grid-cols-[4.75rem_1fr_auto] items-center gap-x-4 gap-y-1 border-b border-paper/15 py-5 sm:grid-cols-[10rem_1fr_auto_auto] sm:gap-8 sm:py-6', 'opacity-50' => $row['full']])>
+                        <span class="col-start-1 row-span-2 font-display text-4xl font-extrabold leading-none text-heat sm:row-span-1 sm:text-7xl">{{ \App\View\LandingPage::numeral($row['distance']) }}</span>
+                        <span class="col-start-2 font-display text-xl font-bold uppercase leading-tight sm:col-start-auto sm:text-2xl">{{ \App\View\LandingPage::title($row['distance']) }}</span>
+                        <span class="col-start-2 text-sm text-paper/60 sm:col-start-auto sm:text-right">{{ $row['full'] ? '' : $page->placesLabel($row['left']) }}</span>
+                        <span class="col-start-3 row-span-2 row-start-1 flex items-center gap-4 sm:col-start-auto sm:row-span-1 sm:row-start-auto sm:justify-end">
+                            <span class="font-display text-2xl font-extrabold sm:text-3xl">{{ $row['full'] ? __('Full') : $row['price'] }}</span>
                             @unless ($row['full'] || ! $page->open)
                                 <a href="{{ $page->registerUrl() }}" class="hidden bg-paper px-4 py-2 font-display text-lg font-bold uppercase text-ink hover:bg-heat hover:text-on-heat sm:inline-flex">{{ __('Enter') }}</a>
                             @endunless

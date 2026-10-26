@@ -26,7 +26,7 @@
                         <x-ri.chip tone="paper">{{ $page->config->venue }}</x-ri.chip>
                     </div>
                     @if ($page->open)
-                        <a href="{{ $page->registerUrl() }}" class="mt-6 inline-flex w-full items-center justify-between gap-4 bg-heat px-7 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95 sm:w-auto">{{ __('Register') }} <span class="text-lg">{{ __('from :price', ['price' => $page->fromPrice()]) }} →</span></a>
+                        <a href="{{ $page->registerUrl() }}" data-hero-cta class="mt-6 inline-flex w-full items-center justify-between gap-4 bg-heat px-7 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95 sm:w-auto">{{ __('Register') }} <span class="text-lg">{{ __('from :price', ['price' => $page->fromPrice()]) }} →</span></a>
                     @else
                         <p class="mt-6 font-display text-2xl font-bold uppercase opacity-70">{{ $page->closedLabel() }}</p>
                     @endif

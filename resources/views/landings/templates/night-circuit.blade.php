@@ -24,7 +24,7 @@
                 <p class="mt-6 max-w-lg text-lg text-paper/75" data-reveal>{{ $page->config->hero->subtitle ?? $page->config->hero->title }}</p>
                 <p class="mt-3 text-sm text-paper/55" data-reveal>{{ $page->config->venue }}</p>
                 @if ($page->open)
-                    <a href="{{ $page->registerUrl() }}" data-reveal class="mt-10 inline-flex items-center gap-3 bg-volt px-9 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-midnight shadow-[0_0_40px_rgb(var(--ri-volt)/0.35)] hover:brightness-105">{{ $page->registerLabel() }} <span aria-hidden="true">→</span></a>
+                    <a href="{{ $page->registerUrl() }}" data-hero-cta data-reveal class="mt-10 inline-flex items-center gap-3 bg-volt px-9 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-midnight shadow-[0_0_40px_rgb(var(--ri-volt)/0.35)] hover:brightness-105">{{ $page->registerLabel() }} <span aria-hidden="true">→</span></a>
                 @else
                     <p class="mt-10 font-display text-2xl font-bold uppercase text-paper/50">{{ $page->closedLabel() }}</p>
                 @endif

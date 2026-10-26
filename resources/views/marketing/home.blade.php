@@ -40,7 +40,7 @@
             </div>
 
             {{-- One device: a Race Ink landing on a phone. --}}
-            <div class="relative mx-auto w-full max-w-[18rem] lg:max-w-[19rem]" data-reveal data-device-mock>
+            <div class="relative mx-auto w-full max-w-[15.5rem] sm:max-w-[18rem] lg:max-w-[19rem]" data-reveal data-device-mock>
                 <div class="relative rounded-[2.75rem] bg-ink p-2.5 shadow-[0_40px_80px_-30px_rgb(var(--ri-ink)/0.6)]">
                     <div class="overflow-hidden rounded-[2.25rem] bg-midnight">
                         <img src="{{ asset('images/templates/mobile/gun-lap.jpg') }}" width="390" height="780" alt="{{ __('A race page made with the Gun Lap template, on a phone') }}" class="block h-auto w-full" fetchpriority="high">

@@ -24,7 +24,7 @@
                 <p class="mt-6 max-w-lg text-lg text-ink/70" data-reveal>{{ $page->config->hero->subtitle ?? $page->config->hero->title }}</p>
                 <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" data-reveal>
                     @if ($page->open)
-                        <a href="{{ $page->registerUrl() }}" class="inline-flex items-center justify-center gap-3 bg-heat px-8 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ __('Grab your bib') }} <span aria-hidden="true">→</span></a>
+                        <a href="{{ $page->registerUrl() }}" data-hero-cta class="inline-flex items-center justify-center gap-3 bg-heat px-8 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ __('Grab your bib') }} <span aria-hidden="true">→</span></a>
                     @endif
                     <p class="text-sm text-ink/60">{{ __('From :price · :date', ['price' => $page->fromPrice(), 'date' => $page->date->format('j M Y')]) }}</p>
                 </div>

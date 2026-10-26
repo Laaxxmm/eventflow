@@ -56,7 +56,11 @@
             base: @js($previewUrl),
             scale: 1,
             get src() { return this.template && this.template !== this.saved ? this.base + '?template=' + encodeURIComponent(this.template) : this.base },
-            fit() { const w = this.$refs.stage?.clientWidth || 1280; this.scale = Math.min(1, w / 1280) },
+            phoneScale: 1,
+            fit() {
+                const w = this.$refs.stage?.clientWidth || 1280; this.scale = Math.min(1, w / 1280);
+                const p = this.$refs.phone?.clientWidth || 406; this.phoneScale = Math.min(1, (p - 20) / 390);
+            },
          }"
          x-init="fit(); window.addEventListener('resize', () => fit())">
 
@@ -86,7 +90,7 @@
                     </div>
                     <div class="inline-flex rounded-xl bg-slate-100 p-1 text-sm font-medium" role="group" aria-label="{{ __('Preview size') }}">
                         <button type="button" class="rounded-lg px-3 py-1.5" :class="device === 'desktop' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" @click="device = 'desktop'; $nextTick(() => fit())" :aria-pressed="device === 'desktop'" data-device="desktop">{{ __('Desktop') }}</button>
-                        <button type="button" class="rounded-lg px-3 py-1.5" :class="device === 'mobile' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" @click="device = 'mobile'" :aria-pressed="device === 'mobile'" data-device="mobile">{{ __('Mobile') }}</button>
+                        <button type="button" class="rounded-lg px-3 py-1.5" :class="device === 'mobile' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500'" @click="device = 'mobile'; $nextTick(() => fit())" :aria-pressed="device === 'mobile'" data-device="mobile">{{ __('Mobile') }}</button>
                     </div>
                 </div>
 
@@ -97,8 +101,14 @@
                                 class="absolute left-0 top-0 origin-top-left border-0" style="width: 1280px; height: 760px" :style="`width: 1280px; height: 760px; transform: scale(${scale})`"></iframe>
                     </div>
                     {{-- Mobile: real 390px width in a phone frame. --}}
-                    <div x-show="device === 'mobile'" x-cloak class="mx-auto w-[406px] max-w-full rounded-[2.5rem] bg-[#0b1020] p-2">
-                        <iframe x-bind:src="device === 'mobile' ? src : ''" title="{{ __('Mobile preview of :event', ['event' => $event->name]) }}" class="block h-[760px] w-full rounded-[2rem] border-0 bg-white"></iframe>
+                    {{-- Mobile: a real 390 x 844 phone viewport, scaled down to fit narrow screens. --}}
+                    <div x-show="device === 'mobile'" x-cloak x-ref="phone" class="mx-auto w-[410px] max-w-full" data-phone-frame>
+                        <div class="mx-auto rounded-[2.6rem] bg-[#0b1020] p-2.5 shadow-xl" :style="`width: ${Math.round(390 * phoneScale) + 20}px`">
+                            <div class="relative overflow-hidden rounded-[2.1rem] bg-white" :style="`height: ${Math.round(844 * phoneScale)}px`">
+                                <iframe x-bind:src="device === 'mobile' ? src : ''" title="{{ __('Mobile preview of :event', ['event' => $event->name]) }}"
+                                        class="absolute left-0 top-0 origin-top-left border-0" :style="`width: 390px; height: 844px; transform: scale(${phoneScale})`"></iframe>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

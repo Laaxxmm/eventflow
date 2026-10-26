@@ -22,7 +22,7 @@
             <p class="mt-8 font-display text-2xl font-bold uppercase tracking-[0.18em]" data-reveal>{{ $page->date->format('l, j F Y') }}</p>
             <p class="mt-2 text-ink/65" data-reveal>{{ $page->config->venue }}</p>
             @if ($page->open)
-                <a href="{{ $page->registerUrl() }}" data-reveal class="mt-10 inline-flex items-center gap-3 bg-heat px-10 py-4 font-display text-2xl font-bold uppercase tracking-[0.12em] text-on-heat hover:brightness-95">{{ __('Enter the meet') }}</a>
+                <a href="{{ $page->registerUrl() }}" data-hero-cta data-reveal class="mt-10 inline-flex items-center gap-3 bg-heat px-10 py-4 font-display text-2xl font-bold uppercase tracking-[0.12em] text-on-heat hover:brightness-95">{{ __('Enter the meet') }}</a>
             @else
                 <p class="mt-10 font-display text-2xl font-bold uppercase tracking-[0.12em] text-ink/55">{{ $page->closedLabel() }}</p>
             @endif
