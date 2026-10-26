@@ -210,11 +210,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-6">
                     <p class="text-sm text-slate-600">
                         {{ __('Need a custom certificate design?') }}
-                        @if ($contact)
-                            <a href="mailto:{{ $contact }}" class="font-semibold text-slate-900 underline">{{ __('Contact Indefine') }}</a>
-                        @else
-                            <span class="font-semibold text-slate-900">{{ __('Contact Indefine') }}</span>
-                        @endif
+                        <a href="{{ \App\Support\Contact::customDesign(__('Custom certificate design for :event', ['event' => $event->name])) }}" class="font-semibold text-slate-900 underline" data-contact-indefine>{{ __('Contact Indefine') }}</a>
                     </p>
                     <button type="submit" class="rounded-xl bg-[#0b1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1f2a4a]">{{ __('Save design') }}</button>
                 </div>

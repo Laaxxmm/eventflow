@@ -17,6 +17,6 @@
             <a href="{{ \App\Saas\EventAddons::requestUrl($event, $addonKey) }}" class="inline-flex items-center rounded-lg bg-[#0b1020] px-4 py-2 font-semibold text-white hover:bg-[#1f2a4a]">{{ __('Unlock for :price', ['price' => \App\Saas\Plans::inr($addon['price_inr'])]) }}</a>
             <a href="{{ route('account.plan') }}" class="font-semibold underline">{{ __('Upgrade plan') }}</a>
         </div>
-        <p class="mt-2 text-xs text-amber-900/70">{{ __('Online checkout is rolling out; until then your request goes to Indefine and the add-on is switched on for you.') }}</p>
+        <p class="mt-2 text-xs text-amber-900/70">{{ \App\Billing\Checkout::ready() ? __('Pay online; it unlocks as soon as the payment is confirmed.') : __('Your request goes to Indefine and the add-on is switched on for you.') }}</p>
     </div>
 @endunless

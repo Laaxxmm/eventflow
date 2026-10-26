@@ -13,7 +13,7 @@ use Cashfree\Model\CustomerDetails;
 use Cashfree\Model\OrderMeta;
 use Illuminate\Http\Request;
 
-class CashfreeGateway implements PaymentGateway
+class CashfreeGateway implements PaymentGateway, SupportsPurchases
 {
     private string $appId;
 
@@ -59,7 +59,8 @@ class CashfreeGateway implements PaymentGateway
         $customer->setCustomerId('reg_'.$r->id);
         $customer->setCustomerName($r->participant_name);
         $customer->setCustomerEmail($r->email);
-        $customer->setCustomerPhone($r->phone);
+        // Cashfree needs a phone; hand-added participants (Session P1) may only have an email.
+        $customer->setCustomerPhone(filled($r->phone) ? $r->phone : '9999999999');
 
         $meta = new OrderMeta;
         $meta->setReturnUrl(url("/pay/return/{$r->id}"));
@@ -85,6 +86,45 @@ class CashfreeGateway implements PaymentGateway
             currency: 'INR',
             checkout: [
                 'payment_session_id' => $paymentSessionId,
+                'order_id' => $orderId,
+                'env' => $this->env,
+            ],
+        );
+    }
+
+    /** An organiser purchase (participant pack, add-on) on this account (Session P1). */
+    public function createPurchaseOrder(PurchaseIntent $intent): PaymentOrder
+    {
+        $customer = new CustomerDetails;
+        $customer->setCustomerId($intent->reference);
+        $customer->setCustomerName($intent->customerName);
+        $customer->setCustomerEmail($intent->customerEmail);
+        // Cashfree wants a 10-digit mobile: keep the last 10 digits ("+91 98450 12345" -> 9845012345).
+        $digits = substr((string) preg_replace('/\D+/', '', (string) $intent->customerPhone), -10);
+        $customer->setCustomerPhone(strlen($digits) === 10 ? $digits : '9999999999');
+
+        $meta = new OrderMeta;
+        $meta->setReturnUrl($intent->returnUrl);
+        $meta->setNotifyUrl($this->notifyUrl ?? url('/webhooks/cashfree'));
+
+        $request = new CreateOrderRequest;
+        $request->setOrderAmount($intent->amountPaise / 100);
+        $request->setOrderCurrency('INR');
+        $request->setCustomerDetails($customer);
+        $request->setOrderMeta($meta);
+        $request->setOrderNote(mb_substr($intent->description, 0, 200));
+
+        $response = $this->client()->PGCreateOrder(Cashfree::$XApiVersion, $request);
+        $order = $response[0] ?? $response;
+        $orderId = $order->getOrderId() ?? $order['order_id'] ?? '';
+
+        return new PaymentOrder(
+            provider: 'cashfree',
+            orderId: $orderId,
+            amountPaise: $intent->amountPaise,
+            currency: 'INR',
+            checkout: [
+                'payment_session_id' => $order->getPaymentSessionId() ?? $order['payment_session_id'] ?? '',
                 'order_id' => $orderId,
                 'env' => $this->env,
             ],

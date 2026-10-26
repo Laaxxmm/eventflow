@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Marketing;
 
+use App\Billing\Checkout;
+use App\Domains\DomainAccess;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\EventController;
 use App\Notifications\NotificationSettings;
 use App\Saas\PlanLimits;
 use App\Saas\Plans;
 use App\Saas\Trial;
+use App\Support\Contact;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -37,7 +40,9 @@ class AccountPlanController extends Controller
             'template' => EventController::galleryTemplate($request->query('template')),
             'trial' => Trial::onTrial($org) ? Trial::status($org) : null,
             'limitHit' => session('plan_limit'),
-            'contactEmail' => config('plans.brand.contact_email'),
+            'contactEmail' => Contact::email(),
+            'domainIncluded' => DomainAccess::planIncludes($org),
+            'checkoutReady' => Checkout::ready(),
         ]);
     }
 }

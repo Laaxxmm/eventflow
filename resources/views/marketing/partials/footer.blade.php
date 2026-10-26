@@ -18,7 +18,7 @@
                 <li><a href="{{ config('plans.links.docs') }}" class="hover:text-paper">{{ __('Docs') }}</a></li>
             @endif
             <li><a href="{{ config('plans.links.status') }}" class="hover:text-paper">{{ __('Status') }}</a></li>
-            <li><a href="mailto:{{ config('plans.brand.contact_email') }}" class="hover:text-paper">{{ config('plans.brand.contact_email') }}</a></li>
+            <li><a href="{{ \App\Support\Contact::mailto() }}" class="hover:text-paper">{{ \App\Support\Contact::email() }}</a></li>
         </ul>
         <ul class="space-y-3 text-sm">
             <li class="text-xs font-semibold uppercase tracking-[0.16em] text-paper/45">{{ __('Company') }}</li>
@@ -27,14 +27,14 @@
                 @if (config('plans.links.terms'))<li><a href="{{ config('plans.links.terms') }}" class="hover:text-paper">{{ __('Terms') }}</a></li>@endif
                 @if (config('plans.links.privacy'))<li><a href="{{ config('plans.links.privacy') }}" class="hover:text-paper">{{ __('Privacy') }}</a></li>@endif
             @else
-                <li><a href="mailto:{{ config('plans.brand.contact_email') }}?subject={{ rawurlencode(__('Terms and privacy')) }}" class="hover:text-paper">{{ __('Terms & privacy') }}</a></li>
+                <li><a href="{{ \App\Support\Contact::mailto(__('Terms and privacy')) }}" class="hover:text-paper">{{ __('Terms & privacy') }}</a></li>
             @endif
         </ul>
     </div>
     <div class="border-t border-paper/10">
         <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 text-xs text-paper/45 sm:px-6 lg:px-8">
             <p>© {{ now()->year }} {{ \App\Saas\Plans::brandName() }} · {{ __('Made in India') }}</p>
-            <a href="mailto:{{ config('plans.brand.contact_email') }}?subject={{ rawurlencode(__('Managed race ops')) }}" class="hover:text-paper/80">{{ __('Managed race ops by Indefine') }}</a>
+            <a href="{{ \App\Support\Contact::url(__('Managed race ops')) }}" data-contact-indefine class="hover:text-paper/80">{{ __('Managed race ops by Indefine') }}</a>
         </div>
     </div>
 </footer>

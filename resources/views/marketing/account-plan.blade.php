@@ -102,6 +102,15 @@
                                 @endcan
                             </dd>
                         </div>
+                        <div class="flex justify-between gap-4 py-3" data-plan-custom-domain="{{ $domainIncluded ? 'included' : 'addon' }}">
+                            <dt class="text-gray-600">{{ __('Custom domain') }}</dt>
+                            <dd class="font-medium text-gray-900 text-right">
+                                {{ $domainIncluded ? __('Included') : __('Add-on · :price per event', ['price' => \App\Saas\Plans::inr(\App\Saas\Plans::customDomainPrice())]) }}
+                                @can('manage-org')
+                                    · <a href="{{ route('settings.domain.show') }}" class="underline hover:text-gray-900">{{ $domainIncluded ? __('Connect') : __('Add') }}</a>
+                                @endcan
+                            </dd>
+                        </div>
                         <div class="flex justify-between gap-4 py-3">
                             <dt class="text-gray-600">{{ __('Add-ons') }}</dt>
                             <dd class="font-medium text-gray-900 text-right">{{ collect($addons)->pluck('name')->map(fn ($n) => __($n))->implode(', ') ?: __('None') }}</dd>
@@ -109,7 +118,9 @@
                     </dl>
 
                     <p class="mt-6 rounded-md bg-gray-50 p-4 text-sm text-gray-700">
-                        {{ __('Online plan billing is being connected. Until it is live nothing is charged automatically: Indefine activates your plan and add-ons when you ask.') }}
+                        {{ $checkoutReady
+                            ? __('Participant packs and add-ons with a price check out online and switch on as soon as the payment is confirmed. Plan changes go to Indefine; nothing renews automatically.')
+                            : __('Plan changes, participant packs and add-ons go to Indefine as a request and are switched on for you. Nothing is charged automatically.') }}
                     </p>
                     <div class="mt-4">@include('saas.overage-actions', ['org' => $org])</div>
                     <p class="mt-4 text-sm text-gray-600"><a href="{{ route('pricing') }}" class="underline hover:text-gray-900">{{ __('Compare plans') }}</a></p>

@@ -30,6 +30,7 @@ class NavigationComposer
         'card' => 'M3 6h18v12H3zM3 10h18M7 15h3',
         'wallet' => 'M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4zM4 7V6a2 2 0 0 1 2-2h10M16 13h2',
         'shield' => 'M12 3 4 6v6c0 4.4 3.4 8.4 8 9 4.6-.6 8-4.6 8-9V6z',
+        'globe' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
     ];
 
     public function compose(View $view): void
@@ -77,6 +78,9 @@ class NavigationComposer
                 }
                 if (Route::has('settings.payments.show')) {
                     $settings[] = $this->item(__('Payments'), 'settings.payments.show', 'wallet', 'settings.payments.*');
+                }
+                if (Route::has('settings.domain.show')) {
+                    $settings[] = $this->item(__('Domain'), 'settings.domain.show', 'globe', 'settings.domain.*');
                 }
             }
             if (Route::has('account.plan')) {

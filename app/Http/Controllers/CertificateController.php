@@ -9,6 +9,7 @@ use App\Certificates\IssueCertificate;
 use App\Models\Event;
 use App\Models\IssuedCertificate;
 use App\Models\Registration;
+use App\Support\Contact;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -52,7 +53,7 @@ class CertificateController extends Controller
             'batch' => $batch,
             'zipReady' => ($batch['state'] ?? null) === 'ready'
                 && Storage::disk($this->templates->disk())->exists($batch['path'] ?? ''),
-            'contact' => config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email'),
+            'contact' => config('eventflow.certificates.custom_contact') ?: Contact::email(),
         ]);
     }
 

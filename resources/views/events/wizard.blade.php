@@ -204,7 +204,7 @@
                             </div>
                         </button>
                     @endforeach
-                    <a href="mailto:{{ $contact }}?subject={{ rawurlencode(__('Custom event page template for :org', ['org' => $org->name])) }}"
+                    <a href="{{ \App\Support\Contact::customDesign(__('Custom event page template for :org', ['org' => $org->name])) }}" data-contact-indefine
                        class="flex flex-col justify-center rounded-2xl border-2 border-dashed border-slate-300 p-6 text-center hover:border-slate-500">
                         <span class="text-lg font-bold">{{ __('Need a custom template?') }}</span>
                         <span class="mt-2 text-sm text-slate-500">{{ __('Contact Indefine and we will design one for your series.') }}</span>

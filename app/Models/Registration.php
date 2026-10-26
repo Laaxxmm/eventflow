@@ -20,7 +20,17 @@ class Registration extends Model
         'org_id', 'event_id', 'pass_no', 'status', 'participant_name', 'email', 'phone', 'distance_code',
         'amount_paise', 'gateway', 'gateway_order_id', 'gateway_payment_id', 'answers',
         'pass_png_path', 'pass_pdf_path', 'paid_at', 'checked_in_at', 'checked_in_by',
+        'source', 'payment_method', 'notes', 'added_by',
     ];
+
+    /** Added by the organiser (Registrations → Add participant), not through the landing form. */
+    public const SOURCE_MANUAL = 'manual';
+
+    /** payment_method for a free place given by the organiser (status paid, amount 0). */
+    public const COMPLIMENTARY = 'complimentary';
+
+    /** payment_method for an entry paid outside the gateway (cash, bank transfer, UPI to the organiser). */
+    public const PAID_OFFLINE = 'manual';
 
     protected function casts(): array
     {
@@ -53,6 +63,21 @@ class Registration extends Model
     public function reminderLogs(): HasMany
     {
         return $this->hasMany(RegistrationReminderLog::class)->withoutGlobalScopes();
+    }
+
+    public function isManual(): bool
+    {
+        return $this->source === self::SOURCE_MANUAL;
+    }
+
+    public function isComplimentary(): bool
+    {
+        return $this->payment_method === self::COMPLIMENTARY;
+    }
+
+    public function addedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'added_by');
     }
 
     public function event(): BelongsTo

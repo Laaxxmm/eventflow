@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RestrictVolunteers;
+use App\Http\Middleware\RouteCustomDomain;
 use App\Http\Middleware\ServerTiming;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append(ServerTiming::class);
+        // Session P1: an organiser's own domain serves their event page (before routing).
+        $middleware->append(RouteCustomDomain::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

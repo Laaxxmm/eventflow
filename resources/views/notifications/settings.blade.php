@@ -220,7 +220,7 @@
                     @else
                         <div class="mt-6 rounded-md bg-indigo-50 p-4 text-sm text-indigo-900">
                             <p>{{ __('Platform mail is a paid add-on and is not on your plan.') }}</p>
-                            <a href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('Platform mail add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add Platform mail') }}</a>
+                            <a href="{{ \App\Support\Contact::url(__('Platform mail add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add Platform mail') }}</a>
                         </div>
                     @endif
                 </div>
@@ -245,7 +245,7 @@
                     @if (! $whatsappModule)
                         <div class="mt-6 rounded-md bg-indigo-50 p-4 text-sm text-indigo-900">
                             <p>{{ __('WhatsApp is a paid add-on and is not on your plan, so nothing is sent on WhatsApp.') }}</p>
-                            <a href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('WhatsApp add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add WhatsApp') }}</a>
+                            <a href="{{ \App\Support\Contact::url(__('WhatsApp add-on for :org', ['org' => $org->name])) }}" class="mt-2 inline-block font-semibold underline">{{ __('Add WhatsApp') }}</a>
                         </div>
                     @else
                         @php

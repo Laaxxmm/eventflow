@@ -10,7 +10,7 @@ use App\Payments\Dto\RefundResult;
 use Illuminate\Http\Request;
 use Razorpay\Api\Api;
 
-class RazorpayGateway implements PaymentGateway
+class RazorpayGateway implements PaymentGateway, SupportsPurchases
 {
     private Api $api;
 
@@ -61,6 +61,37 @@ class RazorpayGateway implements PaymentGateway
                     'email' => $r->email,
                     'contact' => $r->phone,
                 ],
+            ],
+        );
+    }
+
+    /** An organiser purchase (participant pack, add-on) on this account (Session P1). */
+    public function createPurchaseOrder(PurchaseIntent $intent): PaymentOrder
+    {
+        $order = $this->api->order->create([
+            'amount' => $intent->amountPaise,
+            'currency' => 'INR',
+            'receipt' => $intent->reference,
+            'notes' => ['purchase' => $intent->reference],
+        ]);
+
+        return new PaymentOrder(
+            provider: 'razorpay',
+            orderId: $order['id'],
+            amountPaise: $intent->amountPaise,
+            currency: 'INR',
+            checkout: [
+                'key_id' => $this->keyId,
+                'order_id' => $order['id'],
+                'amount' => $intent->amountPaise,
+                'currency' => 'INR',
+                'name' => config('app.name'),
+                'description' => $intent->description,
+                'prefill' => array_filter([
+                    'name' => $intent->customerName,
+                    'email' => $intent->customerEmail,
+                    'contact' => $intent->customerPhone,
+                ]),
             ],
         );
     }

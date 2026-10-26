@@ -70,7 +70,7 @@ class DashboardController extends Controller
 
         return response()->streamDownload(function () use ($query, $answerKeys) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Pass no', 'Name', 'Email', 'Phone', 'Event', 'Distance', 'Status', 'Amount (INR)', 'Paid at', 'Checked in at', ...$answerKeys]);
+            fputcsv($out, ['Pass no', 'Name', 'Email', 'Phone', 'Event', 'Distance', 'Status', 'Amount (INR)', 'Paid at', 'Checked in at', 'Source', 'Notes', ...$answerKeys]);
 
             foreach ($query->lazy(500) as $r) {
                 fputcsv($out, array_map($this->csvCell(...), [
@@ -84,6 +84,8 @@ class DashboardController extends Controller
                     number_format($r->amount_paise / 100, 2, '.', ''),
                     $r->paid_at?->toDateTimeString(),
                     $r->checked_in_at?->toDateTimeString(),
+                    $r->isComplimentary() ? 'manual (complimentary)' : ($r->source ?? 'online'),
+                    $r->notes,
                     ...array_map(fn (string $key) => $this->answer($r->answers[$key] ?? null), $answerKeys),
                 ]));
             }

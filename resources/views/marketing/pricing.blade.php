@@ -11,6 +11,8 @@
     $perEvent = fn (string $key) => __('Add-on :price / event', ['price' => Plans::inr($eventAddons[$key]['price_inr'])]);
     // Plans that include a module for every event (so its per-event add-on is not needed).
     $includedIn = fn (string $module) => collect($plans)->filter(fn ($p) => in_array($module, $p['modules'], true))->pluck('name')->implode(', ');
+    // Custom domain (Session P1): a ₹599 add-on on Single Event, included on Club and Circuit.
+    $domainIncludedIn = collect($plans)->filter(fn ($p) => $p['custom_domain'] ?? false)->pluck('name')->implode(', ');
     $rows = [
         __('Price (+ GST)') => fn ($p) => Plans::inr($p['price_inr']) ?? $quote,
         __('Races') => fn ($p) => $p['max_events'] === null ? $quote : number_format($p['max_events']),
@@ -21,6 +23,7 @@
         __('Volunteer QR check-in') => fn ($p) => in_array('checkin', $p['modules'], true),
         __('Race sheets and heats') => fn ($p) => in_array('race_sheets', $p['modules'], true) ?: $perEvent('race_sheet'),
         __('Finisher certificates') => fn ($p) => in_array('certificates', $p['modules'], true) ?: $perEvent('certificates'),
+        __('Custom domain') => fn ($p) => ($p['custom_domain'] ?? false) ? __('Included') : $perEvent('custom_domain'),
         __('Email · own SMTP') => fn ($p) => __('Included · free'),
         __('Platform mail') => fn ($p) => $paid($p, 'email_branding'),
         __('WhatsApp') => fn ($p) => $paid($p, 'sms_whatsapp'),
@@ -28,7 +31,7 @@
     ];
     $addonRows = [];
     foreach ($eventAddons as $key => $addon) {
-        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']).' '.__('per event'), 'what' => $addon['description'], 'note' => __('Included in :plans', ['plans' => $includedIn($addon['module'])])];
+        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']).' '.__('per event'), 'what' => $addon['description'], 'note' => __('Included in :plans', ['plans' => $addon['module'] ? $includedIn($addon['module']) : $domainIncludedIn])];
     }
     foreach ($addons as $key => $addon) {
         $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']) ?? __('Paid add-on'), 'what' => $addon['description'], 'note' => null];
@@ -141,7 +144,7 @@
             </ol>
         </div>
         @if (\App\Saas\Trial::stubbed())
-            <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Online checkout is rolling out. Until it is live, Upgrade and Buy a participant pack send your request to Indefine, and nothing is charged automatically.') }}</p>
+            <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Plan upgrades go to Indefine as a request, and nothing is charged automatically. Participant packs and add-ons are bought from Plan & billing.') }}</p>
         @endif
 
         <h2 id="add-ons" class="ri-headline mt-24 scroll-mt-20 text-5xl sm:text-6xl">{{ __('Add-ons.') }}</h2>

@@ -65,10 +65,27 @@ final class Plans
         return config('plans.addons');
     }
 
-    /** @return array<string, array<string, mixed>> Per-event add-ons (race sheet, certificates). */
+    /** @return array<string, array<string, mixed>> Per-event add-ons (race sheet, certificates, custom domain). */
     public static function eventAddons(): array
     {
-        return config('plans.event_addons', []);
+        $addons = config('plans.event_addons', []);
+        if (isset($addons['custom_domain'])) {
+            $addons['custom_domain']['price_inr'] = self::customDomainPrice();
+        }
+
+        return $addons;
+    }
+
+    /** Custom domain add-on price in INR (Single Event; Club and Circuit include it). */
+    public static function customDomainPrice(): int
+    {
+        return (int) config('plans.custom_domain_inr', 599);
+    }
+
+    /** Whether a plan includes a custom domain for free. */
+    public static function includesCustomDomain(?string $plan): bool
+    {
+        return $plan !== null && (bool) (self::all()[$plan]['custom_domain'] ?? false);
     }
 
     public static function trialDays(): int

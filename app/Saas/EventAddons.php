@@ -12,6 +12,7 @@ use App\Models\Tenancy\OrgScope;
  * Per-event add-ons (config('plans.event_addons')). An event's race sheet or certificates
  * are unlocked when the org's plan includes the module (Club Season and up, Org Settings
  * toggle on) or the event has the add-on. Single Event includes neither by default.
+ * The custom domain add-on has no module: Club Season and up include it (plans.*.custom_domain).
  */
 final class EventAddons
 {
@@ -19,7 +20,7 @@ final class EventAddons
     public static function keyFor(Module $module): ?string
     {
         foreach (Plans::eventAddons() as $key => $addon) {
-            if ($addon['module'] === $module->value) {
+            if (($addon['module'] ?? null) === $module->value) {
                 return $key;
             }
         }
@@ -51,6 +52,20 @@ final class EventAddons
         return $key !== null && self::has($event, $key);
     }
 
+    /** The org's plan covers add-on $key for every event (module in plan, or e.g. custom domain on Club). */
+    public static function keyInPlan(Event $event, string $key): bool
+    {
+        $addon = Plans::eventAddons()[$key] ?? null;
+        if ($addon === null) {
+            return false;
+        }
+        if (filled($addon['module'] ?? null)) {
+            return self::inPlan($event, Module::from($addon['module']));
+        }
+
+        return ($addon['plan_flag'] ?? null) === 'custom_domain' && Plans::includesCustomDomain($event->org->plan);
+    }
+
     /**
      * Status of each add-on for the event's Overview and locked pages.
      *
@@ -60,9 +75,8 @@ final class EventAddons
     {
         $out = [];
         foreach (Plans::eventAddons() as $key => $addon) {
-            $module = Module::from($addon['module']);
             $via = match (true) {
-                self::inPlan($event, $module) => 'plan',
+                self::keyInPlan($event, $key) => 'plan',
                 self::has($event, $key) => 'addon',
                 default => null,
             };
@@ -72,16 +86,12 @@ final class EventAddons
         return $out;
     }
 
-    /** mailto: that asks Indefine for the add-on (online checkout is not live yet). */
+    /**
+     * Where "Unlock" / "Add" goes: the Buy page (online checkout, or a request to Indefine
+     * while the add-on has no online price). Never a dead link.
+     */
     public static function requestUrl(Event $event, string $key): string
     {
-        $addon = Plans::eventAddons()[$key];
-
-        return 'mailto:'.config('plans.brand.contact_email').'?subject='.rawurlencode(__(':addon (:price) for :event (:org)', [
-            'addon' => __($addon['name']),
-            'price' => Plans::inr($addon['price_inr']),
-            'event' => $event->name,
-            'org' => $event->org->name,
-        ]));
+        return route('billing.show', ['sku' => $key, 'event' => $event->id]);
     }
 }
