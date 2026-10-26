@@ -1,15 +1,16 @@
 /*
- * Race Ink — EventFlow design tokens (see docs/design/race-ink.md).
- * Fonts are self-hosted (@fontsource): Barlow Condensed for display, Inter for UI.
+ * Daylight Track — EventFlow design tokens (docs/design/daylight-track/). Light, calm, premium.
+ * Variable names keep their Race Ink names (--ri-*) so existing Tailwind classes keep working.
+ * Fonts are self-hosted: Archivo (variable, wdth axis) for display, Inter for UI,
+ * Cormorant Garamond for Heritage Crest and two certificate designs.
  */
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
-@import '@fontsource/barlow-condensed/600.css';
-@import '@fontsource/barlow-condensed/700.css';
-@import '@fontsource/barlow-condensed/800.css';
-@import '@fontsource/barlow-condensed/800-italic.css';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource/cormorant-garamond/600.css';
+@import '@fontsource/cormorant-garamond/700.css';
 
 @tailwind base;
 @tailwind components;
@@ -18,33 +19,51 @@
 @layer base {
     :root {
         /* Space-separated RGB so Tailwind opacity modifiers work: rgb(var(--ri-ink) / .5) */
-        --ri-ink: 14 19 32;          /* #0E1320 */
-        --ri-track: 91 76 255;       /* #5B4CFF brand */
+        --ri-paper: 243 245 250;      /* #F3F5FA chalk: page background */
+        --ri-ink: 18 26 51;           /* #121A33 navy: text, ink buttons */
+        --ri-track: 75 63 224;        /* #4B3FE0 indigo: brand, primary buttons, links */
         --ri-on-track: 255 255 255;
-        --ri-track-text: 91 76 255; /* Track as text on paper: 4.8:1 */
-        --ri-heat: 255 90 60;        /* #FF5A3C CTAs, urgency */
-        --ri-on-heat: 14 19 32;      /* ink on Heat: 6:1 (white would be 3.1:1) */
-        --ri-paper: 246 243 236;     /* #F6F3EC */
-        --ri-mist: 232 228 220;      /* #E8E4DC */
-        --ri-midnight: 18 22 31;     /* #12161F */
-        --ri-volt: 200 245 49;       /* #C8F531, sparingly, on dark only */
+        --ri-track-text: 75 63 224;   /* indigo as text on white: 6.8:1 */
+        --ri-heat: 242 169 59;        /* #F2A93B marigold: small highlights, race Register */
+        --ri-on-heat: 18 26 51;       /* navy on marigold: 8.6:1 */
+        --ri-mist: 221 226 238;       /* #DDE2EE borders, empty bars */
+        --ri-midnight: 27 34 68;      /* #1B2244 dusk: Night Circuit hero only */
+        --ri-volt: 242 169 59;        /* retired: alias of marigold */
+        --ri-muted: 74 83 114;        /* #4A5372 secondary text: 6.9:1 on chalk */
+        --ri-track-deep: 43 35 144;   /* #2B2390 text on lilac, pressed */
+        --ri-lilac: 236 234 255;      /* #ECEAFF selected, active nav, soft panels */
+        --ri-success: 30 122 92;      /* #1E7A5C; text #0B4A38 on #E3F4EE */
+        --ri-warning: 138 83 0;       /* #8A5300; text on #FDF0DA */
+        --ri-danger: 161 42 42;       /* #A12A2A; text #6E1414 on #FBE4E4 */
     }
 
-    .font-display { font-feature-settings: 'ss01'; }
+    body { background-color: rgb(var(--ri-paper)); color: rgb(var(--ri-ink)); }
+
+    /* Visible keyboard focus everywhere (marigold ring). */
+    :focus-visible { outline: 3px solid #F2A93B; outline-offset: 2px; }
+
 }
 
 @layer components {
-    /* Huge athletic headline: condensed, tight, uppercase. */
+    /* Headline: Archivo, wide (wdth 118), heavy, sentence case. */
     .ri-headline {
-        @apply font-display font-extrabold uppercase leading-[0.86] tracking-[-0.01em];
+        font-family: theme('fontFamily.display');
+        font-variation-settings: 'wdth' 118;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.02;
+        text-transform: none;
     }
+    /* Display numbers and short labels in Archivo (no headline sizing). */
+    .font-display { font-variation-settings: 'wdth' 118; }
+    /* Small label; no rule before it (Daylight Track drops eyebrow kickers on new layouts). */
     .ri-kicker {
-        @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em];
+        @apply inline-flex items-center gap-2 text-sm font-semibold;
     }
-    .ri-kicker::before {
-        content: '';
-        @apply h-[2px] w-6 bg-current;
-    }
+    .ri-serif { font-family: theme('fontFamily.serif'); }
+    /* Floating things only: pass card, primary buttons, phone frames. */
+    .ri-float { box-shadow: 0 30px 60px -30px rgb(18 26 51 / .5); }
+    .ri-glow { box-shadow: 0 16px 32px -16px rgb(75 63 224 / .7); }
     /* Photo grade: slightly cooler and contrasty, so mixed stock reads as one set. */
     .ri-grade { filter: saturate(0.92) contrast(1.06); }
 }
@@ -60,6 +79,17 @@
         transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
     }
     .js [data-reveal].is-visible { opacity: 1; transform: none; }
-    .ri-kenburns { animation: ri-kenburns 24s ease-out both; }
+    .ri-kenburns { animation: ri-kenburns 24s cubic-bezier(.2,.7,.2,1) both; }
     @keyframes ri-kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+}
+
+/* Everything stops for visitors who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .ef-spin, [data-motion] { animation: none !important; transform: none !important; }
 }
