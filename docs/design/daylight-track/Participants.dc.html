@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Participants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+.sel{font:inherit;font-size:14px;padding:11px 14px;border-radius:12px;border:1px solid #DDE2EE;background:#FFFFFF;color:#121A33}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1200px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="participants" hint-size="248px,1200px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<h1 class="d" style="margin: 0; font-size: 40px">Participants</h1>
+<div style="display: flex; gap: 8px"><a href="#csv" style="background: #FFFFFF; border: 1px solid #DDE2EE; color: #121A33; text-decoration: none; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Export CSV</a><a href="#add" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px">Add participant</a></div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<div role="tablist" aria-label="Payment status" style="display: flex; background: #FFFFFF; border-radius: 999px; padding: 4px">
+<button type="button" role="tab" aria-selected="true" style="font: inherit; cursor: pointer; border: 0; background: #121A33; color: #FFFFFF; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">All 1,302</button>
+<button type="button" role="tab" aria-selected="false" style="font: inherit; cursor: pointer; border: 0; background: transparent; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Paid 1,209</button>
+<button type="button" role="tab" aria-selected="false" style="font: inherit; cursor: pointer; border: 0; background: transparent; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Unpaid 93</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<label style="position: relative"><span style="position: absolute; left: -9999px">Search</span><input class="sel" type="search" placeholder="Name, phone or EF- number" style="width: 240px"></label>
+<label><span style="position: absolute; left: -9999px">Event</span><select class="sel"><option>All events</option><option>Bengaluru City Marathon 2027</option></select></label>
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; background: #ECEAFF; border-radius: 18px; padding: 12px 16px">
+<span style="font-size: 14px; font-weight: 600; color: #2B2390">2 unpaid selected</span>
+<span style="display: flex; align-items: center; gap: 12px"><span style="font-size: 13px; color: #3B4463">Quiet hours are 9 pm to 8 am IST, so late reminders wait till morning.</span><a href="#remind" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px">Send reminder now</a></span>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 24px; overflow-x: auto">
+<table style="width: 100%; min-width: 900px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #4A5372; font-size: 13px"><th scope="col" style="padding: 16px 18px; width: 20px"><span style="position: absolute; left: -9999px">Select</span></th><th scope="col" style="font-weight: 600">Pass no</th><th scope="col" style="font-weight: 600">Name</th><th scope="col" style="font-weight: 600">Event and distance</th><th scope="col" style="font-weight: 600">Payment</th><th scope="col" style="font-weight: 600">Checked in</th></tr></thead>
+<tbody>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+<tr style="border-top: 1px solid #EEF0F6; background: {{ r.rowBg }}">
+<td style="padding: 14px 18px"><input type="checkbox" aria-label="Select {{ r.name }}" checked="{{ r.sel }}" style="width: 18px; height: 18px; accent-color: #4B3FE0"></td>
+<td style="font-weight: 600; letter-spacing: .02em; color: #3B4463">{{ r.pass }}</td>
+<td><strong style="display: block">{{ r.name }}</strong><span style="color: #4A5372; font-size: 13px">{{ r.phone }}</span></td>
+<td><span style="display: block">{{ r.event }}</span><span style="color: #4A5372; font-size: 13px">{{ r.dist }}</span></td>
+<td><span style="font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: {{ r.payBg }}; color: {{ r.payInk }}">{{ r.pay }}</span></td>
+<td style="color: #4A5372">{{ r.checked }}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 13px; color: #4A5372">Showing 10 of 1,302. <a href="#more">Show more</a></p>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const paid = { pay: 'Paid', payBg: '#E3F4EE', payInk: '#0B4A38' };
+    const unpaid = { pay: 'Unpaid', payBg: '#FDF0DA', payInk: '#6B4A12' };
+    const B = 'Bengaluru City Marathon 2027', N = 'Nandi Hills Night Ride 2027';
+    const rows = [
+      ['EF-7K2Q9M4XB3TA', 'Ananya Rao', '+91 98450 00000', B, 'Half marathon', paid, false],
+      ['EF-3M8D1V6QW2KC', 'Rahul Menon', '+91 99000 11223', B, '10K run', paid, false],
+      ['EF-9H4T7B2NX5LE', 'Farah Sheikh', '+91 97411 45678', B, 'Half marathon', unpaid, true],
+      ['EF-5P2Z8C1RJ7GD', 'Vikram Shetty', '+91 98860 33445', N, '100K', paid, false],
+      ['EF-1A6Y3F9KM4TS', 'Meera Iyer', '+91 90080 77889', B, '5K fun run', paid, false],
+      ['EF-8W5N2H7QD3BV', 'Arjun Gowda', '+91 96320 11990', B, 'Full marathon', paid, false],
+      ['EF-2R9L4X6PC8MJ', 'Sneha Pai', '+91 98440 55667', N, '25K', unpaid, true],
+      ['EF-6G3K8S1VB5WN', 'Kiran Das', '+91 99720 88776', B, '10K run', paid, false],
+      ['EF-4T7M2E9ZQ1HF', 'Divya Nair', '+91 97380 22114', B, 'Half marathon', paid, false],
+      ['EF-0C5B8J3UY6RA', 'Imran Khan', '+91 95350 66330', N, '50K', paid, false]
+    ];
+    return { rows: rows.map(r => Object.assign({ pass: r[0], name: r[1], phone: r[2], event: r[3], dist: r[4], sel: r[6], rowBg: r[6] ? '#F8F7FF' : '#FFFFFF', checked: 'Not yet' }, r[5])) };
+  }
+}
+</script>
+</body>
+</html>

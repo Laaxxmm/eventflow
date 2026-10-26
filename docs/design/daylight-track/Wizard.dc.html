@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New event: page design</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+button:focus-visible,a:focus-visible{outline:3px solid #F2A93B;outline-offset:2px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1300px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="events" hint-size="248px,1300px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 40px 48px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><p style="margin: 0; font-size: 14px; color: #4A5372">New event, step 3 of 5</p><h1 class="d" style="margin: 4px 0 0; font-size: 36px">Pick a page design</h1></div>
+<p style="margin: 0; font-size: 14px; color: #4A5372">Saved as a draft. Nothing goes live until you publish.</p>
+</div>
+
+<ol aria-label="Steps" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; font-size: 14px; font-weight: 600">
+<li style="display: flex; flex-direction: column; gap: 8px; color: #2B2390"><span style="height: 6px; border-radius: 3px; background: #4B3FE0"></span>1 Basics</li>
+<li style="display: flex; flex-direction: column; gap: 8px; color: #2B2390"><span style="height: 6px; border-radius: 3px; background: #4B3FE0"></span>2 Sport pack</li>
+<li aria-current="step" style="display: flex; flex-direction: column; gap: 8px; color: #121A33"><span style="height: 6px; border-radius: 3px; background: linear-gradient(90deg, #4B3FE0 50%, #C9C5FA 50%)"></span>3 Page design</li>
+<li style="display: flex; flex-direction: column; gap: 8px; color: #4A5372"><span style="height: 6px; border-radius: 3px; background: #DDE2EE"></span>4 Logo, photo and colours</li>
+<li style="display: flex; flex-direction: column; gap: 8px; color: #4A5372"><span style="height: 6px; border-radius: 3px; background: #DDE2EE"></span>5 Review and publish</li>
+</ol>
+
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+<div style="flex: 3 1 520px; min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px">
+<sc-for list="{{ tpls }}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="font: inherit; cursor: pointer; text-align: left; background: #FFFFFF; color: #121A33; border-radius: 24px; padding: 10px; border: 3px solid {{ t.border }}; display: flex; flex-direction: column; gap: 12px">
+<span style="position: relative; display: block; height: 150px; border-radius: 16px; background: {{ t.hero }}">
+<span style="position: absolute; left: 12px; bottom: 12px; right: 12px; font-family: 'Archivo', Inter, sans-serif; font-variation-settings: 'wdth' 118; font-weight: 800; font-size: 18px; line-height: 1; color: {{ t.heroInk }}; text-align: {{ t.align }}">Your race name</span>
+<span style="position: absolute; right: 10px; top: 10px; font-size: 11px; font-weight: 700; background: #FFFFFF; color: #2B2390; padding: 4px 9px; border-radius: 999px">{{ t.badge }}</span>
+</span>
+<span style="padding: 0 6px 6px; display: flex; flex-direction: column; gap: 4px"><strong style="font-size: 16px">{{ t.name }}</strong><span style="font-size: 13px; color: #4A5372">{{ t.blurb }}</span></span>
+</button>
+</sc-for>
+</div>
+
+<aside style="flex: 2 1 320px; min-width: 0; background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<p style="margin: 0; align-self: stretch; font-size: 14px; font-weight: 600">How runners will see it</p>
+<div style="width: 250px; border-radius: 34px; background: #121A33; padding: 8px; box-shadow: 0 30px 50px -28px rgba(18,26,51,.55)">
+<div style="border-radius: 27px; overflow: hidden; background: {{ cur.bg }}; height: 480px; display: flex; flex-direction: column">
+<div style="padding: 12px 14px; display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; color: {{ cur.ink }}"><span>Demo Runners</span><span style="background: {{ cur.accent }}; color: {{ cur.onAccent }}; padding: 4px 8px; border-radius: 999px">Register</span></div>
+<div style="margin: 0 8px; height: 200px; border-radius: 14px; background: {{ cur.hero }}; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; color: {{ cur.heroInk }}; text-align: {{ cur.align }}"><span style="font-size: 10px">Sat 26 Dec 2026</span><span class="d" style="font-size: 24px; line-height: 1">Bengaluru City Marathon 2027</span></div>
+<div style="padding: 10px 8px; display: flex; flex-direction: column; gap: 6px; color: {{ cur.ink }}">
+<span style="display: flex; justify-content: space-between; background: {{ cur.row }}; border-radius: 10px; padding: 10px; font-size: 11px; font-weight: 600"><span>5K fun run</span><span>₹599</span></span>
+<span style="display: flex; justify-content: space-between; background: {{ cur.row }}; border-radius: 10px; padding: 10px; font-size: 11px; font-weight: 600"><span>10K run</span><span>₹899</span></span>
+<span style="display: flex; justify-content: space-between; background: {{ cur.row }}; border-radius: 10px; padding: 10px; font-size: 11px; font-weight: 600"><span>Half marathon</span><span>₹1,499</span></span>
+</div>
+<div style="margin: auto 8px 8px; background: {{ cur.accent }}; color: {{ cur.onAccent }}; border-radius: 14px; padding: 12px; text-align: center; font-size: 12px; font-weight: 700">Register from ₹599</div>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; color: #4A5372; text-align: center">Your logo, photo and colours come in the next step.</p>
+</aside>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 22px; padding: 14px 16px">
+<a href="#back" style="color: #121A33; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; background: #F3F5FA">Back</a>
+<span style="font-size: 14px; color: #4A5372">{{ cur.name }} selected</span>
+<a href="#next" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 13px 22px; border-radius: 999px; font-weight: 700">Continue to branding</a>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { picked: 0 }; }
+  renderVals() {
+    const T = [
+      { name: 'Gun Lap', blurb: 'Big photo, huge type. Best for running.', badge: 'Running pack pick', bg: '#FFFFFF', hero: 'linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)', heroInk: '#FFFFFF', ink: '#121A33', accent: '#F2A93B', onAccent: '#121A33', row: '#F3F5FA', align: 'left' },
+      { name: 'Stadium Split', blurb: 'Colour panel and action photo. Fits any sport.', badge: 'Any sport', bg: '#F3F5FA', hero: 'linear-gradient(90deg, #F2A93B 0%, #F2A93B 55%, #6F67E8 55%, #2B2390 100%)', heroInk: '#121A33', ink: '#121A33', accent: '#4B3FE0', onAccent: '#FFFFFF', row: '#FFFFFF', align: 'left' },
+      { name: 'Equipment Close', blurb: 'Gear close-up and places-left cards.', badge: 'Skating', bg: '#F4FAF7', hero: 'linear-gradient(160deg, #C9EEDF, #6FC3A3 60%, #1E7A5C)', heroInk: '#FFFFFF', ink: '#0B4A38', accent: '#0B4A38', onAccent: '#FFFFFF', row: '#FFFFFF', align: 'left' },
+      { name: 'Night Circuit', blurb: 'Dusk-blue hero and a giant date.', badge: 'Cycling', bg: '#F1F2F9', hero: 'linear-gradient(180deg, #3B4A8C, #1B2244)', heroInk: '#FFFFFF', ink: '#121A33', accent: '#F2A93B', onAccent: '#121A33', row: '#FFFFFF', align: 'left' },
+      { name: 'Heritage Crest', blurb: 'Crest, ruled frames, a classic feel.', badge: 'Club classics', bg: '#FBFAF6', hero: 'linear-gradient(170deg, #E9DFC8, #B79E73 60%, #6E5634)', heroInk: '#FFFFFF', ink: '#231A14', accent: '#7A1F2B', onAccent: '#FFFFFF', row: '#F3EEE3', align: 'center' }
+    ];
+    const p = this.state.picked;
+    return {
+      cur: T[p],
+      tpls: T.map((t, i) => Object.assign({}, t, { pressed: i === p ? 'true' : 'false', border: i === p ? '#4B3FE0' : 'transparent', pick: () => this.setState({ picked: i }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

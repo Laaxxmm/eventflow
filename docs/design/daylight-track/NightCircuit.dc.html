@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Night Circuit race page</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F1F2F9}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+.cap{position:absolute;font-size:12px;font-weight:600;background:rgba(255,255,255,.88);color:#121A33;padding:6px 10px;border-radius:999px}
+@keyframes lane{from{stroke-dashoffset:0}to{stroke-dashoffset:-240}}
+.lane{animation:lane 6s linear infinite}
+@media (prefers-reduced-motion:reduce){.lane{animation:none}}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #121A33; background: #F1F2F9">
+
+<section style="position: relative; margin: 16px; border-radius: 40px; overflow: hidden; background: linear-gradient(180deg, #3B4A8C 0%, #1B2244 70%); color: #FFFFFF; min-height: 700px; display: flex; flex-direction: column">
+<svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0">
+<path class="lane" d="M-50 640 C 400 560, 800 600, 1450 380" stroke="#F2A93B" stroke-width="3" fill="none" stroke-dasharray="120 120"></path>
+<path class="lane" d="M-50 680 C 420 600, 820 640, 1450 420" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="2" fill="none" stroke-dasharray="80 160"></path>
+<path class="lane" d="M-50 600 C 380 520, 780 560, 1450 340" stroke="#8C86F0" stroke-width="2" fill="none" stroke-dasharray="60 180"></path>
+</svg>
+<span class="cap" style="right: 28px; top: 90px">Photo: riders with headlights on a hill road at dusk, long exposure</span>
+<header style="position: relative; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; gap: 16px">
+<span class="d" style="font-size: 20px">Deccan Wheelers</span>
+<a href="#register" style="background: #F2A93B; color: #121A33; text-decoration: none; padding: 12px 20px; border-radius: 999px; font-weight: 700">Register</a>
+</header>
+<div style="position: relative; margin-top: auto; padding: 0 40px 60px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 48px">
+<div class="d" style="font-size: clamp(120px, 15vw, 220px); line-height: .8; color: #F2A93B">16<span style="display: block; font-size: .42em; color: #FFFFFF">January</span></div>
+<div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 18px; padding-bottom: 12px">
+<p style="margin: 0; font-size: 16px; color: #C9CDE0">Saturday, flag-off 6:00 pm from Nandi Hills base</p>
+<h1 class="d" style="margin: 0; font-size: clamp(44px, 5vw, 76px); line-height: .98">Nandi Hills Night Ride 2027</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center"><a href="#register" style="background: #F2A93B; color: #121A33; text-decoration: none; padding: 18px 28px; border-radius: 999px; font-weight: 700; font-size: 17px">Register from ₹699</a><span style="font-size: 15px; color: #C9CDE0">82 days to go</span></div>
+</div>
+</div>
+</section>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 64px 40px 32px">
+<h2 class="d" style="margin: 0 0 28px; font-size: 44px">Pick your loop</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px">
+<a href="#register" style="text-decoration: none; color: #121A33; background: #FFFFFF; border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 10px"><span style="font-size: 14px; color: #4A5372">Lane 1</span><span class="d" style="font-size: 56px; line-height: 1">25K</span><span style="font-weight: 600">Social ride, no timing</span><span style="margin-top: 12px; display: flex; justify-content: space-between"><span class="d" style="font-size: 24px">₹699</span><span style="font-size: 14px; color: #4A5372">210 places left</span></span></a>
+<a href="#register" style="text-decoration: none; color: #121A33; background: #FFFFFF; border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 10px"><span style="font-size: 14px; color: #4A5372">Lane 2</span><span class="d" style="font-size: 56px; line-height: 1">50K</span><span style="font-weight: 600">Timed, one climb</span><span style="margin-top: 12px; display: flex; justify-content: space-between"><span class="d" style="font-size: 24px">₹1,199</span><span style="font-size: 14px; color: #4A5372">96 places left</span></span></a>
+<a href="#register" style="text-decoration: none; color: #FFFFFF; background: #1B2244; border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 10px"><span style="font-size: 14px; color: #C9CDE0">Lane 3</span><span class="d" style="font-size: 56px; line-height: 1; color: #F2A93B">100K</span><span style="font-weight: 600">Timed, three climbs</span><span style="margin-top: 12px; display: flex; justify-content: space-between"><span class="d" style="font-size: 24px">₹1,799</span><span style="font-size: 14px; color: #C9CDE0">31 places left</span></span></a>
+</div>
+</section>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 40px 40px">
+<div style="background: #FFFFFF; border-radius: 32px; padding: 36px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px"><h2 class="d" style="margin: 0; font-size: 32px">The 100K route</h2><span style="font-size: 15px; color: #4A5372">1,420 m of climbing, highest point 1,478 m</span></div>
+<svg role="img" aria-label="Elevation profile with three climbs" width="100%" height="200" viewBox="0 0 1200 200" preserveAspectRatio="none" style="display: block">
+<path d="M0 180 L 120 170 L 220 60 L 300 150 L 460 140 L 560 40 L 640 150 L 820 160 L 920 30 L 1000 140 L 1200 175 L 1200 200 L 0 200 Z" fill="#ECEAFF"></path>
+<path d="M0 180 L 120 170 L 220 60 L 300 150 L 460 140 L 560 40 L 640 150 L 820 160 L 920 30 L 1000 140 L 1200 175" fill="none" stroke="#4B3FE0" stroke-width="3"></path>
+<circle cx="920" cy="30" r="7" fill="#F2A93B"></circle>
+</svg>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; font-size: 15px">
+<span><strong class="d" style="display: block; font-size: 20px">17:00</strong>Bike check and pass scan</span>
+<span><strong class="d" style="display: block; font-size: 20px">18:00</strong>100K flag-off</span>
+<span><strong class="d" style="display: block; font-size: 20px">18:20</strong>50K and 25K flag-off</span>
+<span><strong class="d" style="display: block; font-size: 20px">23:30</strong>Course closes</span>
+</div>
+</div>
+</section>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 32px 40px 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px">
+<div style="position: relative; min-height: 320px; border-radius: 32px; background: linear-gradient(160deg, #6E78C8, #1B2244)"><span class="cap" style="left: 20px; bottom: 20px">Photo: lit hairpin bends from above</span></div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 class="d" style="margin: 0 0 6px; font-size: 32px">Rules of the night</h2>
+<p style="margin: 0; background: #FFFFFF; border-radius: 20px; padding: 18px 20px; line-height: 1.55">Front and rear lights are compulsory. No lights, no start.</p>
+<p style="margin: 0; background: #FFFFFF; border-radius: 20px; padding: 18px 20px; line-height: 1.55">Helmets on at all times. Marshals can stop any rider.</p>
+<p style="margin: 0; background: #FFFFFF; border-radius: 20px; padding: 18px 20px; line-height: 1.55">[ORGANISER’S RULE]</p>
+</div>
+</section>
+
+<section id="register" style="margin: 0 16px 16px; border-radius: 40px; background: #1B2244; color: #FFFFFF">
+<div style="max-width: 1280px; margin: 0 auto; padding: 52px 40px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px">
+<h2 class="d" style="margin: 0; font-size: 40px">Lights on. See you at the base.</h2>
+<a href="Review.dc.html" style="background: #F2A93B; color: #121A33; text-decoration: none; padding: 18px 30px; border-radius: 999px; font-weight: 700; font-size: 17px">Register from ₹699</a>
+</div>
+</section>
+<p style="margin: 0; padding: 8px 20px 24px; text-align: center; font-size: 13px; color: #4A5372">Organised by Deccan Wheelers. Registrations powered by EventFlow.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

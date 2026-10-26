@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+button:focus-visible,a:focus-visible{outline:3px solid #F2A93B;outline-offset:2px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1500px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="events" hint-size="248px,1500px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 40px 48px; display: flex; flex-direction: column; gap: 22px">
+<nav aria-label="Breadcrumb" style="font-size: 14px; color: #4A5372"><a href="Events.dc.html" style="color: #4A5372">Events</a> / Bengaluru City Marathon 2027</nav>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 12px"><h1 class="d" style="margin: 0; font-size: 36px">Bengaluru City Marathon 2027</h1><span style="font-size: 13px; font-weight: 700; background: #F2A93B; color: #121A33; padding: 5px 12px; border-radius: 999px">Live</span></div>
+<p style="margin: 0; font-size: 15px; color: #4A5372">Sat 26 Dec 2026, 5:30 am. <a href="GunLap.dc.html">eventflow.in/demo-runners/bengaluru-city-marathon-2027</a></p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<a href="Wizard.dc.html" style="background: #121A33; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Edit content</a>
+<a href="#comms" style="background: #FFFFFF; border: 1px solid #DDE2EE; color: #121A33; text-decoration: none; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Communications</a>
+<a href="#unpublish" style="background: #FFFFFF; border: 1px solid #DDE2EE; color: #121A33; text-decoration: none; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Unpublish</a>
+</div>
+</div>
+
+<section aria-label="Places by distance" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border-radius: 20px; padding: 18px"><div style="display: flex; justify-content: space-between; font-size: 14px"><strong>5K</strong><span style="color: #4A5372">88 / 500</span></div><div aria-hidden="true" style="margin-top: 10px; height: 8px; border-radius: 4px; background: #ECEAFF"><div style="width: 18%; height: 100%; border-radius: 4px; background: #4B3FE0"></div></div><p style="margin: 8px 0 0; font-size: 13px; color: #4A5372">412 left</p></div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 18px"><div style="display: flex; justify-content: space-between; font-size: 14px"><strong>10K</strong><span style="color: #4A5372">332 / 400</span></div><div aria-hidden="true" style="margin-top: 10px; height: 8px; border-radius: 4px; background: #ECEAFF"><div style="width: 83%; height: 100%; border-radius: 4px; background: #4B3FE0"></div></div><p style="margin: 8px 0 0; font-size: 13px; color: #4A5372">68 left</p></div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 18px"><div style="display: flex; justify-content: space-between; font-size: 14px"><strong>Half</strong><span style="color: #4A5372">391 / 400</span></div><div aria-hidden="true" style="margin-top: 10px; height: 8px; border-radius: 4px; background: #ECEAFF"><div style="width: 98%; height: 100%; border-radius: 4px; background: #F2A93B"></div></div><p style="margin: 8px 0 0; font-size: 13px; color: #8A5300; font-weight: 600">9 left</p></div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 18px"><div style="display: flex; justify-content: space-between; font-size: 14px"><strong>Full</strong><span style="color: #4A5372">200 / 200</span></div><div aria-hidden="true" style="margin-top: 10px; height: 8px; border-radius: 4px; background: #ECEAFF"><div style="width: 100%; height: 100%; border-radius: 4px; background: #9AA2BA"></div></div><p style="margin: 8px 0 0; font-size: 13px; color: #4A5372">Sold out</p></div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<section style="flex: 3 1 560px; min-width: 0; background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Live preview</h2>
+<div role="group" aria-label="Preview size" style="display: flex; background: #F3F5FA; border-radius: 999px; padding: 4px">
+<button type="button" onClick="{{ toDesktop }}" aria-pressed="{{ deskPressed }}" style="font: inherit; cursor: pointer; border: 0; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; background: {{ deskBg }}; color: #121A33">Desktop</button>
+<button type="button" onClick="{{ toMobile }}" aria-pressed="{{ mobPressed }}" style="font: inherit; cursor: pointer; border: 0; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; background: {{ mobBg }}; color: #121A33">Mobile</button>
+</div>
+</div>
+<div style="background: #E9ECF4; border-radius: 20px; padding: 24px; display: flex; justify-content: center; min-height: 480px; align-items: center">
+<div style="width: {{ frameW }}; transition: width .5s cubic-bezier(.2,.7,.2,1); background: {{ tpl.bg }}; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(18,26,51,.45)">
+<div style="padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: {{ tpl.ink }}"><span>Demo Runners</span><span style="background: {{ tpl.accent }}; color: {{ tpl.onAccent }}; padding: 5px 10px; border-radius: 999px">Register</span></div>
+<div style="margin: 0 10px; height: 220px; border-radius: 12px; background: {{ tpl.hero }}; padding: 18px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; color: {{ tpl.heroInk }}; text-align: {{ tpl.align }}"><span style="font-size: 11px">Sat 26 Dec 2026</span><span class="d" style="font-size: {{ titleSize }}; line-height: 1">Bengaluru City Marathon 2027</span></div>
+<div style="padding: 12px 10px 16px; display: grid; grid-template-columns: repeat({{ cols }}, minmax(0, 1fr)); gap: 8px; color: {{ tpl.ink }}">
+<span style="background: {{ tpl.row }}; border-radius: 10px; padding: 10px; font-size: 12px; font-weight: 600">5K ₹599</span>
+<span style="background: {{ tpl.row }}; border-radius: 10px; padding: 10px; font-size: 12px; font-weight: 600">10K ₹899</span>
+<span style="background: {{ tpl.row }}; border-radius: 10px; padding: 10px; font-size: 12px; font-weight: 600">Half ₹1,499</span>
+<span style="background: {{ tpl.row }}; border-radius: 10px; padding: 10px; font-size: 12px; font-weight: 600; opacity: .55">Full sold out</span>
+</div>
+</div>
+</div>
+</section>
+
+<section style="flex: 2 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+<div style="background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px">Change template</h2>
+<p style="margin: 0; font-size: 14px; color: #4A5372">Pick one to try it in the preview. Your logo and colours carry over.</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{ tpls }}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="font: inherit; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; border: 2px solid {{ t.border }}; background: #FFFFFF; color: #121A33">
+<span aria-hidden="true" style="width: 52px; height: 40px; flex: none; border-radius: 10px; background: {{ t.hero }}"></span>
+<span style="flex: 1; font-weight: 600; font-size: 15px">{{ t.name }}</span>
+<span style="font-size: 12px; font-weight: 700; color: #2B2390">{{ t.tag }}</span>
+</button>
+</sc-for>
+</div>
+<button type="button" style="font: inherit; cursor: pointer; border: 0; background: #4B3FE0; color: #FFFFFF; padding: 14px; border-radius: 999px; font-weight: 700; font-size: 15px">Apply template</button>
+<p style="margin: 0; font-size: 13px; color: #4A5372">Applies to your live page straight away.</p>
+</div>
+<div style="background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0 0 4px; font-size: 18px">Add-ons for this event</h2>
+<div style="display: flex; justify-content: space-between; font-size: 15px; padding: 8px 0; border-bottom: 1px solid #EEF0F6"><span>Race sheets</span><span style="color: #1E7A5C; font-weight: 600">In your plan</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 15px; padding: 8px 0; border-bottom: 1px solid #EEF0F6"><span>Certificates</span><span style="color: #1E7A5C; font-weight: 600">In your plan</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; padding: 8px 0"><span>Participant pack</span><a href="#billing" style="font-weight: 600">Buy more places</a></div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { mobile: false, picked: 0 }; }
+  renderVals() {
+    const T = [
+      { name: 'Gun Lap', bg: '#FFFFFF', hero: 'linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)', heroInk: '#FFFFFF', ink: '#121A33', accent: '#F2A93B', onAccent: '#121A33', row: '#F3F5FA', align: 'left' },
+      { name: 'Stadium Split', bg: '#F3F5FA', hero: 'linear-gradient(90deg, #F2A93B 0%, #F2A93B 55%, #6F67E8 55%, #2B2390 100%)', heroInk: '#121A33', ink: '#121A33', accent: '#4B3FE0', onAccent: '#FFFFFF', row: '#FFFFFF', align: 'left' },
+      { name: 'Equipment Close', bg: '#F4FAF7', hero: 'linear-gradient(160deg, #C9EEDF, #6FC3A3 60%, #1E7A5C)', heroInk: '#FFFFFF', ink: '#0B4A38', accent: '#0B4A38', onAccent: '#FFFFFF', row: '#FFFFFF', align: 'left' },
+      { name: 'Night Circuit', bg: '#F1F2F9', hero: 'linear-gradient(180deg, #3B4A8C, #1B2244)', heroInk: '#FFFFFF', ink: '#121A33', accent: '#F2A93B', onAccent: '#121A33', row: '#FFFFFF', align: 'left' },
+      { name: 'Heritage Crest', bg: '#FBFAF6', hero: 'linear-gradient(170deg, #E9DFC8, #B79E73 60%, #6E5634)', heroInk: '#FFFFFF', ink: '#231A14', accent: '#7A1F2B', onAccent: '#FFFFFF', row: '#F3EEE3', align: 'center' }
+    ];
+    const m = this.state.mobile, p = this.state.picked;
+    return {
+      tpl: T[p],
+      tpls: T.map((t, i) => ({ name: t.name, hero: t.hero, tag: i === 0 ? 'Current' : (i === p ? 'Trying' : ''), pressed: i === p ? 'true' : 'false', border: i === p ? '#4B3FE0' : '#EEF0F6', pick: () => this.setState({ picked: i }) })),
+      frameW: m ? '300px' : '100%', cols: m ? 2 : 4, titleSize: m ? '24px' : '36px',
+      deskBg: m ? 'transparent' : '#FFFFFF', mobBg: m ? '#FFFFFF' : 'transparent',
+      deskPressed: m ? 'false' : 'true', mobPressed: m ? 'true' : 'false',
+      toDesktop: () => this.setState({ mobile: false }), toMobile: () => this.setState({ mobile: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

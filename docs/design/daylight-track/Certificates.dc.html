@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Certificates</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Cormorant+Garamond:wght@600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+button:focus-visible{outline:3px solid #F2A93B;outline-offset:2px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1300px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="certificates" hint-size="248px,1300px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><p style="margin: 0; font-size: 14px; color: #4A5372">Kanteerava Skate Fest, Sun 11 Oct 2026</p><h1 class="d" style="margin: 4px 0 0; font-size: 40px">Certificates</h1></div>
+<div style="display: flex; gap: 8px"><a href="#sample" style="background: #FFFFFF; border: 1px solid #DDE2EE; color: #121A33; text-decoration: none; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Download sample</a><a href="#generate" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px">Generate 298 certificates</a></div>
+</div>
+<section aria-label="Status" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Checked in</span><p class="d" style="margin: 6px 0 0; font-size: 30px">298</p></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Issued</span><p class="d" style="margin: 6px 0 0; font-size: 30px">0</p></div>
+<div style="background: #FFFFFF; border-radius: 22px; padding: 20px"><span style="font-size: 14px; color: #4A5372">Last ZIP</span><p style="margin: 10px 0 0; font-size: 15px; font-weight: 600">Not generated yet</p></div>
+</section>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<section style="flex: 1 1 300px; min-width: 0; background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0 0 6px; font-size: 18px">Design</h2>
+<sc-for list="{{ designs }}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{ t.pick }}" aria-pressed="{{ t.pressed }}" style="font: inherit; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; border: 2px solid {{ t.border }}; background: #FFFFFF; color: #121A33">
+<span aria-hidden="true" style="width: 60px; height: 42px; flex: none; border-radius: 8px; background: {{ t.paper }}; box-shadow: inset 0 0 0 3px {{ t.frame }}"></span>
+<span style="font-weight: 600; font-size: 15px">{{ t.name }}</span>
+</button>
+</sc-for>
+<div style="margin-top: 6px; border: 2px dashed #C5CBDB; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><strong style="font-size: 15px">Upload your own</strong><span style="font-size: 13px; color: #4A5372">Full-bleed A4 artwork. We print the name, details and QR on top.</span></div>
+</section>
+<section style="flex: 3 1 560px; min-width: 0; background: #FFFFFF; border-radius: 28px; padding: 22px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><h2 style="margin: 0; font-size: 18px">Preview</h2><span style="font-size: 13px; color: #4A5372">A4 landscape, shown with a checked-in skater</span></div>
+<div style="background: #E9ECF4; border-radius: 20px; padding: 28px; display: flex; justify-content: center">
+<div style="width: 100%; max-width: 680px; aspect-ratio: 297 / 210; background: {{ cur.paper }}; color: {{ cur.ink }}; box-shadow: 0 30px 50px -30px rgba(18,26,51,.5); position: relative; box-sizing: border-box; padding: 18px">
+<div style="position: absolute; inset: 14px; border: 3px solid {{ cur.frame }}"></div>
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{ cur.strip }}; background: {{ cur.frame }}"></div>
+<div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 0 60px">
+<span style="font-size: 13px; font-weight: 600; letter-spacing: .08em; color: {{ cur.sub }}">Certificate of finish</span>
+<span style="font-family: {{ cur.font }}; font-weight: 800; font-size: 44px; line-height: 1.05">Aadya S</span>
+<span style="font-size: 15px; color: {{ cur.sub }}">completed the Under 8 girls 200 m quad race at</span>
+<span style="font-family: {{ cur.font }}; font-weight: 700; font-size: 22px">Kanteerava Skate Fest, 11 October 2026</span>
+<div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: flex-end; width: 100%; font-size: 12px; color: {{ cur.sub }}"><span style="border-top: 1px solid {{ cur.sub }}; padding-top: 6px; min-width: 140px">Race director</span><span aria-hidden="true" style="width: 54px; height: 54px; background: repeating-conic-gradient({{ cur.ink }} 0 25%, transparent 0 50%) 0 0 / 12px 12px; opacity: .8"></span><span style="border-top: 1px solid {{ cur.sub }}; padding-top: 6px; min-width: 140px">Verify: EF-CERT</span></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { picked: 0 }; }
+  renderVals() {
+    const A = "'Archivo', Inter, sans-serif", S = "'Cormorant Garamond', Georgia, serif";
+    const D = [
+      { name: 'Stadium Strip', paper: '#FFFFFF', frame: '#4B3FE0', ink: '#121A33', sub: '#4A5372', font: A, strip: '22px' },
+      { name: 'Modern Minimal', paper: '#FFFFFF', frame: '#DDE2EE', ink: '#121A33', sub: '#4A5372', font: A, strip: '0px' },
+      { name: 'Heritage Gold', paper: '#FBF6EA', frame: '#B8761A', ink: '#3A2A12', sub: '#6B5B4A', font: S, strip: '0px' },
+      { name: 'Academic Seal', paper: '#F7F8FC', frame: '#1B2244', ink: '#1B2244', sub: '#4A5372', font: S, strip: '0px' },
+      { name: 'Midnight Elite', paper: '#1B2244', frame: '#F2A93B', ink: '#FFFFFF', sub: '#C9CDE0', font: A, strip: '0px' }
+    ];
+    const p = this.state.picked;
+    return { cur: D[p], designs: D.map((d, i) => Object.assign({}, d, { pressed: i === p ? 'true' : 'false', border: i === p ? '#4B3FE0' : '#EEF0F6', pick: () => this.setState({ picked: i }) })) };
+  }
+}
+</script>
+</body>
+</html>

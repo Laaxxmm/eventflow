@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Modules</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+.sw{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:#C5CBDB;position:relative;cursor:pointer;flex:none;margin:0;transition:background .2s}
+.sw::after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:999px;background:#FFFFFF;transition:transform .2s}
+.sw:checked{background:#4B3FE0}.sw:checked::after{transform:translateX(18px)}
+.sw:disabled{cursor:not-allowed;opacity:.5}
+.sw:focus-visible{outline:3px solid #F2A93B;outline-offset:2px}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1100px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="modules" hint-size="248px,1100px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 22px; max-width: 980px">
+<div><h1 class="d" style="margin: 0; font-size: 40px">Modules</h1><p style="margin: 6px 0 0; font-size: 15px; color: #4A5372">Switch off what your events don’t need. The menu and your event pages follow.</p></div>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 8px 26px">
+<h2 style="margin: 0; padding: 18px 0 8px; font-size: 18px">Always on</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6"><span><strong style="display: block">Registration and payments</strong><span style="font-size: 14px; color: #4A5372">Your race page, entry form and checkout</span></span><span style="font-size: 13px; font-weight: 600; color: #4A5372">Always on</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6"><span><strong style="display: block">EF- passes</strong><span style="font-size: 14px; color: #4A5372">QR pass as an image and PDF after payment</span></span><span style="font-size: 13px; font-weight: 600; color: #4A5372">Always on</span></div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 8px 26px">
+<h2 style="margin: 0; padding: 18px 0 8px; font-size: 18px">Optional</h2>
+<label style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6; cursor: pointer"><span><strong style="display: block">QR check-in</strong><span style="font-size: 14px; color: #4A5372">Volunteers scan passes at the gate</span></span><input class="sw" type="checkbox" role="switch" checked=""></label>
+<label style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6; cursor: pointer"><span><strong style="display: block">Race sheets</strong><span style="font-size: 14px; color: #4A5372">Heats and start lists you can print</span></span><input class="sw" type="checkbox" role="switch" checked=""></label>
+<label style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6; cursor: pointer"><span><strong style="display: block">Certificates</strong><span style="font-size: 14px; color: #4A5372">Finisher certificates after race day</span></span><input class="sw" type="checkbox" role="switch" checked=""></label>
+<label style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6; cursor: pointer"><span><strong style="display: block">Email with your SMTP</strong><span style="font-size: 14px; color: #4A5372">Free on every plan</span></span><input class="sw" type="checkbox" role="switch" checked=""></label>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6"><span><strong style="display: block">Platform mail</strong><span style="font-size: 14px; color: #4A5372">Not in your plan. <a href="Billing.dc.html">Add it</a></span></span><input class="sw" type="checkbox" role="switch" disabled="" aria-label="Platform mail, not in your plan"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid #EEF0F6"><span><strong style="display: block">WhatsApp</strong><span style="font-size: 14px; color: #4A5372">Not in your plan. <a href="Billing.dc.html">Add it</a></span></span><input class="sw" type="checkbox" role="switch" disabled="" aria-label="WhatsApp, not in your plan"></div>
+</section>
+<div style="display: flex; justify-content: flex-end"><button type="button" style="font: inherit; cursor: pointer; border: 0; background: #4B3FE0; color: #FFFFFF; padding: 14px 24px; border-radius: 999px; font-weight: 700">Save</button></div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Domain settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1200px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="domain" hint-size="248px,1200px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 22px; max-width: 1000px">
+<div><h1 class="d" style="margin: 0; font-size: 40px">Domain</h1><p style="margin: 6px 0 0; font-size: 15px; color: #4A5372">A custom domain is included in your Club Season.</p></div>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 14px">
+<div><h2 style="margin: 0; font-size: 18px">Your EventFlow addresses</h2><p style="margin: 4px 0 0; font-size: 14px; color: #4A5372">Always on, with HTTPS. Share these any time.</p></div>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; background: #F3F5FA; border-radius: 18px; padding: 14px 16px"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 13px; color: #4A5372">Workspace page, all your events</span><strong style="word-break: break-all">eventflow.in/demo-runners</strong></span><span style="display: flex; align-items: center; gap: 10px"><span style="font-size: 12px; font-weight: 700; background: #E3F4EE; color: #0B4A38; padding: 5px 10px; border-radius: 999px">Live</span><a href="#copy" style="font-weight: 600; font-size: 14px">Copy</a></span></div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 28px; padding: 26px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 style="margin: 0; font-size: 18px">races.demorunners.in</h2><span style="font-size: 14px; color: #4A5372">Shows your workspace page</span></div>
+<span style="font-size: 12px; font-weight: 700; background: #FDF0DA; color: #6B4A12; padding: 6px 12px; border-radius: 999px">Waiting for DNS</span>
+</div>
+<ol aria-label="Setup progress" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 14px; font-weight: 600">
+<li style="display: flex; flex-direction: column; gap: 8px; color: #2B2390"><span style="height: 6px; border-radius: 3px; background: #4B3FE0"></span>1 Add your domain</li>
+<li aria-current="step" style="display: flex; flex-direction: column; gap: 8px"><span style="height: 6px; border-radius: 3px; background: #F2A93B"></span>2 Add the DNS record</li>
+<li style="display: flex; flex-direction: column; gap: 8px; color: #4A5372"><span style="height: 6px; border-radius: 3px; background: #DDE2EE"></span>3 We verify and add HTTPS</li>
+</ol>
+<p style="margin: 0; font-size: 15px; line-height: 1.55">Log in where you bought your domain (GoDaddy, Hostinger, Cloudflare and so on), open DNS settings, and add this record:</p>
+<div style="overflow-x: auto; border: 1px solid #EEF0F6; border-radius: 18px">
+<table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 15px">
+<thead><tr style="text-align: left; background: #F3F5FA; font-size: 13px; color: #4A5372"><th scope="col" style="padding: 12px 16px; font-weight: 600">Type</th><th scope="col" style="padding: 12px 16px; font-weight: 600">Name</th><th scope="col" style="padding: 12px 16px; font-weight: 600">Value</th><th scope="col" style="padding: 12px 16px"><span style="position: absolute; left: -9999px">Copy</span></th></tr></thead>
+<tbody><tr><td style="padding: 16px; font-weight: 700">CNAME</td><td style="padding: 16px">races</td><td style="padding: 16px; font-family: ui-monospace, Menlo, monospace; font-size: 14px">[YOUR CNAME TARGET]</td><td style="padding: 16px; text-align: right"><a href="#copy" style="font-weight: 600; font-size: 14px">Copy</a></td></tr></tbody>
+</table>
+</div>
+<p style="margin: 0; font-size: 13px; color: #4A5372">Root domain without www? Use an A record instead. DNS changes can take up to a few hours. Last check 10 minutes ago.</p>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; border-top: 1px solid #EEF0F6; padding-top: 18px">
+<button type="button" style="font: inherit; cursor: pointer; border: 0; background: transparent; color: #A12A2A; padding: 12px 4px; font-weight: 600">Remove domain</button>
+<span style="display: flex; gap: 10px"><button type="button" style="font: inherit; cursor: pointer; border: 1px solid #C5CBDB; background: #FFFFFF; color: #121A33; padding: 12px 20px; border-radius: 999px; font-weight: 600">Re-check</button><button type="button" style="font: inherit; cursor: pointer; border: 0; background: #4B3FE0; color: #FFFFFF; padding: 13px 22px; border-radius: 999px; font-weight: 700">Verify now</button></span>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

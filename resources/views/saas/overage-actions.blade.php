@@ -9,14 +9,14 @@
 @endphp
 <div class="flex flex-wrap gap-3" data-overage-actions>
     @if ($nextPlan && $nextPlan['self_serve'])
-        <a href="{{ \App\Support\Contact::url(__('Upgrade :org to :plan', ['org' => $org->name, 'plan' => $nextPlan['name']])) }}" class="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700" data-upgrade>
+        <a href="{{ \App\Support\Contact::url(__('Upgrade :org to :plan', ['org' => $org->name, 'plan' => $nextPlan['name']])) }}" class="inline-flex min-h-[44px] items-center rounded-full bg-ink px-5 text-sm font-semibold text-white hover:bg-ink/90" data-upgrade>
             {{ __('Upgrade to :plan (:price)', ['plan' => $nextPlan['name'], 'price' => \App\Saas\Plans::priceLabel($nextPlan['price_inr'])]) }}
         </a>
     @endif
-    <a href="{{ route('billing.show', array_filter(['sku' => \App\Billing\Catalog::PACK, 'event' => isset($event) ? $event->id : null])) }}" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50" data-buy-pack>
+    <a href="{{ route('billing.show', array_filter(['sku' => \App\Billing\Catalog::PACK, 'event' => isset($event) ? $event->id : null])) }}" class="inline-flex min-h-[44px] items-center rounded-full bg-white px-5 text-sm font-semibold text-ink ring-1 ring-inset ring-[#C5CBDB] hover:ring-ink/40" data-buy-pack>
         {{ __('Buy a participant pack') }}
     </a>
-    <a href="{{ \App\Support\Contact::url(__('EventFlow plan for :org', ['org' => $org->name])) }}" class="inline-flex items-center px-2 py-2 text-sm font-semibold text-gray-700 underline hover:text-gray-900" data-contact-indefine>
+    <a href="{{ \App\Support\Contact::url(__('EventFlow plan for :org', ['org' => $org->name])) }}" class="inline-flex min-h-[44px] items-center px-2 text-sm font-semibold text-track underline-offset-4 hover:underline" data-contact-indefine>
         {{ __('Contact Indefine') }}
     </a>
 </div>

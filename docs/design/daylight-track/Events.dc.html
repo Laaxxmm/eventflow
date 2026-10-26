@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Events</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1100px; background: #F3F5FA; font-family: Inter, system-ui, sans-serif; color: #121A33">
+<div style="flex: 0 0 248px; display: flex"><dc-import name="Sidebar" active="events" hint-size="248px,1100px"></dc-import></div>
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+<div><h1 class="d" style="margin: 0; font-size: 40px">Events</h1><p style="margin: 6px 0 0; font-size: 15px; color: #4A5372">3 of 5 races used in your Club Season, until 14 Aug 2027.</p></div>
+<a href="Wizard.dc.html" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 13px 20px; border-radius: 999px; font-weight: 700; font-size: 15px">New event</a>
+</div>
+<div role="tablist" aria-label="Filter events" style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" role="tab" aria-selected="true" style="font: inherit; cursor: pointer; border: 0; background: #121A33; color: #FFFFFF; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">All 4</button>
+<button type="button" role="tab" aria-selected="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Live 2</button>
+<button type="button" role="tab" aria-selected="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Drafts 1</button>
+<button type="button" role="tab" aria-selected="false" style="font: inherit; cursor: pointer; border: 1px solid #DDE2EE; background: #FFFFFF; color: #121A33; padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px">Past 1</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px">
+<sc-for list="{{ events }}" as="e" hint-placeholder-count="4">
+<article style="background: #FFFFFF; border-radius: 28px; padding: 12px; display: flex; flex-direction: column; gap: 14px">
+<div style="position: relative; height: 170px; border-radius: 20px; background: {{ e.photo }}">
+<span style="position: absolute; left: 12px; top: 12px; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: {{ e.pillBg }}; color: {{ e.pillInk }}">{{ e.status }}</span>
+<span style="position: absolute; right: 12px; top: 12px; font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.88); color: #121A33">{{ e.template }}</span>
+</div>
+<div style="padding: 0 8px; display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-size: 19px">{{ e.name }}</h2>
+<p style="margin: 0; font-size: 14px; color: #4A5372">{{ e.when }}</p>
+</div>
+<div style="padding: 0 8px"><div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px"><span><strong>{{ e.entries }}</strong> registrations</span><span style="color: #4A5372">{{ e.cap }}</span></div><div aria-hidden="true" style="height: 8px; border-radius: 4px; background: #ECEAFF"><div style="height: 100%; border-radius: 4px; width: {{ e.fill }}; background: #4B3FE0"></div></div></div>
+<div style="padding: 4px 8px 8px; display: flex; gap: 8px">
+<a href="Overview.dc.html" style="flex: 1; text-align: center; background: #121A33; color: #FFFFFF; text-decoration: none; padding: 11px; border-radius: 999px; font-weight: 600; font-size: 14px">Overview</a>
+<a href="{{ e.page }}" style="flex: 1; text-align: center; background: #F3F5FA; color: #121A33; text-decoration: none; padding: 11px; border-radius: 999px; font-weight: 600; font-size: 14px">View page</a>
+<a href="Wizard.dc.html" style="flex: 1; text-align: center; background: #F3F5FA; color: #121A33; text-decoration: none; padding: 11px; border-radius: 999px; font-weight: 600; font-size: 14px">Edit</a>
+</div>
+</article>
+</sc-for>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const live = { pillBg: '#F2A93B', pillInk: '#121A33' };
+    return { events: [
+      Object.assign({ name: 'Bengaluru City Marathon 2027', when: 'Sat 26 Dec 2026, Sree Kanteerava Stadium', status: 'Live', template: 'Gun Lap', entries: '1,089', cap: 'of 1,500', fill: '73%', page: 'GunLap.dc.html', photo: 'linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)' }, live),
+      Object.assign({ name: 'Nandi Hills Night Ride 2027', when: 'Sat 16 Jan 2027, Nandi Hills base', status: 'Live', template: 'Night Circuit', entries: '213', cap: 'of 550', fill: '39%', page: 'NightCircuit.dc.html', photo: 'linear-gradient(160deg, #6E78C8, #283263 60%, #1B2244)' }, live),
+      { name: 'Cubbon Park 10K', when: 'Sun 14 Feb 2027, Cubbon Park', status: 'Draft', template: 'Stadium Split', entries: '0', cap: 'not published', fill: '0%', page: 'StadiumSplit.dc.html', photo: 'linear-gradient(90deg, #F2A93B 50%, #6F67E8 50%)', pillBg: '#FFFFFF', pillInk: '#121A33' },
+      { name: 'Kanteerava Skate Fest', when: 'Sun 11 Oct 2026, finished', status: 'Ended', template: 'Equipment Close', entries: '316', cap: '298 checked in', fill: '94%', page: 'EquipmentClose.dc.html', photo: 'linear-gradient(160deg, #C9EEDF, #6FC3A3 60%, #1E7A5C)', pillBg: '#DDE2EE', pillInk: '#3B4463' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

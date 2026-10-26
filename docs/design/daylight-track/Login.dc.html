@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log in to EventFlow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+.f{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+.f input{font:inherit;font-weight:400;font-size:16px;padding:14px 16px;border-radius:14px;border:1px solid #C5CBDB;background:#FFFFFF;color:#121A33}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #121A33; background: #F3F5FA; display: flex; flex-wrap: wrap; min-height: 900px">
+<div style="flex: 1 1 520px; min-width: 0; padding: 32px 40px 48px; display: flex; flex-direction: column; gap: 40px">
+<a href="Main.dc.html" style="display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: #121A33"><span class="d" style="font-size: 24px">EventFlow</span><span style="font-size: 13px; color: #4A5372">by Indefine</span></a>
+<form style="max-width: 26rem; width: 100%; margin: auto; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px"><h1 class="d" style="margin: 0; font-size: 44px; line-height: 1.02">Welcome back</h1><p style="margin: 0; font-size: 16px; color: #4A5372">Organisers, staff and check-in volunteers all log in here.</p></div>
+<label class="f">Email<input type="email" autocomplete="email"></label>
+<label class="f"><span style="display: flex; justify-content: space-between"><span>Password</span><a href="#forgot" style="font-weight: 500">Forgot password?</a></span><input type="password" autocomplete="current-password"></label>
+<label style="display: flex; align-items: center; gap: 10px; font-size: 14px"><input type="checkbox" style="width: 18px; height: 18px; accent-color: #4B3FE0">Keep me logged in on this device</label>
+<a href="Dashboard.dc.html" style="text-align: center; background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 17px; border-radius: 999px; font-size: 17px; font-weight: 700; box-shadow: 0 16px 32px -16px rgba(75,63,224,.7)">Log in</a>
+<p style="margin: 0; font-size: 14px; color: #4A5372; text-align: center">New to EventFlow? <a href="Signup.dc.html" style="font-weight: 600">Start a free trial</a></p>
+</form>
+</div>
+<aside style="flex: 1 1 520px; min-width: 0; margin: 16px; border-radius: 32px; background: #4B3FE0; color: #FFFFFF; padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; position: relative; overflow: hidden">
+<svg aria-hidden="true" width="760" height="460" viewBox="0 0 760 460" style="position: absolute; left: -120px; bottom: -200px"><rect x="0" y="0" width="760" height="460" rx="230" fill="none" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="2"></rect><rect x="28" y="28" width="704" height="404" rx="202" fill="none" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="2"></rect><rect x="56" y="56" width="648" height="348" rx="174" fill="none" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="2"></rect><rect x="84" y="84" width="592" height="292" rx="146" fill="none" stroke="#FFFFFF" stroke-opacity=".16" stroke-width="2"></rect></svg>
+<h2 class="d" style="position: relative; margin: 0; font-size: 48px; line-height: 1.02; max-width: 26rem">Race morning starts here.</h2>
+<div style="position: relative; align-self: flex-end; width: 280px; background: #FFFFFF; color: #121A33; border-radius: 24px; padding: 20px; transform: rotate(-4deg); box-shadow: 0 40px 70px -30px rgba(18,26,51,.6); display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 13px; color: #4A5372">Today at gate 2</span>
+<span class="d" style="font-size: 34px; line-height: 1">412 checked in</span>
+<span aria-hidden="true" style="height: 8px; border-radius: 4px; background: #ECEAFF"><span style="display: block; width: 41%; height: 100%; border-radius: 4px; background: #F2A93B"></span></span>
+<span style="font-size: 13px; color: #4A5372">Bengaluru City Marathon 2027</span>
+</div>
+</aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

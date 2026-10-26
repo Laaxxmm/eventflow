@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>EventFlow race page templates</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F3F5FA}
+a{color:#4B3FE0}a:hover{color:#2B2390}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+</style>
+</helmet>
+<div style="font-family: Inter, system-ui, sans-serif; color: #121A33; background: #F3F5FA">
+<header style="max-width: 1280px; margin: 0 auto; padding: 24px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" style="display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: #121A33"><span class="d" style="font-size: 24px">EventFlow</span><span style="font-size: 13px; color: #4A5372">by Indefine</span></a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px; font-size: 15px; font-weight: 500">
+<a href="#top" aria-current="page" style="color: #4B3FE0; text-decoration: none; font-weight: 700">Templates</a>
+<a href="Pricing.dc.html" style="color: #121A33; text-decoration: none">Pricing</a>
+<a href="Login.dc.html" style="color: #121A33; text-decoration: none">Log in</a>
+<a href="Signup.dc.html" style="background: #121A33; color: #FFFFFF; text-decoration: none; padding: 12px 20px; border-radius: 999px; font-weight: 600">Start free trial</a>
+</nav>
+</header>
+
+<section id="top" style="max-width: 1280px; margin: 0 auto; padding: 48px 40px 48px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 32px">
+<h1 class="d" style="margin: 0; font-size: clamp(42px, 5vw, 72px); line-height: 1.02; max-width: 46rem">Your runners land on a sports page, not a form</h1>
+<p style="margin: 0; max-width: 28rem; font-size: 18px; line-height: 1.55; color: #4A5372">Five designs. Each one takes your logo, colours and photos, and you can switch between them any time before or after you publish.</p>
+</section>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 0 40px 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(520px, 1fr)); gap: 28px">
+<sc-for list="{{ items }}" as="t" hint-placeholder-count="5">
+<article style="background: #FFFFFF; border-radius: 32px; padding: 14px; display: flex; flex-direction: column; gap: 18px">
+<div style="position: relative; height: 340px; border-radius: 22px; overflow: hidden; background: {{ t.page }}">
+<div style="position: absolute; inset: 0; background: {{ t.photo }}"></div>
+<div style="position: absolute; inset: 0; background: {{ t.scrim }}"></div>
+<div style="position: absolute; left: 0; right: 0; top: 0; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; color: {{ t.headInk }}; font-size: 12px; font-weight: 700"><span>Demo Runners</span><span style="background: {{ t.accent }}; color: {{ t.onAccent }}; padding: 6px 12px; border-radius: 999px">Register</span></div>
+<div style="position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; flex-direction: column; gap: 8px; color: {{ t.titleInk }}; text-align: {{ t.align }}">
+<span style="font-size: 12px; font-weight: 600; opacity: .9">{{ t.date }}</span>
+<span class="d" style="font-size: 38px; line-height: 1">{{ t.event }}</span>
+</div>
+<span style="position: absolute; right: 14px; top: 56px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.85); color: #121A33; padding: 5px 9px; border-radius: 999px">Photo: {{ t.brief }}</span>
+</div>
+<div style="padding: 4px 12px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px; max-width: 26rem">
+<div style="display: flex; align-items: center; gap: 10px"><h2 style="margin: 0; font-size: 22px">{{ t.name }}</h2><span style="font-size: 12px; font-weight: 600; color: #2B2390; background: #ECEAFF; padding: 4px 10px; border-radius: 999px">{{ t.sport }}</span></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #4A5372">{{ t.blurb }}</p>
+</div>
+<div style="display: flex; gap: 10px">
+<a href="{{ t.file }}" style="border: 1px solid #C5CBDB; color: #121A33; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Live preview</a>
+<a href="Signup.dc.html" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; font-size: 14px">Use this template</a>
+</div>
+</div>
+</article>
+</sc-for>
+</section>
+
+<section style="max-width: 1280px; margin: 0 auto; padding: 24px 40px 96px">
+<div style="background: #ECEAFF; border-radius: 32px; padding: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px">
+<h2 class="d" style="margin: 0; font-size: 30px; line-height: 1.1">Every template includes</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.55"><strong style="display: block; margin-bottom: 4px">Your brand, checked</strong>Logo and colours, with contrast checked so Register always reads.</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.55"><strong style="display: block; margin-bottom: 4px">Everything runners ask</strong>Distances and prices, schedule, venue, sponsors and FAQ.</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.55"><strong style="display: block; margin-bottom: 4px">One tap to register</strong>A Register bar that stays on screen on phones, and a QR pass by email after payment.</p>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sc = 'linear-gradient(180deg, rgba(18,26,51,0) 35%, rgba(18,26,51,.55) 100%)';
+    return { items: [
+      { name: 'Gun Lap', sport: 'Running', file: 'GunLap.dc.html', blurb: 'A full-width race photo with huge type, and the start list right below.', event: 'Bengaluru City Marathon 2027', date: 'Sat 26 Dec 2026', brief: 'start line at dawn', page: '#4B3FE0', photo: 'linear-gradient(160deg, #8C86F0 0%, #4B3FE0 55%, #2B2390 100%)', scrim: sc, headInk: '#FFFFFF', titleInk: '#FFFFFF', accent: '#F2A93B', onAccent: '#121A33', align: 'left' },
+      { name: 'Stadium Split', sport: 'Any sport', file: 'StadiumSplit.dc.html', blurb: 'A solid colour panel beside a big action photo, with sponsors and FAQ below.', event: 'Bengaluru City Marathon 2027', date: 'Sat 26 Dec 2026', brief: 'runner mid-stride', page: '#F2A93B', photo: 'linear-gradient(90deg, #F2A93B 0%, #F2A93B 50%, #6F67E8 50%, #2B2390 100%)', scrim: 'transparent', headInk: '#121A33', titleInk: '#121A33', accent: '#4B3FE0', onAccent: '#FFFFFF', align: 'left' },
+      { name: 'Equipment Close', sport: 'Skating', file: 'EquipmentClose.dc.html', blurb: 'A gear close-up, a limited-places badge, and category cards that show places left.', event: 'Karnataka Speed Skating Open', date: 'Sun 7 Feb 2027', brief: 'skate wheels, low angle', page: '#1E7A5C', photo: 'linear-gradient(160deg, #C9EEDF 0%, #6FC3A3 55%, #1E7A5C 100%)', scrim: sc, headInk: '#0B4A38', titleInk: '#FFFFFF', accent: '#0B4A38', onAccent: '#FFFFFF', align: 'left' },
+      { name: 'Night Circuit', sport: 'Cycling', file: 'NightCircuit.dc.html', blurb: 'A dusk-blue hero with an oversized date, for evening races and rides.', event: 'Nandi Hills Night Ride', date: 'Sat 16 Jan 2027, 6 pm', brief: 'riders with lights at dusk', page: '#1B2244', photo: 'linear-gradient(160deg, #6E78C8 0%, #283263 55%, #1B2244 100%)', scrim: sc, headInk: '#FFFFFF', titleInk: '#FFFFFF', accent: '#F2A93B', onAccent: '#121A33', align: 'left' },
+      { name: 'Heritage Crest', sport: 'Club classics', file: 'HeritageCrest.dc.html', blurb: 'A centred crest, ruled frames and an order of events, for races with history.', event: 'Mysuru Heritage Run', date: 'Sun 3 Oct 2027', brief: 'palace road, morning', page: '#6E5634', photo: 'linear-gradient(160deg, #E9DFC8 0%, #B79E73 55%, #6E5634 100%)', scrim: sc, headInk: '#FFFFFF', titleInk: '#FFFFFF', accent: '#7A1F2B', onAccent: '#FFFFFF', align: 'center' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>

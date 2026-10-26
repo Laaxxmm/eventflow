@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Register for Bengaluru City Marathon 2027</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.d{font-family:'Archivo',Inter,system-ui,sans-serif;font-variation-settings:'wdth' 118;font-weight:800;letter-spacing:-0.02em}
+.f{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600}
+.f input,.f select{font:inherit;font-weight:400;font-size:16px;padding:13px 14px;border-radius:14px;border:1px solid #C5CBDB;background:#FFFFFF;color:#121A33}
+.hint{font-size:12px;font-weight:400;color:#4A5372}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1500px; overflow: hidden; background: #F3F5FA; color: #121A33; font-family: Inter, system-ui, sans-serif">
+<header style="padding: 16px 20px; display: flex; align-items: center; gap: 12px">
+<a href="Event.dc.html" aria-label="Back to event page" style="width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121A33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<span style="display: flex; flex-direction: column"><span style="font-size: 13px; color: #4A5372">Bengaluru City Marathon 2027</span><span style="font-weight: 700">Register</span></span>
+</header>
+
+<ol aria-label="Steps" style="list-style: none; margin: 0 20px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; font-size: 12px; font-weight: 600">
+<li style="display: flex; flex-direction: column; gap: 6px; color: #2B2390"><span style="height: 4px; border-radius: 2px; background: #4B3FE0"></span>Distance</li>
+<li aria-current="step" style="display: flex; flex-direction: column; gap: 6px; color: #2B2390"><span style="height: 4px; border-radius: 2px; background: #4B3FE0"></span>Your details</li>
+<li style="display: flex; flex-direction: column; gap: 6px; color: #4A5372"><span style="height: 4px; border-radius: 2px; background: #DDE2EE"></span>Pay</li>
+</ol>
+
+<div style="margin: 20px 12px 0; background: #FFFFFF; border-radius: 24px; padding: 18px; display: flex; align-items: center; gap: 14px">
+<span class="d" style="width: 56px; height: 56px; flex: none; border-radius: 16px; background: #F2A93B; display: flex; align-items: center; justify-content: center; font-size: 18px">21.1</span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><strong>Half marathon</strong><span style="font-size: 13px; color: #4A5372">Your place is held for 30 minutes</span></span>
+<a href="Event.dc.html" style="font-size: 14px; font-weight: 600; color: #4B3FE0">Change</a>
+</div>
+
+<form style="margin: 12px; background: #FFFFFF; border-radius: 24px; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px">
+<h1 class="d" style="margin: 0; font-size: 24px">About you</h1>
+<label class="f">Full name<input type="text" value="Ananya Rao"></label>
+<label class="f">Email<input type="email" value="ananya@example.com"><span class="hint">Your pass is sent here.</span></label>
+<label class="f">Mobile number<input type="tel" value="+91 98450 00000"></label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<label class="f">Date of birth<input type="text" value="14-03-1994"></label>
+<label class="f">Gender<select><option>Female</option><option>Male</option><option>Other</option></select></label>
+</div>
+<p style="margin: -6px 0 0; font-size: 13px; color: #2B2390; background: #ECEAFF; padding: 10px 12px; border-radius: 12px">Your category on race day: Open 18–39</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<label class="f">T-shirt size<select><option>M</option><option>S</option><option>L</option></select></label>
+<label class="f">Blood group<select><option>Optional</option><option>B+</option></select></label>
+</div>
+<h2 class="d" style="margin: 8px 0 0; font-size: 20px">In case of emergency</h2>
+<label class="f">Contact name<input type="text"></label>
+<label class="f">Contact phone<input type="tel"></label>
+<label class="f">City (optional)<input type="text"></label>
+</form>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1px solid #DDE2EE; padding: 14px 16px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<span style="display: flex; flex-direction: column"><span style="font-size: 13px; color: #4A5372">To pay</span><span class="d" style="font-size: 24px">₹1,499</span></span>
+<a href="PassReady.dc.html" style="background: #4B3FE0; color: #FFFFFF; text-decoration: none; padding: 16px 22px; border-radius: 999px; font-weight: 700">Continue to payment</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
