@@ -69,11 +69,11 @@ return [
      * Custom layouts are not built in-app: organisers are pointed to Indefine.
      */
     'landing_templates' => [
-        'gun-lap' => ['label' => 'Gun Lap', 'tone' => 'dark', 'description' => 'Full-bleed race photo, giant type, sticky Register. Pure race energy.'],
-        'stadium-split' => ['label' => 'Stadium Split', 'tone' => 'light', 'description' => 'Solid brand panel beside a big action photo; sponsors, accordions, FAQ.'],
-        'equipment-close' => ['label' => 'Equipment Close', 'tone' => 'light', 'description' => 'Sport-gear hero, “Limited bibs” urgency and category cards.'],
-        'night-circuit' => ['label' => 'Night Circuit', 'tone' => 'dark', 'description' => 'Dark canvas, volt accents, oversized date, one bright Register.'],
-        'heritage-crest' => ['label' => 'Heritage Crest', 'tone' => 'light', 'description' => 'Federation-formal: centred crest, paper, framed sections, sponsor row.'],
+        'gun-lap' => ['label' => 'Gun Lap', 'tone' => 'dark', 'swatch' => 'linear-gradient(160deg, #8C86F0, #4B3FE0 60%, #2B2390)', 'description' => 'Full-bleed race photo, giant type, sticky Register. Pure race energy.'],
+        'stadium-split' => ['label' => 'Stadium Split', 'tone' => 'light', 'swatch' => 'linear-gradient(90deg, #F2A93B 0%, #F2A93B 55%, #6F67E8 55%, #2B2390 100%)', 'description' => 'Solid brand panel beside a big action photo; sponsors, accordions, FAQ.'],
+        'equipment-close' => ['label' => 'Equipment Close', 'tone' => 'light', 'swatch' => 'linear-gradient(160deg, #C9EEDF, #6FC3A3 60%, #1E7A5C)', 'description' => 'Sport-gear hero, “Limited bibs” urgency and category cards.'],
+        'night-circuit' => ['label' => 'Night Circuit', 'tone' => 'dark', 'swatch' => 'linear-gradient(180deg, #3B4A8C, #1B2244)', 'description' => 'Dark canvas, volt accents, oversized date, one bright Register.'],
+        'heritage-crest' => ['label' => 'Heritage Crest', 'tone' => 'light', 'swatch' => 'linear-gradient(170deg, #E9DFC8, #B79E73 60%, #6E5634)', 'description' => 'Federation-formal: centred crest, paper, framed sections, sponsor row.'],
     ],
 
     // Earlier template keys still stored on events; they render as their Race Ink successor.

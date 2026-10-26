@@ -34,9 +34,15 @@ class EventOverviewController extends Controller
     public function show(Request $request, Event $event): View
     {
         $org = $this->org($request, $event);
-        $template = $this->config($event)?->template;
+        $config = $this->config($event);
+        $template = $config?->template;
 
         return view('events.overview', [
+            'places' => collect($config?->distances ?? [])->map(fn ($d) => [
+                'label' => $d->label,
+                'capacity' => $d->capacity,
+                'taken' => Capacity::taken($event, $d->code),
+            ])->all(),
             'org' => $org,
             'event' => $event,
             'live' => $event->status === EventStatus::Published,
