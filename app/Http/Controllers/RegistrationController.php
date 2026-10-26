@@ -119,9 +119,10 @@ class RegistrationController extends Controller
         ]);
     }
 
+    /** Open until the event starts, or until registration_closes when that is earlier (Session P1). */
     public static function isOpen(EventConfig $config): bool
     {
-        return $config->date->isFuture();
+        return $config->closesAt()->isFuture();
     }
 
     /** Season Pass gate; skipped until an Entitlements implementation is bound. */

@@ -60,7 +60,7 @@
                     <option value="{{ $key }}" @selected($v('template') === $key)>{{ $tpl['label'] }} — {{ $tpl['description'] }}</option>
                 @endforeach
             </select>
-            <p class="mt-1 text-xs text-gray-500">{{ __('Need a custom template? Contact Indefine:') }} {{ config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email') }}</p>
+            <p class="mt-1 text-xs text-gray-500">{{ __('Need a custom template?') }} <a href="{{ \App\Support\Contact::customDesign(__('Custom event page template for :org', ['org' => $org->name])) }}" class="font-semibold underline" data-contact-indefine>{{ __('Contact Indefine') }}</a></p>
             <x-input-error class="mt-2" :messages="$errors->get('template')" />
         </div>
         <div>
@@ -83,16 +83,107 @@
             <x-text-input id="hero_subtitle" name="hero[subtitle]" type="text" class="mt-1 block w-full" :value="$v('hero.subtitle')" maxlength="255" />
             <x-input-error class="mt-2" :messages="$errors->get('hero.subtitle')" />
         </div>
-        <div>
-            <x-input-label for="branding_logo" :value="__('Logo path or URL (optional)')" />
-            <x-text-input id="branding_logo" name="branding[logo]" type="text" class="mt-1 block w-full" :value="$v('branding.logo')" />
-            <x-input-error class="mt-2" :messages="$errors->get('branding.logo')" />
+        {{-- Session P1: hero / banner, share image and logo uploads (paths stay editable for YAML-authored events). --}}
+        @foreach ([
+            ['key' => 'hero.image', 'file' => 'hero_upload', 'label' => __('Hero / banner image'), 'hint' => __('The big photo at the top of your page. Landscape, at least 1600 px wide. JPG, PNG or WebP up to 5 MB. Without one, the page uses sport artwork.'), 'ratio' => 'aspect-[16/9]'],
+            ['key' => 'hero.og_image', 'file' => 'og_upload', 'label' => __('Share image (optional)'), 'hint' => __('Shown when the link is shared on WhatsApp or social media. 1200 × 630 px is ideal. Defaults to the banner.'), 'ratio' => 'aspect-[1200/630]'],
+            ['key' => 'branding.logo', 'file' => 'logo_upload', 'label' => __('Logo (optional)'), 'hint' => __('Transparent PNG works best. Shown in the header and footer.'), 'ratio' => 'aspect-[3/1]'],
+        ] as $slot)
+            @php
+                $current = $v($slot['key']);
+                $url = \App\Landing\Theme::url($current);
+                $id = str_replace('.', '_', $slot['key']);
+            @endphp
+            <div class="sm:col-span-2 rounded-lg border border-gray-200 p-4" data-upload-slot="{{ $slot['file'] }}">
+                <div class="grid gap-4 sm:grid-cols-[12rem_1fr] sm:items-start">
+                    <div class="{{ $slot['ratio'] }} w-full overflow-hidden rounded-md bg-gray-100 ring-1 ring-gray-200">
+                        @if ($url)
+                            <img src="{{ $url }}" alt="" class="h-full w-full {{ $slot['file'] === 'logo_upload' ? 'object-contain p-2' : 'object-cover' }}">
+                        @else
+                            <div class="flex h-full items-center justify-center text-xs text-gray-400">{{ __('None yet') }}</div>
+                        @endif
+                    </div>
+                    <div>
+                        <x-input-label :for="$slot['file']" :value="$slot['label']" />
+                        <input id="{{ $slot['file'] }}" name="{{ $slot['file'] }}" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm text-gray-700 file:me-3 file:rounded-md file:border-0 file:bg-gray-900 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-700">
+                        <p class="mt-1 text-xs text-gray-500">{{ $slot['hint'] }}</p>
+                        <x-input-error class="mt-2" :messages="$errors->get($slot['file'])" />
+                        <div class="mt-2 flex flex-wrap items-center gap-4">
+                            @if ($current)
+                                <label class="inline-flex items-center gap-2 text-xs text-gray-600">
+                                    <input type="hidden" name="remove[{{ $id }}]" value="0">
+                                    <input type="checkbox" name="remove[{{ $id }}]" value="1" class="rounded border-gray-300">
+                                    {{ __('Remove') }}
+                                </label>
+                            @endif
+                            <details class="text-xs text-gray-500">
+                                <summary class="cursor-pointer">{{ __('Use a path or URL instead') }}</summary>
+                                <input id="{{ $id }}" name="{{ \Illuminate\Support\Str::of($slot['key'])->replaceFirst('.', '[')->append(']') }}" type="text" value="{{ $current }}" class="{{ $control }} text-sm">
+                            </details>
+                        </div>
+                        <x-input-error class="mt-2" :messages="$errors->get($slot['key'])" />
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</section>
+
+<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" data-countdown-settings>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900">{{ __('Countdown and closing time') }}</h2>
+        <p class="mt-1 text-sm text-gray-600">{{ __('A big Race Ink timer under the hero builds urgency. It switches to “Registration closed” and “We’re live” on its own.') }}</p>
+    </header>
+
+    <div class="mt-6 grid gap-6 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+            <label for="countdown_enabled" class="inline-flex items-center gap-3">
+                <input type="hidden" name="countdown[enabled]" value="0">
+                <input id="countdown_enabled" type="checkbox" name="countdown[enabled]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" @checked($v('countdown.enabled'))>
+                <span class="text-sm font-medium text-gray-700">{{ __('Show a countdown on the event page') }}</span>
+            </label>
         </div>
         <div>
-            <x-input-label for="hero_image" :value="__('Hero image path or URL (optional)')" />
-            <x-text-input id="hero_image" name="hero[image]" type="text" class="mt-1 block w-full" :value="$v('hero.image')" />
-            <x-input-error class="mt-2" :messages="$errors->get('hero.image')" />
+            <x-input-label for="countdown_target" :value="__('Count down to')" />
+            <select id="countdown_target" name="countdown[target]" class="{{ $control }}">
+                <option value="registration_close" @selected($v('countdown.target') === 'registration_close')>{{ __('Registration closing') }}</option>
+                <option value="event_start" @selected($v('countdown.target') === 'event_start')>{{ __('Event start') }}</option>
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('countdown.target')" />
         </div>
+        <div>
+            <x-input-label for="registration_closes" :value="__('Registration closes (IST, optional)')" />
+            <x-text-input id="registration_closes" name="registration_closes" type="datetime-local" class="mt-1 block w-full" :value="$v('registration_closes')" />
+            <p class="mt-1 text-xs text-gray-500">{{ __('Blank = entries stay open until the start time.') }}</p>
+            <x-input-error class="mt-2" :messages="$errors->get('registration_closes')" />
+        </div>
+    </div>
+</section>
+
+<section class="p-4 sm:p-8 bg-white shadow sm:rounded-lg" data-footer-settings>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900">{{ __('Page footer') }}</h2>
+        <p class="mt-1 text-sm text-gray-600">{{ __('Your logo and name always show. Add a support contact, socials and your terms so runners know who to ask.') }}</p>
+    </header>
+
+    <div class="mt-6 grid gap-6 sm:grid-cols-2">
+        @foreach ([
+            'email' => [__('Support email'), 'email', __('Blank = your account email')],
+            'phone' => [__('Support phone / WhatsApp'), 'tel', __('Blank = your organisation phone')],
+            'website' => [__('Website'), 'url', 'https://'],
+            'instagram' => [__('Instagram'), 'text', '@yourrace'],
+            'facebook' => [__('Facebook'), 'text', 'yourrace'],
+            'x' => [__('X (Twitter)'), 'text', '@yourrace'],
+            'youtube' => [__('YouTube'), 'text', '@yourrace'],
+            'terms_url' => [__('Terms / refund policy URL'), 'url', 'https://'],
+            'privacy_url' => [__('Privacy policy URL'), 'url', 'https://'],
+        ] as $key => [$label, $type, $placeholder])
+            <div>
+                <x-input-label for="contact_{{ $key }}" :value="$label" />
+                <x-text-input id="contact_{{ $key }}" name="contact[{{ $key }}]" :type="$type" class="mt-1 block w-full" :value="$v('contact.'.$key)" maxlength="255" :placeholder="$placeholder" />
+                <x-input-error class="mt-2" :messages="$errors->get('contact.'.$key)" />
+            </div>
+        @endforeach
     </div>
 </section>
 
@@ -281,7 +372,7 @@
             </select>
         </div>
         <p class="sm:col-span-3 text-sm text-gray-600">
-            {{ __('Need a custom certificate layout? Contact Indefine:') }} {{ config('eventflow.certificates.custom_contact') ?: __('ask your account manager') }}
+            {{ __('Need a custom certificate layout?') }} <a href="{{ \App\Support\Contact::customDesign(__('Custom certificate layout for :org', ['org' => $org->name])) }}" class="font-semibold underline" data-contact-indefine>{{ __('Contact Indefine') }}</a>
         </p>
     </div>
 </section>

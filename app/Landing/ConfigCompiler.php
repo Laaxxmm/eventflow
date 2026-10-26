@@ -33,6 +33,9 @@ final class ConfigCompiler
         }
 
         $data['date'] = self::withOffset($data['date']);
+        if (filled($data['registration_closes'] ?? null)) {
+            $data['registration_closes'] = self::withOffset($data['registration_closes']);
+        }
 
         return $data;
     }

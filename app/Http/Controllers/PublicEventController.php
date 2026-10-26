@@ -51,6 +51,7 @@ class PublicEventController extends Controller
                 open: RegistrationController::isOpen($config) && ! ($paused = PlanLimits::atParticipantCap($event)),
                 paused: $paused ?? false,
                 watermark: Trial::watermark($event->org),
+                orgContact: LandingPage::orgContact($event->org),
             ),
         ]);
     }

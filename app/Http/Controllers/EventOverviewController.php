@@ -76,6 +76,7 @@ class EventOverviewController extends Controller
                 open: RegistrationController::isOpen($config),
                 preview: true,
                 watermark: Trial::watermark($org),
+                orgContact: LandingPage::orgContact($org),
             ),
         ]);
     }

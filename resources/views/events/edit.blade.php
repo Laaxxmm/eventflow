@@ -21,7 +21,7 @@
                 </div>
             @endif
 
-            <form method="post" action="{{ route('organiser.events.update', $event) }}" class="space-y-6">
+            <form method="post" action="{{ route('organiser.events.update', $event) }}" class="space-y-6" enctype="multipart/form-data">
                 @csrf
                 @method('put')
                 @include('events.partials.form')

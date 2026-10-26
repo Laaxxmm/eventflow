@@ -35,6 +35,8 @@
         </div>
     </section>
 
+    @include('landings.partials.countdown')
+
     {{-- Sponsor strip --}}
     <section class="border-y-2 border-ink bg-mist">
         <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
