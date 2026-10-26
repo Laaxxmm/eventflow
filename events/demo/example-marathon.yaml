@@ -7,8 +7,8 @@ date: "2027-01-17T05:30:00+05:30"
 venue: Sree Kanteerava Stadium, Bengaluru
 
 branding:
-  primary: "#d9ff45"
-  secondary: "#ff6e61"
+  primary: "#4b3fe0"
+  secondary: "#f2a93b"
   logo: branding/demo-runners/logo.png
 
 hero:

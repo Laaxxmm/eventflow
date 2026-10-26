@@ -13,30 +13,29 @@
         $parts = ['d' => intdiv((int) $diff, 86400), 'h' => intdiv((int) $diff % 86400, 3600), 'm' => intdiv((int) $diff % 3600, 60), 's' => (int) $diff % 60];
         $units = ['d' => __('Days'), 'h' => __('Hours'), 'm' => __('Min'), 's' => __('Sec')];
     @endphp
-    <section class="relative overflow-hidden bg-ink text-paper" data-countdown data-state="{{ $cd['state'] }}" data-target="{{ $cd['target'] }}"
+    <section class="relative overflow-hidden bg-lilac text-track-deep" data-countdown data-state="{{ $cd['state'] }}" data-target="{{ $cd['target'] }}"
              data-close="{{ $cd['close']->toIso8601String() }}" data-start="{{ $cd['start']->toIso8601String() }}" data-live-until="{{ $cd['live_until']->toIso8601String() }}"
              aria-live="polite">
-        <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[repeating-linear-gradient(115deg,transparent_0_22px,rgb(var(--ri-paper)/0.04)_22px_24px)]" aria-hidden="true"></div>
-        <div class="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-12 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+                <div class="relative mx-auto flex max-w-[1280px] flex-col gap-6 px-4 py-10 sm:px-6 sm:py-12 lg:flex-row lg:items-center lg:justify-between lg:px-10">
             <div data-countdown-counting @class(['hidden' => $cd['state'] !== 'counting'])>
-                <p class="ri-kicker text-heat">{{ $cd['target'] === 'registration_close' ? __('Registration closes in') : __('Race starts in') }}</p>
-                <p class="mt-2 text-sm text-paper/60">{{ ($cd['target'] === 'registration_close' ? $cd['close'] : $cd['start'])->setTimezone(\App\Landing\ConfigCompiler::TIMEZONE)->format('D j M Y · g:i A') }} IST</p>
+                <p class="ri-headline text-2xl">{{ $cd['target'] === 'registration_close' ? __('Registration closes in') : __('Race starts in') }}</p>
+                <p class="mt-2 text-sm text-[#3B4463]">{{ ($cd['target'] === 'registration_close' ? $cd['close'] : $cd['start'])->setTimezone(\App\Landing\ConfigCompiler::TIMEZONE)->format('D j M Y · g:i A') }} IST</p>
             </div>
             <dl data-countdown-counting @class(['grid grid-cols-4 gap-2 sm:gap-4', 'hidden' => $cd['state'] !== 'counting'])>
                 @foreach ($units as $key => $label)
-                    <div class="min-w-[4.25rem] bg-paper/[0.06] px-2 py-3 text-center ring-1 ring-inset ring-paper/10 sm:min-w-[6.5rem] sm:px-4 sm:py-4">
-                        <dd class="font-display text-5xl font-extrabold leading-none tabular-nums sm:text-7xl" data-unit="{{ $key }}">{{ str_pad((string) $parts[$key], 2, '0', STR_PAD_LEFT) }}</dd>
-                        <dt class="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-paper/55">{{ $label }}</dt>
+                    <div class="min-w-[4.25rem] rounded-[18px] bg-white px-2 py-3 text-center sm:min-w-[6.5rem] sm:px-4 sm:py-4">
+                        <dd class="ri-headline text-4xl tabular-nums text-ink sm:text-6xl" data-unit="{{ $key }}">{{ str_pad((string) $parts[$key], 2, '0', STR_PAD_LEFT) }}</dd>
+                        <dt class="mt-2 text-xs font-semibold text-muted">{{ $label }}</dt>
                     </div>
                 @endforeach
             </dl>
             <div data-countdown-closed @class(['flex flex-wrap items-baseline gap-x-6 gap-y-2', 'hidden' => $cd['state'] !== 'closed'])>
-                <p class="font-display text-5xl font-extrabold uppercase leading-none sm:text-7xl">{{ __('Registration closed') }}</p>
-                <p class="text-sm text-paper/60">{{ __('Race day :date. See you at the start line.', ['date' => $cd['start']->setTimezone(\App\Landing\ConfigCompiler::TIMEZONE)->format('j M')]) }}</p>
+                <p class="ri-headline text-4xl sm:text-6xl">{{ __('Registration closed') }}</p>
+                <p class="text-sm text-[#3B4463]">{{ __('Race day :date. See you at the start line.', ['date' => $cd['start']->setTimezone(\App\Landing\ConfigCompiler::TIMEZONE)->format('j M')]) }}</p>
             </div>
             <div data-countdown-live @class(['flex items-center gap-4', 'hidden' => $cd['state'] !== 'live'])>
-                <span class="relative flex h-4 w-4" aria-hidden="true"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-heat opacity-75"></span><span class="relative inline-flex h-4 w-4 rounded-full bg-heat"></span></span>
-                <p class="font-display text-5xl font-extrabold uppercase leading-none sm:text-7xl">{{ __('We’re live') }}</p>
+                <span class="relative flex h-4 w-4" aria-hidden="true"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-heat motion-reduce:animate-none opacity-75"></span><span class="relative inline-flex h-4 w-4 rounded-full bg-heat"></span></span>
+                <p class="ri-headline text-4xl sm:text-6xl">{{ __('We’re live') }}</p>
             </div>
         </div>
     </section>

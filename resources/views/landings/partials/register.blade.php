@@ -7,7 +7,7 @@
         'preview' => $page->preview,
     ])
 @elseif ($page->paused)
-    <p class="mt-4 rounded-2xl bg-black/5 p-6 text-center font-medium" role="status">{{ __(\App\Http\Controllers\RegistrationController::PAUSED_MESSAGE) }}</p>
+    <p class="mt-4 rounded-[24px] bg-white p-6 text-center font-medium text-ink" role="status">{{ __(\App\Http\Controllers\RegistrationController::PAUSED_MESSAGE) }}</p>
 @else
-    <p class="mt-4 rounded-2xl bg-black/5 p-6 text-center font-medium">{{ __('Registration for this event is closed.') }}</p>
+    <p class="mt-4 rounded-[24px] bg-white p-6 text-center font-medium text-ink">{{ __('Registration for this event is closed.') }}</p>
 @endif

@@ -6,7 +6,7 @@
 
     <div class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 lg:px-10">
         <section class="overflow-hidden rounded-[28px] bg-white">
-            <div class="h-2" style="background: linear-gradient(90deg, {{ $event->colours['primary'] ?? '#d9ff45' }}, {{ $event->colours['secondary'] ?? '#ff6e61' }})"></div>
+            <div class="h-2" style="background: linear-gradient(90deg, {{ $event->colours['primary'] ?? '#4b3fe0' }}, {{ $event->colours['secondary'] ?? '#f2a93b' }})"></div>
             <div class="p-6 sm:p-10">
                 <p class="text-sm font-semibold uppercase tracking-wider text-muted">{{ $template['label'] ?? '' }} {{ __('design') }}</p>
                 <h3 class="mt-2 text-3xl font-extrabold tracking-tight">{{ $event->name }}</h3>

@@ -37,7 +37,7 @@ it('keeps Register one tap away on mobile', function () {
 
     $this->get('/demo-runners/bengaluru-city-marathon-2027')
         ->assertSee('fixed inset-x-0 bottom-0', false)
-        ->assertSee('from ₹599');
+        ->assertSee('From ₹599');
 });
 
 it('renders old template keys as their Race Ink successor', function (string $old, string $new) {
