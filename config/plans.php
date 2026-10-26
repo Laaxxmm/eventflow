@@ -157,6 +157,27 @@ return [
         ],
     ],
 
+    // Per-event add-ons (Session UX-H2, prices locked). Bought for one event; they unlock that
+    // event's module even when the plan does not include it (Single Event includes neither).
+    // Club Season and up include both modules for every event. Granted by Indefine until online
+    // billing is live: php artisan plans:event-addon <org> <event> race_sheet|certificates
+    'event_addons' => [
+        'race_sheet' => [
+            'name' => 'Race sheet download',
+            'short' => 'Race sheet',
+            'description' => 'Export start lists and heat sheets for the event (CSV and print-ready PDF).',
+            'price_inr' => 599,
+            'module' => 'race_sheets',
+        ],
+        'certificates' => [
+            'name' => 'Certificates',
+            'short' => 'Certificates',
+            'description' => 'Unlock the premium finisher certificate pack for the event: generate, download and reissue.',
+            'price_inr' => 799,
+            'module' => 'certificates',
+        ],
+    ],
+
     // When a race reaches its participant cap: soft-block, then these ways out.
     'overage' => [
         'participant_pack' => [

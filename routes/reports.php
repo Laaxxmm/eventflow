@@ -1,10 +1,10 @@
 <?php
 
-use App\Entitlements\EnsureModuleEnabled;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CertificateDesignController;
 use App\Http\Controllers\CertificateVerifyController;
 use App\Http\Controllers\RaceSheetController;
+use App\Saas\EnsureEventModule;
 use Illuminate\Support\Facades\Route;
 
 // Stream E: certificates and race sheets. Organisers only (owner, staff);
@@ -13,19 +13,24 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])
     ->prefix('dashboard/events/{event}')
     ->name('reports.')
     ->group(function () {
-        // Each needs its module (Season Pass + Org Settings toggle).
-        Route::middleware(EnsureModuleEnabled::class.':race_sheets')->group(function () {
-            Route::get('race-sheet', [RaceSheetController::class, 'show'])->name('race-sheet');
+        // Pages are always viewable (they explain the lock and offer the add-on). Downloads and
+        // generation need the module in the plan (Club Season and up) or the event's add-on:
+        // race sheet ₹599, certificates ₹799 (config/plans.php event_addons).
+        $raceSheet = EnsureEventModule::class.':race_sheets,reports.race-sheet';
+        $certificates = EnsureEventModule::class.':certificates,reports.certificates';
+
+        Route::get('race-sheet', [RaceSheetController::class, 'show'])->name('race-sheet');
+        Route::middleware($raceSheet)->group(function () {
             Route::get('race-sheet/csv', [RaceSheetController::class, 'csv'])->name('race-sheet.csv');
             Route::get('race-sheet/pdf', [RaceSheetController::class, 'pdf'])->name('race-sheet.pdf');
         });
 
-        Route::middleware(EnsureModuleEnabled::class.':certificates')->group(function () {
-            Route::get('certificates', [CertificateController::class, 'index'])->name('certificates');
+        Route::get('certificates', [CertificateController::class, 'index'])->name('certificates');
+        Route::put('certificates/design', [CertificateDesignController::class, 'update'])->name('certificates.design');
+        Route::get('certificates/preview/{template}', [CertificateDesignController::class, 'preview'])->name('certificates.preview');
+        Route::middleware($certificates)->group(function () {
             Route::post('certificates', [CertificateController::class, 'store'])->name('certificates.generate');
             Route::get('certificates/download', [CertificateController::class, 'download'])->name('certificates.download');
-            Route::put('certificates/design', [CertificateDesignController::class, 'update'])->name('certificates.design');
-            Route::get('certificates/preview/{template}', [CertificateDesignController::class, 'preview'])->name('certificates.preview');
             Route::get('certificates/{registration}', [CertificateController::class, 'show'])->name('certificates.show');
             Route::post('certificates/{registration}/reissue', [CertificateController::class, 'reissue'])->name('certificates.reissue');
         });

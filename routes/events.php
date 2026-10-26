@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventOverviewController;
 use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\TemplatePreviewController;
@@ -15,6 +16,11 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('organiser
     Route::resource('events', EventController::class)->except('show');
     Route::get('templates/{template}/preview', TemplatePreviewController::class)->name('templates.preview');
     Route::get('events/{event}/published', [EventController::class, 'published'])->name('events.published');
+    // Event → Overview: live preview of the public page, publish, template, add-ons (Session UX-H2).
+    Route::get('events/{event}', [EventOverviewController::class, 'show'])->name('events.show');
+    Route::get('events/{event}/preview', [EventOverviewController::class, 'preview'])->name('events.preview');
+    Route::patch('events/{event}/template', [EventOverviewController::class, 'updateTemplate'])->name('events.template');
+    Route::patch('events/{event}/status', [EventOverviewController::class, 'updateStatus'])->name('events.status');
 });
 
 Route::get('/r/{registration}/review', [RegistrationController::class, 'review'])

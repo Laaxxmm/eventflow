@@ -26,6 +26,8 @@
     </x-slot>
 
     <div class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-10">
+        @include('saas.addon-lock', ['addonKey' => 'certificates'])
+        @php($certsUnlocked = \App\Saas\EventAddons::unlocked($event, \App\Enums\Module::Certificates))
         @if (session('status'))
             <p class="rounded-xl bg-green-50 p-4 text-sm font-medium text-green-800" role="status">{{ session('status') }}</p>
         @endif
@@ -71,11 +73,11 @@
             <div class="mt-6 flex flex-wrap items-center gap-3">
                 <form method="POST" action="{{ route('reports.certificates.generate', $event) }}">
                     @csrf
-                    <button type="submit" @disabled($eligibleCount === 0 || $busy) class="rounded-xl bg-[#0b1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1f2a4a] disabled:cursor-not-allowed disabled:opacity-40">
-                        {{ __('Generate certificates') }}
+                    <button type="submit" @disabled($eligibleCount === 0 || $busy || ! $certsUnlocked) @unless ($certsUnlocked) title="{{ __('Locked: add the certificates add-on') }}" @endunless class="rounded-xl bg-[#0b1020] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1f2a4a] disabled:cursor-not-allowed disabled:opacity-40">
+                        {{ __('Generate certificates') }}@unless ($certsUnlocked) 🔒@endunless
                     </button>
                 </form>
-                @if ($zipReady)
+                @if ($zipReady && $certsUnlocked)
                     <a href="{{ route('reports.certificates.download', $event) }}" class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">{{ __('Download ZIP') }}</a>
                 @endif
             </div>
@@ -252,11 +254,15 @@
                                 </p>
                             </div>
                             <div class="flex gap-2 text-sm">
+                                @if ($certsUnlocked)
                                 <a href="{{ route('reports.certificates.show', [$event, $r]) }}" class="rounded-lg bg-[#0b1020] px-3 py-1.5 font-medium text-white hover:bg-[#1f2a4a]">{{ __('Download') }}</a>
                                 <form method="POST" action="{{ route('reports.certificates.reissue', [$event, $r]) }}">
                                     @csrf
                                     <button type="submit" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ $cert?->issued_at ? __('Re-issue') : __('Issue') }}</button>
                                 </form>
+                                @else
+                                    <span class="rounded-lg px-3 py-1.5 font-medium text-slate-400 ring-1 ring-slate-200" title="{{ __('Locked: add the certificates add-on') }}">{{ __('Download') }} 🔒</span>
+                                @endif
                             </div>
                         </li>
                     @endforeach

@@ -65,6 +65,12 @@ final class Plans
         return config('plans.addons');
     }
 
+    /** @return array<string, array<string, mixed>> Per-event add-ons (race sheet, certificates). */
+    public static function eventAddons(): array
+    {
+        return config('plans.event_addons', []);
+    }
+
     public static function trialDays(): int
     {
         return (int) config('plans.trial_days');

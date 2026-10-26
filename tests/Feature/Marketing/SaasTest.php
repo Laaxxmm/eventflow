@@ -35,29 +35,52 @@ function organiserOf(string $name = 'Trail Runners'): User
     return User::factory()->create(['org_id' => $org->id, 'role' => Role::Owner, 'email_verified_at' => now()]);
 }
 
-it('serves the self-serve SaaS homepage with Single-first pricing from config', function () {
-    $this->get('/')
+it('serves a slim homepage: hero, one featured template, quiet pricing, one CTA', function () {
+    $html = $this->get('/')
         ->assertOk()
         ->assertSee('>by Indefine<', false)
-        ->assertSee('Publish a race site you’re proud of')
-        ->assertSee('— in under an hour.')
-        ->assertSee('No ticket % required')->assertSee('Own SMTP free')->assertSee('India Razorpay-ready')
-        ->assertSee('Start free trial')
+        ->assertSee('online in')
+        ->assertSee('No ticket % · Own SMTP free · Razorpay-ready') // one proof line, not a chip pile
         ->assertSee('href="'.route('register').'"', false)
-        ->assertSee('See live templates')
+        ->assertSee('See templates')
         ->assertSee('href="'.route('templates.index').'"', false)
-        ->assertSeeInOrder(['Single Event', '₹3,999', 'Club Season', '₹12,999', 'Circuit Season', '₹29,999']) // price line under the hero
-        ->assertSee('Your runners land on a sports page, not a form.')
-        ->assertSee('Soft pax caps')
-        ->assertSee('Email ✓')->assertSee('Platform mail add-on')->assertSee('WhatsApp add-on')
-        ->assertSee('Upgrade, participant packs, and SMTP — all in settings. No waiting on a quote to go live.')
-        ->assertSee('Talk to Indefine')
-        ->assertSee('Managed race ops by Indefine')
-        ->assertDontSee('Book a demo');
+        ->assertSee('data-device-mock', false)
+        ->assertSee('Featured template')->assertSee('Stadium Split')->assertSee('Browse all templates')
+        ->assertSeeInOrder(['Single Event', '₹3,999', 'Club Season', '₹12,999', 'Circuit Season', '₹29,999'])
+        ->assertSee('Race sheet ₹599')->assertSee('Certificates ₹799')->assertSee('Platform mail')->assertSee('WhatsApp')
+        ->assertSee('Custom for federations and series')
+        ->assertDontSee('Talk to Indefine') // Contact is never a primary CTA
+        ->assertDontSee('data-template-card', false) // no template grid on /
+        ->getContent();
+
+    // Four bands below the nav, in order, and nothing else.
+    preg_match_all('/data-band="([a-z-]+)"/', $html, $bands);
+    expect($bands[1])->toBe(['hero', 'featured-template', 'pricing', 'cta']);
+    // The final band has exactly one button and no contact link.
+    $cta = (string) str($html)->after('data-band="cta"')->before('</section>');
+    expect(substr_count($cta, '</a>'))->toBe(1)->and($cta)->toContain('Start free trial')->not->toContain('mailto:');
 });
 
-it('keeps the nav to Product, Templates, Pricing, Login and Start free trial', function () {
-    $this->get('/')->assertSeeInOrder(['Product', 'Templates', 'Pricing', 'Login', 'Start free trial']);
+it('keeps the nav to Pricing, Templates, Login and Free trial', function () {
+    $nav = str($this->get('/')->getContent())->between('<header', '</header>');
+    expect((string) $nav)->not->toContain('>Product<');
+    $this->get('/')->assertSeeInOrder(['Pricing', 'Templates', 'Login', 'Free trial']);
+});
+
+it('keeps the full template gallery on /templates', function () {
+    $html = $this->get('/templates')->assertOk()->getContent();
+
+    foreach (array_keys(config('eventflow.landing_templates')) as $key) {
+        expect($html)->toContain('data-template-card="'.$key.'"')
+            ->toContain(route('register', ['template' => $key]));
+    }
+});
+
+it('prices the race sheet and certificate add-ons on /pricing', function () {
+    $this->get('/pricing')->assertOk()
+        ->assertSeeInOrder(['Race sheet download', '₹599 per event', 'Certificates', '₹799 per event', 'Platform mail', 'WhatsApp'])
+        ->assertSee('Add-on ₹599 / event') // Single Event row in the comparison
+        ->assertSee('Included in Club Season, Circuit Season');
 });
 
 it('reads every price on the homepage from config', function () {
