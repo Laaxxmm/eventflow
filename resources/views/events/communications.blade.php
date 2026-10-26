@@ -133,7 +133,7 @@
             @if ($logs->isEmpty())
                 <p class="px-6 py-6 text-sm text-muted sm:px-8">{{ __('None sent yet.') }}</p>
             @else
-                <div class="overflow-x-auto px-6 pb-6 sm:px-8">
+                <div class="relative overflow-x-auto px-6 pb-6 sm:px-8">
                     <table class="mt-4 min-w-full text-sm">
                         <thead>
                             <tr class="border-b text-left text-muted">

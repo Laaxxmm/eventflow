@@ -115,7 +115,7 @@
                     </div>
                 @endif
 
-                <div class="overflow-x-auto rounded-[24px] bg-white">
+                <div class="relative overflow-x-auto rounded-[24px] bg-white">
                     <table class="w-full min-w-[960px] text-sm">
                         <thead>
                             <tr class="text-left text-[13px] text-muted">

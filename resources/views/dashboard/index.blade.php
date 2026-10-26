@@ -191,7 +191,7 @@
                         <h3 class="text-lg font-bold">{{ $heading }}</h3>
                         <a href="{{ route('organiser.events.index') }}" class="text-sm font-semibold text-track hover:text-track-deep">{{ __('All events') }}</a>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="relative overflow-x-auto">
                         <table class="w-full min-w-[640px] border-collapse text-[15px]">
                             <thead>
                                 <tr class="text-left text-[13px] text-muted">
