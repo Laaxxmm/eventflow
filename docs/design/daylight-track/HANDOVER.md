@@ -10,9 +10,10 @@ behaviour.**
 ```bash
 git fetch origin && git checkout feature/sDT-daylight-track
 composer install && npm install        # new packages: @fontsource-variable/archivo, @fontsource/cormorant-garamond (Barlow removed)
+php artisan migrate:fresh --seed        # demo YAML brand colours changed to indigo/marigold
 php artisan migrate                    # no new migrations in this branch; main's P1 migrations if not run yet
 npm run build                          # needed after every Blade/Tailwind change before looking at pages
-php artisan test                       # 401 passing at the last commit
+php artisan test                       # all passing at the last commit
 ./vendor/bin/pint --test               # PaymentController/PaymentsTest style warnings are pre-existing, not ours
 ```
 
@@ -24,12 +25,16 @@ Screenshots: the Playwright script used is reproduced at the bottom; it logs in 
 
 | Phase | State | What's in it |
 |---|---|---|
-| 1 Tokens, fonts, components | **Done** | `resources/css/app.css` tokens (Race Ink names kept, values changed, new muted/track-deep/lilac/success/warning/danger), `tailwind.config.js` colours + `fontFamily.display` Archivo + `serif` Cormorant, `.ri-headline` (wdth 118, 800, sentence case), `.ri-kicker` without the rule, `.ri-float`/`.ri-glow`, marigold `:focus-visible` ring, reduced-motion block. `App\Landing\Theme` defaults (#4b3fe0 / #f2a93b / chalk / dusk). Components in `resources/views/components/ri/`: `button` (primary, ink, register, secondary, quiet, danger-text; old names alias), `chip` (live, paid, unpaid, trial, ended, suspended…; old names alias), new `places-bar`, `switch`, `segmented`; `photo` gained `focus`/`scrim`, the light gradient fallback always sits under the image. Tests: contrast pairs + reduced-motion in `LandingTemplatesTest`. |
-| 2 App shell + core pages | **In progress** | Done: `layouts/app.blade.php` (chalk page, white sidebar column painted full height, header slot styles h2 as the 40 px headline), `layouts/navigation.blade.php` rebuilt from `Sidebar.dc.html` (org card with plan usage, New event, groups from `NavigationComposer` unchanged; icons/labels updated to the mockup), `dashboard/index` (next-race card, totals, 30-day CSS bars, Worth doing next, Upcoming/Past tables; data added in `DashboardController::index`: `next`, `nextPlaces`, `thisWeek`, `unpaid`, `daily`), `events/index` (photo cards + Alpine filter pills), `saas/plan-banner` + `saas/overage-actions` restyled. **To do:** `events/overview` (Overview.dc.html), `events/wizard` (Wizard.dc.html, all 5 steps), `dashboard/participants` + `participants-create` (Participants.dc.html), `events/edit` + `events/partials/form` (style to match). |
-| 3 Remaining app pages | To do | RaceSheet, Certificates (design list left, live A4 preview right), Checkin (3 result states; `resources/js/checkin.js`), Payments, Notifications, Domain (stepper + DNS table), Modules (`<x-ri.switch>`), Billing (`marketing/account-plan` + `billing/show`), Profile, PlatformOrgs. |
-| 4 Race pages | To do | 5 templates + Event (phone), Review, PassReady, `payments/return`, `mail/pass`, `emails/layout`. Keep `data-hero-cta`, sticky bar, `#register`, footer and countdown partials (P1), `MobileLandingTest`, `LandingTemplatesTest`. |
-| 5 Marketing + auth | To do | Main (3D track hero, bands hero/sports/how-it-works/templates/pricing/cta), Pricing (table from config), Templates, Signup, Login, `layouts/guest`. Update `SaasTest` per brief §6. |
-| 6 Images | To do | `public/images/race-ink/<set>/` folders exist but are **empty**; every slot shows the gradient fallback. Needs licensed photos per brief §5 + `CREDITS.md`. No Unsplash/Pexels key in this environment. |
+| 1 Tokens, fonts, components | **Done** | Tokens in `resources/css/app.css` (Race Ink names, Daylight values, new muted/track-deep/lilac/success/warning/danger), Archivo (wdth 118) + Inter + Cormorant, `.ri-headline`, `.ri-input`/`.ri-label`, focus ring, motion keyframes (`ef-spin`, `ef-float`, `ef-runner`, `ef-medal`, `ef-sway`, `ef-lane`, `ef-seal`, `ef-scan`) all stopped under reduced motion. Components: `button`, `chip`, `places-bar`, `switch`, `segmented`, `photo`, `accordion` (lines or cards), `medal`, `pass-card`, `track-stage`. Breeze form components restyled. |
+| 2 App shell + core pages | **Done** | Sidebar, shell, Dashboard, Events, Overview (places by distance, template swatches), Wizard (5 steps, phone preview), Edit event, Participants (tab counts, search, reminder bar), Add participant. |
+| 3 Remaining app pages | **Done** | Race sheet (+ PDF), Certificates (design list + live preview), Check-in (three result states, scan line), Payments, Email and WhatsApp, Domain, Modules, Plan and billing, Buy page, checkout/return, Profile, Platform orgs, Communications, Published. |
+| 4 Race pages | **Done** | Gun Lap (phone: medal hero card), Stadium Split, Equipment Close (turning seal), Night Circuit (light lanes), Heritage Crest (Cormorant). Equipment Close and Heritage Crest use house colours (green / burgundy) only while the organiser keeps the default brand colour. Shared: light header, sticky navy register bar, registration form card with pay bar, venue map card, partner cards, light footer, countdown. Review and pay, pass-ready page with QR `pass-card`, light branded emails. Demo YAML brand is now indigo/marigold. |
+| 5 Marketing + auth | **Done** | Homepage bands hero (3D track, tilts on desktop), sports, how-it-works, templates (3D fan), pricing (race bibs from `config/plans.php`, Single Event highlighted), cta. Light nav/footer. Pricing, Templates, Login, Sign-up and the other auth pages. `SaasTest` updated per brief §6. |
+| 6 Images | **Tooling done, photos not added** | `php artisan imagery:fetch` downloads licensed stock per brief §5 slots (needs `UNSPLASH_ACCESS_KEY` or `PEXELS_API_KEY`), resizes to 2400 px, keeps files under 400 KB and appends credits. `public/images/race-ink/CREDITS.md` documents the slot convention. No key was available here, so every slot still shows the graphic fallback. |
+
+Known gaps: check-in header has no event/counter (controller passes none); certificate preview shows the
+design thumbnail, the exact page opens as PDF; Razorpay mode is read from the key prefix so it shows a
+chip, not a Test/Live toggle; platform orgs has no "Open requests" total or Activate/Grant actions (no routes).
 
 ## Conventions and gotchas learned here
 
@@ -77,7 +82,6 @@ const [out, ...pairs] = process.argv.slice(2);
 ## Prompt to continue in a new session
 
 > Continue the Daylight Track redesign on branch `feature/sDT-daylight-track` in Laaxxmm/eventflow.
-> Read `docs/design/daylight-track/HANDOVER.md`, `DAYLIGHT_TRACK_BRIEF.md` and the mockups in that
-> folder. Phase 1 is done and phase 2 is part done (shell, sidebar, dashboard, events list). Next:
-> Overview, Wizard, Participants, then phases 3–6. Keep all tests passing, run `npm run build` and take
-> 1440/390 screenshots after each page, small commits, then open one PR.
+> Read `docs/design/daylight-track/HANDOVER.md`. Phases 1–5 are done; phase 6 needs real photos: add
+> an Unsplash or Pexels key and run `php artisan imagery:fetch`, or add organiser photography, then
+> review each template at 1440/390 against the mockups and open one PR.
