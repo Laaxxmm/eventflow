@@ -41,6 +41,7 @@ class SendEventReminders extends Command
             Registration::withoutGlobalScopes()
                 ->where('event_id', $event->id)
                 ->where('status', PaymentStatus::Paid)
+                ->whereNotNull('email')->where('email', '!=', '') // hand-added participants may have none (Session P1)
                 ->whereNotExists(fn ($q) => $q->from('notification_deliveries')
                     ->whereColumn('notification_deliveries.registration_id', 'registrations.id')
                     ->where('channel', 'mail')

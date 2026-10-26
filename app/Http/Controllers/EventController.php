@@ -15,6 +15,7 @@ use App\Models\Event;
 use App\Models\Org;
 use App\Saas\PlanLimits;
 use App\Saas\Trial;
+use App\Support\Contact;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -53,7 +54,7 @@ class EventController extends Controller
             'templates' => config('eventflow.landing_templates'),
             'presetTemplate' => self::galleryTemplate($request->query('template')),
             'step' => (int) session('wizard_step', 1),
-            'contact' => config('eventflow.certificates.custom_contact') ?: config('plans.brand.contact_email'),
+            'contact' => config('eventflow.certificates.custom_contact') ?: Contact::email(),
         ]);
     }
 
@@ -133,6 +134,7 @@ class EventController extends Controller
             throw ValidationException::withMessages(['status' => self::trialLimitMessage()]);
         }
 
+        $input = $this->withUploads($request, $input, $org);
         $authored = EventForm::toConfig($input, $org->slug, $event->slug, $event->config ?? []);
         $config = $this->compile($authored);
 
@@ -160,6 +162,29 @@ class EventController extends Controller
         $event->delete();
 
         return redirect()->route('organiser.events.index')->with('status', 'event-deleted');
+    }
+
+    /**
+     * Event Design uploads (Session P1): hero / banner, share (OG) image and logo go to the
+     * public disk and replace the path fields; "remove" clears one (the sport pack art shows).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    private function withUploads(Request $request, array $input, Org $org): array
+    {
+        $slots = ['hero_upload' => 'hero.image', 'og_upload' => 'hero.og_image', 'logo_upload' => 'branding.logo'];
+        foreach ($slots as $file => $key) {
+            $name = str_replace('.', '_', $key);
+            if (! empty($input['remove'][$name])) {
+                data_set($input, $key, null);
+            }
+            if ($request->hasFile($file)) {
+                data_set($input, $key, $request->file($file)->storePublicly("branding/{$org->id}", 'public'));
+            }
+        }
+
+        return $input;
     }
 
     /** The signed-in organiser's org (route model binding is already org-scoped). */

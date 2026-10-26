@@ -155,7 +155,7 @@
                                     </p>
                                 </div>
                                 @if ($row['unlocked'])
-                                    <a href="{{ route($key === 'race_sheet' ? 'reports.race-sheet' : 'reports.certificates', $event) }}" class="shrink-0 font-medium text-slate-700 underline hover:text-slate-900">{{ __('Open') }}</a>
+                                    <a href="{{ match ($key) { 'race_sheet' => route('reports.race-sheet', $event), 'certificates' => route('reports.certificates', $event), default => route('settings.domain.show', ['event' => $event->id]) } }}" class="shrink-0 font-medium text-slate-700 underline hover:text-slate-900">{{ $key === 'custom_domain' ? __('Connect') : __('Open') }}</a>
                                 @else
                                     <a href="{{ \App\Saas\EventAddons::requestUrl($event, $key) }}" class="shrink-0 rounded-lg bg-[#0b1020] px-3 py-1.5 font-semibold text-white hover:bg-[#1f2a4a]">{{ __('Unlock') }}</a>
                                 @endif

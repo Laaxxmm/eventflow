@@ -34,7 +34,7 @@
                 <h3 class="font-display text-2xl font-bold uppercase tracking-wide text-ink">{{ $plan['name'] }}</h3>
                 <p class="mt-2 text-sm">{{ $plan['tagline'] }}</p>
             </div>
-            <a href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan', ['plan' => $plan['name']])) }}" class="text-sm font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }} →</a>
+            <a href="{{ \App\Support\Contact::url(__('EventFlow :plan', ['plan' => $plan['name']])) }}" data-contact-indefine class="text-sm font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }} →</a>
         </article>
     @endforeach
 </div>

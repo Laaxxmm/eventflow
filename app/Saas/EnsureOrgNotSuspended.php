@@ -2,6 +2,7 @@
 
 namespace App\Saas;
 
+use App\Support\Contact;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +23,7 @@ class EnsureOrgNotSuspended
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => __('This organisation\'s account is suspended. Contact :email.', ['email' => config('plans.brand.contact_email')]),
+                'email' => __('This organisation\'s account is suspended. Contact :email.', ['email' => Contact::email()]),
             ]);
         }
 

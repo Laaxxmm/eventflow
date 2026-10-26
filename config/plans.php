@@ -25,7 +25,8 @@ return [
         'name' => 'EventFlow',
         // "EventFlow by Indefine"; set BRAND_SHOW_INDEFINE=false to show "EventFlow" only.
         'by' => env('BRAND_SHOW_INDEFINE', true) ? 'Indefine' : null,
-        'contact_email' => env('SALES_CONTACT_EMAIL', 'hello@indefine.in'),
+        // Read config('brand.contact_email') / App\Support\Contact; kept here for older callers.
+        'contact_email' => env('SALES_CONTACT_EMAIL') ?: 'hello@indefine.in',
     ],
 
     // Footer links, per deployment. An unset link is hidden (legal falls back to the contact email).
@@ -76,6 +77,8 @@ return [
             'upgrade_to' => 'club_season',
             'support' => 'Email',
             'modules' => ['checkin'],
+            // Custom domain (Session P1): not included; buy the Custom domain add-on (₹599 per event).
+            'custom_domain' => false,
             'features' => [
                 'Branded event page, Razorpay or Cashfree checkout',
                 'EF- passes (PNG + PDF) by email',
@@ -96,6 +99,7 @@ return [
             'upgrade_to' => 'circuit_season',
             'support' => 'Email',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
+            'custom_domain' => true, // included free
             'features' => [
                 'Everything in Single Event',
                 'Race sheets: heats by distance, age band and gender',
@@ -115,6 +119,7 @@ return [
             'upgrade_to' => 'custom',
             'support' => 'Priority email',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
+            'custom_domain' => true, // included free
             'features' => [
                 'Everything in Club Season',
                 'Built for big fields and busy calendars',
@@ -133,6 +138,7 @@ return [
             'upgrade_to' => null,
             'support' => 'Onboarding + race-day support',
             'modules' => ['checkin', 'race_sheets', 'certificates'],
+            'custom_domain' => true, // per quote; on once Indefine sets the plan up
             'features' => [
                 'Races, field sizes and term to suit you',
                 'Custom certificate layouts by Indefine',
@@ -140,6 +146,10 @@ return [
             ],
         ],
     ],
+
+    // Custom domain add-on price (Session P1, locked): Single Event only, per event / 90-day window.
+    // Club Season, Circuit Season and Custom include a custom domain (plans.*.custom_domain).
+    'custom_domain_inr' => 599,
 
     // Paid add-ons. "module" switches an App\Enums\Module on. Prices are quoted by Indefine.
     'addons' => [
@@ -176,6 +186,15 @@ return [
             'price_inr' => 799,
             'module' => 'certificates',
         ],
+        // No module: unlocks Settings -> Domain for this event (App\Domains\DomainAccess).
+        'custom_domain' => [
+            'name' => 'Custom domain',
+            'short' => 'Custom domain',
+            'description' => 'Put the event page on your own domain (e.g. register.yourrace.in), with HTTPS.',
+            'price_inr' => null, // filled from custom_domain_inr by App\Saas\Plans::eventAddons()
+            'module' => null,
+            'plan_flag' => 'custom_domain',
+        ],
     ],
 
     // When a race reaches its participant cap: soft-block, then these ways out.
@@ -184,6 +203,13 @@ return [
             'name' => 'Participant pack',
             'description' => 'More places for one race on your current plan.',
             'price_inr' => null, // quoted by Indefine
+            // Sizes on the Buy page. A size with a price checks out online (platform gateway) and
+            // raises the cap on payment; a size without one (null) sends a request to Indefine.
+            'sizes' => [
+                ['participants' => 250, 'price_inr' => null],
+                ['participants' => 500, 'price_inr' => null],
+                ['participants' => 1000, 'price_inr' => null],
+            ],
         ],
     ],
 

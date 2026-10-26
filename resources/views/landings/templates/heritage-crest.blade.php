@@ -29,6 +29,8 @@
         </div>
     </header>
 
+    @include('landings.partials.countdown')
+
     <main class="mx-auto max-w-5xl space-y-16 px-4 py-16 sm:px-6">
         <figure class="border-[10px] border-white shadow-[0_0_0_2px_rgb(var(--ri-ink))]" data-reveal>
             <x-ri.photo :src="$page->heroPhoto(0)" :sport="$page->config->sport->value" class="aspect-[16/7]" :alt="$page->config->hero->title" />

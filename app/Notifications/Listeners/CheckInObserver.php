@@ -18,7 +18,8 @@ class CheckInObserver
         }
 
         $org = $registration->event()->withoutGlobalScopes()->first()?->org;
-        if ($org && NotificationSettings::for($org)->send_checkin_confirmation) {
+        // Hand-added participants may have no email (Session P1).
+        if ($org && filter_var($registration->email, FILTER_VALIDATE_EMAIL) && NotificationSettings::for($org)->send_checkin_confirmation) {
             Mail::to($registration->email)->queue(new CheckInConfirmedMail($registration->id));
         }
     }

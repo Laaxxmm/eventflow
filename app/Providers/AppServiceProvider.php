@@ -9,6 +9,8 @@ use App\Contracts\LandingSource;
 use App\Contracts\PassGenerator;
 use App\Contracts\RaceSheetBuilder;
 use App\Contracts\SportPackRepository;
+use App\Domains\DnsResolver;
+use App\Domains\SystemDnsResolver;
 use App\Entitlements\GrantSeasonPass;
 use App\Entitlements\SeasonPassEntitlements;
 use App\Enums\Role;
@@ -45,6 +47,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(SeasonPassEntitlements::class);
         $this->app->scoped(Entitlements::class, fn ($app) => $app->make(SeasonPassEntitlements::class));
         $this->commands([GrantSeasonPass::class]);
+
+        // Session P1: custom domain DNS checks.
+        $this->app->singleton(DnsResolver::class, SystemDnsResolver::class);
     }
 
     /**

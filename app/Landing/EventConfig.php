@@ -18,6 +18,7 @@ final readonly class EventConfig
      * @param  list<Faq>  $faq
      * @param  list<array{name: string, logo?: ?string, url?: ?string, tier?: ?string}>  $sponsors
      * @param  list<array{time: string, label: string}>  $schedule
+     * @param  array<string, string>  $contact  Footer contact / links (CONTACT_KEYS)
      */
     public function __construct(
         public string $org,
@@ -38,7 +39,25 @@ final readonly class EventConfig
         public array $sponsors = [],
         public array $schedule = [],
         public ?string $charity = null,
+        public ?CarbonImmutable $registrationCloses = null,
+        public bool $countdown = false,
+        public string $countdownTarget = self::COUNTDOWN_TARGETS[0],
+        public array $contact = [],
     ) {}
+
+    /** Countdown block targets (Session P1). */
+    public const COUNTDOWN_TARGETS = ['registration_close', 'event_start'];
+
+    /** Footer contact keys (Session P1). */
+    public const CONTACT_KEYS = ['email', 'phone', 'website', 'instagram', 'facebook', 'x', 'youtube', 'terms_url', 'privacy_url'];
+
+    /** Online registration closes at the earlier of registration_closes and the start. */
+    public function closesAt(): CarbonImmutable
+    {
+        return $this->registrationCloses !== null && $this->registrationCloses->lessThan($this->date)
+            ? $this->registrationCloses
+            : $this->date;
+    }
 
     /** Landing template used when the event and its sport pack set none (or an unknown key). */
     public const DEFAULT_TEMPLATE = 'gun-lap';
@@ -68,6 +87,10 @@ final readonly class EventConfig
             sponsors: array_values(array_filter($data['sponsors'] ?? [], fn ($s) => is_array($s) && filled($s['name'] ?? null))),
             schedule: array_values(array_filter($data['schedule'] ?? [], fn ($s) => is_array($s) && filled($s['time'] ?? null))),
             charity: filled($data['charity'] ?? null) ? (string) $data['charity'] : null,
+            registrationCloses: filled($data['registration_closes'] ?? null) ? CarbonImmutable::parse($data['registration_closes']) : null,
+            countdown: (bool) ($data['countdown']['enabled'] ?? false),
+            countdownTarget: in_array($data['countdown']['target'] ?? null, self::COUNTDOWN_TARGETS, true) ? $data['countdown']['target'] : self::COUNTDOWN_TARGETS[0],
+            contact: array_filter(array_intersect_key((array) ($data['contact'] ?? []), array_flip(self::CONTACT_KEYS)), 'filled'),
         );
     }
 

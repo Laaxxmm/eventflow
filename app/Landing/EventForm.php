@@ -29,6 +29,17 @@ final class EventForm
 
     public const MAX_CUSTOM_FIELDS = 12;
 
+    /** Hero / share image upload limit (Session P1). */
+    public const UPLOAD_MAX_KB = 5120;
+
+    /** Social profile bases: "@myrace" or "myrace" becomes the full profile URL. */
+    public const SOCIAL_BASES = [
+        'instagram' => 'https://instagram.com/',
+        'facebook' => 'https://facebook.com/',
+        'x' => 'https://x.com/',
+        'youtube' => 'https://youtube.com/@',
+    ];
+
     /** Rows rendered for each repeatable list (blank rows are ignored on save). */
     public const ROWS = ['distances' => 6, 'age_bands' => 8, 'custom' => 4, 'faq' => 6];
 
@@ -48,6 +59,25 @@ final class EventForm
             'hero.title' => ['nullable', 'string', 'max:160'],
             'hero.subtitle' => ['nullable', 'string', 'max:255'],
             'hero.image' => ['nullable', 'string', 'max:255'],
+            'hero.og_image' => ['nullable', 'string', 'max:255'],
+            // Session P1: uploads (stored on the public disk by EventController) and removals.
+            'hero_upload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::UPLOAD_MAX_KB],
+            'og_upload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.self::UPLOAD_MAX_KB],
+            'logo_upload' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove' => ['array'],
+            'remove.*' => ['boolean'],
+            'registration_closes' => ['nullable', 'date_format:Y-m-d\TH:i'],
+            'countdown.enabled' => ['nullable', 'boolean'],
+            'countdown.target' => ['nullable', 'in:'.implode(',', EventConfig::COUNTDOWN_TARGETS)],
+            'contact.email' => ['nullable', 'email', 'max:255'],
+            'contact.phone' => ['nullable', 'string', 'max:30'],
+            'contact.website' => ['nullable', 'url:https,http', 'max:255'],
+            'contact.instagram' => ['nullable', 'string', 'max:255'],
+            'contact.facebook' => ['nullable', 'string', 'max:255'],
+            'contact.x' => ['nullable', 'string', 'max:255'],
+            'contact.youtube' => ['nullable', 'string', 'max:255'],
+            'contact.terms_url' => ['nullable', 'url:https,http', 'max:255'],
+            'contact.privacy_url' => ['nullable', 'url:https,http', 'max:255'],
             'distances' => ['array'],
             'distances.*.code' => ['nullable', 'string', 'max:20'],
             'distances.*.label' => ['nullable', 'required_with:distances.*.code', 'string', 'max:80'],
@@ -102,11 +132,28 @@ final class EventForm
                 'title' => ($input['hero']['title'] ?? null) ?: $input['name'],
                 'subtitle' => $input['hero']['subtitle'] ?? null,
                 'image' => $input['hero']['image'] ?? null,
+                'og_image' => $input['hero']['og_image'] ?? null,
             ], fn ($v) => $v !== null),
             'distances' => self::distances($input['distances'] ?? []),
             'age_bands' => self::ageBands($input['age_bands'] ?? []),
             'fields' => self::fields($input['show'] ?? [], $input['custom'] ?? []),
         ];
+
+        if (filled($input['registration_closes'] ?? null)) {
+            $config['registration_closes'] = CarbonImmutable::createFromFormat('Y-m-d\TH:i', $input['registration_closes'], ConfigCompiler::TIMEZONE)->toIso8601String();
+        }
+        if (! empty($input['countdown']['enabled'])) {
+            $config['countdown'] = ['enabled' => true, 'target' => $input['countdown']['target'] ?? EventConfig::COUNTDOWN_TARGETS[0]];
+        }
+        if ($contact = self::contact($input['contact'] ?? [])) {
+            $config['contact'] = $contact;
+        }
+        // Keys the editor does not show stay as authored (sponsors, schedule, charity).
+        foreach (['sponsors', 'schedule', 'charity'] as $key) {
+            if (isset($previous[$key])) {
+                $config[$key] = $previous[$key];
+            }
+        }
 
         if ($config['template'] === null) {
             unset($config['template']); // the sport pack's default applies
@@ -182,7 +229,12 @@ final class EventForm
             'venue' => $config['venue'] ?? '',
             'status' => $status,
             'branding' => ($config['branding'] ?? []) + ['primary' => '#d9ff45', 'secondary' => '#ff6e61', 'logo' => null],
-            'hero' => ($config['hero'] ?? []) + ['title' => '', 'subtitle' => null, 'image' => null],
+            'hero' => ($config['hero'] ?? []) + ['title' => '', 'subtitle' => null, 'image' => null, 'og_image' => null],
+            'registration_closes' => isset($config['registration_closes'])
+                ? CarbonImmutable::parse(ConfigCompiler::withOffset($config['registration_closes']))->setTimezone(ConfigCompiler::TIMEZONE)->format('Y-m-d\TH:i')
+                : '',
+            'countdown' => ($config['countdown'] ?? []) + ['enabled' => false, 'target' => EventConfig::COUNTDOWN_TARGETS[0]],
+            'contact' => ($config['contact'] ?? []) + array_fill_keys(EventConfig::CONTACT_KEYS, null),
             'distances' => $config['distances'] ?? [],
             'age_bands' => $config['age_bands'] ?? [],
             'show' => $show,
@@ -214,6 +266,24 @@ final class EventForm
         }
 
         return $bag;
+    }
+
+    /** @return array<string, string> Footer contact with blanks dropped and socials as URLs. */
+    private static function contact(array $input): array
+    {
+        $contact = [];
+        foreach (EventConfig::CONTACT_KEYS as $key) {
+            $value = trim((string) ($input[$key] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+            if (isset(self::SOCIAL_BASES[$key]) && ! preg_match('#^https?://#i', $value)) {
+                $value = self::SOCIAL_BASES[$key].ltrim($value, '@/');
+            }
+            $contact[$key] = $value;
+        }
+
+        return $contact;
     }
 
     /** @return list<array<string, mixed>> */

@@ -13,8 +13,9 @@
         <meta name="description" content="{{ $page->config->hero->subtitle ?? $page->config->name }}">
         <meta property="og:title" content="{{ $page->config->name }}">
         <meta property="og:description" content="{{ $page->date->format('j M Y') }} · {{ $page->config->venue }}">
-        @if ($page->heroUrl())
-            <meta property="og:image" content="{{ $page->heroUrl() }}">
+        @if ($og = $page->ogImageUrl())
+            <meta property="og:image" content="{{ $og }}">
+            <meta name="twitter:card" content="summary_large_image">
         @endif
         @if ($page->preview)
             <meta name="robots" content="noindex">
@@ -42,11 +43,7 @@
 
         @include('landings.partials.sticky-register')
 
-        {{-- Bottom space clears the mobile sticky Register bar. The credit shows only on trial orgs. --}}
-        <footer class="pb-28 pt-8 text-center text-xs opacity-60 sm:pb-8">
-            @if ($page->watermark)
-                <a href="{{ route('home') }}" data-watermark>{{ __('Powered by :app', ['app' => config('plans.brand.name', 'EventFlow')]) }}</a>
-            @endif
-        </footer>
+        {{-- Branded footer (Session P1); its bottom space clears the mobile sticky Register bar. --}}
+        @include('landings.partials.footer')
     </body>
 </html>

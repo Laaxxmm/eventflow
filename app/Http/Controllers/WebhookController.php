@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\Fulfilment;
 use App\Contracts\PaymentGateway;
 use App\Events\RegistrationPaid;
 use App\Models\Org;
 use App\Models\PaymentEvent as PaymentEventModel;
+use App\Models\Purchase;
 use App\Models\Registration;
 use App\Payments\GatewayManager;
 use App\Payments\PaymentStatus;
@@ -77,6 +79,14 @@ class WebhookController extends Controller
                     ]);
 
                     event(new RegistrationPaid($registration->id));
+                } elseif ($registration === null && $org === null) {
+                    // Session P1: an organiser purchase (participant pack, add-on) on the platform account.
+                    $purchase = Purchase::withoutGlobalScopes()
+                        ->where('gateway', $event->provider)->where('gateway_order_id', $event->orderId)->first();
+                    if ($purchase !== null) {
+                        Fulfilment::paid($purchase, $event->paymentId);
+                        $stored->update(['processed_at' => now()]);
+                    }
                 }
             });
         } else {

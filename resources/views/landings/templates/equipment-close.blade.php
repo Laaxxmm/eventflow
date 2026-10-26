@@ -37,6 +37,8 @@
         </div>
     </section>
 
+    @include('landings.partials.countdown')
+
     {{-- Stats bar --}}
     <section class="bg-ink text-paper">
         <dl class="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">

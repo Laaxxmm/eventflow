@@ -200,7 +200,8 @@ it('shows the organiser their plan, trial use and billing note', function () {
         ->assertSee('On hold: set up email')
         ->assertSee('Upgrade to Club Season (₹12,999)')
         ->assertSee('Buy a participant pack')
-        ->assertSee('Online plan billing is being connected');
+        ->assertSee('Nothing is charged automatically')
+        ->assertSee('Add-on · ₹599 per event'); // Session P1: custom domain on Single Event
 });
 
 it('logs organisers in to the dashboard and platform admins in to the console', function () {

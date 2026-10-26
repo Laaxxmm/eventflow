@@ -8,5 +8,6 @@ final readonly class Hero
         public string $title,
         public ?string $subtitle = null,
         public ?string $image = null,
+        public ?string $og_image = null,
     ) {}
 }

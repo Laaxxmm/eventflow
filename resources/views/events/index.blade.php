@@ -43,8 +43,18 @@
                                 @foreach ($events as $event)
                                     <tr>
                                         <td class="py-3 pr-4">
-                                            <span class="font-medium text-gray-900">{{ $event->name }}</span>
-                                            <span class="block text-gray-500">{{ $event->venue }}</span>
+                                            @php($thumb = \App\Landing\Theme::url($event->config['hero']['image'] ?? null) ?? \App\View\SportImagery::pick($event->sport?->value))
+                                            <div class="flex items-center gap-3">
+                                                <span class="h-12 w-16 shrink-0 overflow-hidden rounded-md bg-gray-900 ring-1 ring-gray-200" data-event-thumb>
+                                                    @if ($thumb)
+                                                        <img src="{{ $thumb }}" alt="" class="h-full w-full object-cover" loading="lazy">
+                                                    @endif
+                                                </span>
+                                                <span class="min-w-0">
+                                                    <span class="font-medium text-gray-900">{{ $event->name }}</span>
+                                                    <span class="block text-gray-500">{{ $event->venue }}</span>
+                                                </span>
+                                            </div>
                                         </td>
                                         <td class="py-3 pr-4 whitespace-nowrap">{{ $event->date->setTimezone(\App\Landing\ConfigCompiler::TIMEZONE)->format('j M Y, g:i A') }}</td>
                                         <td class="py-3 pr-4">{{ __(ucfirst($event->status)) }}</td>

@@ -2,12 +2,14 @@
 
 namespace App\View;
 
+use App\Enums\Role;
 use App\Landing\AgeBand;
 use App\Landing\ConfigCompiler;
 use App\Landing\Distance;
 use App\Landing\EventConfig;
 use App\Landing\RegistrationForm;
 use App\Landing\Theme;
+use App\Models\Org;
 use Carbon\CarbonImmutable;
 
 /**
@@ -32,6 +34,7 @@ final readonly class LandingPage
         public bool $preview = false,
         public bool $watermark = false, // "Powered by EventFlow" while the org is on a trial
         public bool $paused = false, // plan participant cap reached (soft-block)
+        public array $orgContact = [], // footer fallback: ['email' => owner email, 'phone' => org phone]
     ) {
         $this->date = $config->date->setTimezone(ConfigCompiler::TIMEZONE);
         $this->distances = array_map(fn (Distance $d) => [
@@ -56,6 +59,88 @@ final readonly class LandingPage
     public function heroUrl(): ?string
     {
         return Theme::url($this->config->hero->image);
+    }
+
+    /** Social share image: the organiser's share image, else the banner, else sport art (absolute URL). */
+    public function ogImageUrl(): ?string
+    {
+        $url = Theme::url($this->config->hero->og_image) ?? $this->heroPhoto();
+
+        return $url === null ? null : url($url);
+    }
+
+    /** How long the "We're live" state shows after the start before the countdown hides. */
+    public const LIVE_HOURS = 12;
+
+    /**
+     * Countdown block (Session P1), or null when it is off or the event is long over.
+     * state: counting (to `target`), closed (registration closed, before the start), live.
+     *
+     * @return array{state: string, target: string, ends: CarbonImmutable, close: CarbonImmutable, start: CarbonImmutable, live_until: CarbonImmutable}|null
+     */
+    public function countdown(?CarbonImmutable $now = null): ?array
+    {
+        if (! $this->config->countdown) {
+            return null;
+        }
+        $now ??= CarbonImmutable::now();
+        $start = $this->config->date;
+        $close = $this->config->closesAt();
+        $liveUntil = $start->addHours(self::LIVE_HOURS);
+        $target = $this->config->countdownTarget;
+
+        $state = match (true) {
+            $now->greaterThanOrEqualTo($liveUntil) => null,
+            $now->greaterThanOrEqualTo($start) => 'live',
+            $target === 'registration_close' && $now->greaterThanOrEqualTo($close) => 'closed',
+            default => 'counting',
+        };
+
+        return $state === null ? null : [
+            'state' => $state,
+            'target' => $target,
+            'ends' => $target === 'registration_close' ? $close : $start,
+            'close' => $close,
+            'start' => $start,
+            'live_until' => $liveUntil,
+        ];
+    }
+
+    /**
+     * Footer details (Session P1): the event's contact, falling back to the org's.
+     *
+     * @return array{email: ?string, phone: ?string, website: ?string, socials: array<string, string>, terms: ?string, privacy: ?string}
+     */
+    public function footer(): array
+    {
+        $c = $this->config->contact;
+        $socials = [];
+        foreach (['instagram' => 'Instagram', 'facebook' => 'Facebook', 'x' => 'X', 'youtube' => 'YouTube'] as $key => $label) {
+            if (filled($c[$key] ?? null) && preg_match('#^https?://#i', $c[$key])) {
+                $socials[$label] = $c[$key];
+            }
+        }
+
+        return [
+            'email' => $c['email'] ?? ($this->orgContact['email'] ?? null),
+            'phone' => $c['phone'] ?? ($this->orgContact['phone'] ?? null),
+            'website' => $c['website'] ?? null,
+            'socials' => $socials,
+            'terms' => $c['terms_url'] ?? null,
+            'privacy' => $c['privacy_url'] ?? null,
+        ];
+    }
+
+    /**
+     * Footer fallback contact for an org: the owner's email and the org phone.
+     *
+     * @return array{email?: string, phone?: string}
+     */
+    public static function orgContact(Org $org): array
+    {
+        $owner = $org->users()->where('role', Role::Owner->value)->orderBy('id')->value('email');
+
+        return array_filter(['email' => $owner, 'phone' => $org->phone], 'filled');
     }
 
     public function fromPrice(): string

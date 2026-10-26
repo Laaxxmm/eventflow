@@ -24,6 +24,6 @@
         <x-ri.button :variant="$featured ? 'heat' : 'ink'" size="md" class="mt-8 w-full" :href="route('register', ['plan' => $key])">{{ __('Start free trial') }}</x-ri.button>
         <p @class(['mt-2 text-center text-xs', 'text-ink/55' => ! $featured, 'opacity-70' => $featured])>{{ __(':days days free · no card', ['days' => $trialDays]) }}</p>
     @else
-        <a href="mailto:{{ $contactEmail }}?subject={{ rawurlencode(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}" class="mt-8 text-sm font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }} →</a>
+        <a href="{{ \App\Support\Contact::url(__('EventFlow :plan plan', ['plan' => $plan['name']])) }}" data-contact-indefine class="mt-8 text-sm font-semibold text-ink underline decoration-heat decoration-2 underline-offset-4">{{ __('Contact Indefine') }} →</a>
     @endif
 </article>

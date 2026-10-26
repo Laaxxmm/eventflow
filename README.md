@@ -700,9 +700,45 @@ it never shows those two add-ons as included. Race sheets and certificates start
 - **Soft-lock:** the race sheet and certificates pages stay viewable and show an amber banner with
   **Unlock for ₹X** and **Upgrade plan**. Downloads and generation go through
   `App\Saas\EnsureEventModule`, which redirects back to the page until unlocked.
-- **Buying:** the Overview's Add-ons panel and the lock banner open a request to Indefine (online
-  checkout is not live yet). Staff switch it on with
-  `php artisan plans:event-addon <org-slug> <event-slug> race_sheet|certificates [--amount=INR] [--note=…] [--revoke]`.
+- **Buying:** the Overview's Add-ons panel and the lock banner open the Buy page
+  (`/dashboard/billing/{sku}`, see *Ops polish* below). Staff can still switch an add-on on by hand with
+  `php artisan plans:event-addon <org-slug> <event-slug> race_sheet|certificates|custom_domain [--amount=INR] [--note=…] [--revoke]`.
+
+### Ops polish (Session P1)
+
+- **Add participant** (Participants → **+ Add participant**): name\*, distance\*, optional email and phone,
+  payment **Paid** (offline: cash, UPI, bank), **Unpaid** or **Complimentary** (₹0), optional amount
+  (blank = the distance price) and private notes. It's a normal registration
+  (`source = manual`, `payment_method` = `manual` | `complimentary`). It appears under the paid and
+  unpaid filters, counts against places and the plan cap, and gets the EF- pass when paid or
+  complimentary. Unpaid entries need an email or phone so payment reminders can reach them.
+- **Buy page** (`App\Billing`): **Buy a participant pack**, **Unlock** and **Add Custom domain** all
+  open `/dashboard/billing/{sku}`. If the item has a price and the platform gateway keys are set
+  (`FEATURE_ONLINE_BILLING`, default on), it checks out on Indefine's platform account through
+  `PaymentGateway` (`App\Payments\SupportsPurchases`). The platform webhook, or the return page,
+  then applies it once: a pack raises the race's cap, an add-on unlocks the event. Without a price
+  (packs in `plans.overage.participant_pack.sizes` are `null` until Indefine prices them), it
+  records a request and emails Indefine the grant command. It is never a dead button.
+- **Contact Indefine** links all go through `App\Support\Contact`: `BRAND_CONTACT_URL` if set,
+  else `mailto:SALES_CONTACT_EMAIL`. A blank `SALES_CONTACT_EMAIL` falls back to hello@indefine.in.
+  The link is never `#`.
+- **Event design** (Edit event): upload a **hero / banner**, an optional **share (OG) image** and a
+  **logo** (public disk). The sport artwork is the fallback. The banner is also the thumbnail in the
+  Events list.
+- **Footer** on every template: organiser logo or name, support email and phone (the event's,
+  else the owner's email and the org phone), WhatsApp, website, socials, terms and privacy, and a
+  small "Powered by EventFlow". These are set under **Page footer** in Edit event.
+- **Countdown** (Edit event → *Countdown and closing time*): optional big timer to
+  **registration close** (`registration_closes`, default the start time) or **event start**. It
+  switches to "Registration closed" (registration is also closed server-side), then "We're live",
+  and hides 12 hours after the start.
+- **Custom domain:** a **₹599 add-on per event** on Single Event (`plans.custom_domain_inr`),
+  **included** on Club Season and Circuit Season (`plans.plans.*.custom_domain`). Settings →
+  **Domain** shows the default URLs (these always work) and **Connect custom domain**, which takes a
+  host, a CNAME to `CUSTOM_DOMAIN_CNAME_TARGET`, and **Verify**. `RouteCustomDomain` then serves the
+  event page (or, on Club and up, the workspace page) at `/` on that host. TLS is on demand: the edge
+  proxy asks `/domains/tls-check?domain=`. Setup is in
+  [`docs/custom-domains.md`](docs/custom-domains.md).
 
 ### Free trial and `TRIAL_STUB`
 

@@ -8,9 +8,14 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Participants') }}
-        </h2>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Participants') }}
+            </h2>
+            <a href="{{ route('dashboard.participants.create', array_filter(['event' => $event?->id])) }}" class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700" data-add-participant>
+                <span aria-hidden="true">+</span> {{ __('Add participant') }}
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -35,6 +40,17 @@
                         ])>{{ $label }}</a>
                     @endforeach
                 </nav>
+
+                @if ($added = session('participant_added'))
+                    <div class="mt-4 rounded-md bg-green-50 p-4 text-sm text-green-800" role="status" data-participant-added>
+                        {{ __(':name added (:pass).', ['name' => $added['name'], 'pass' => $added['pass']]) }}
+                        {{ match ($added['status']) {
+                            'unpaid' => __('Marked unpaid: send a payment reminder from this list when you are ready.'),
+                            default => __('Their pass is being generated and emailed.'),
+                        } }}
+                        <a href="{{ route('dashboard.participants.create', array_filter(['event' => $event?->id])) }}" class="ms-1 font-semibold underline">{{ __('Add another') }}</a>
+                    </div>
+                @endif
 
                 @if (session()->has('reminders_queued'))
                     <div class="mt-4 rounded-md bg-green-50 p-4 text-sm text-green-800" role="status">
@@ -135,14 +151,19 @@
                                             </td>
                                         @endif
                                         <td class="py-3 pe-4 font-mono whitespace-nowrap">{{ $r->pass_no }}</td>
-                                        <td class="py-3 pe-4">{{ $r->participant_name }}</td>
+                                        <td class="py-3 pe-4">
+                                            {{ $r->participant_name }}
+                                            @if ($r->isManual())
+                                                <span class="ms-1 rounded bg-gray-100 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-gray-600" title="{{ $r->notes }}" data-manual-badge>{{ __('Added') }}</span>
+                                            @endif
+                                        </td>
                                         <td class="py-3 pe-4">
                                             <div>{{ $r->email }}</div>
                                             <div class="text-gray-600">{{ $r->phone }}</div>
                                         </td>
                                         <td class="py-3 pe-4">{{ $r->event?->name }}</td>
                                         <td class="py-3 pe-4">{{ $r->distance_code }}</td>
-                                        <td class="py-3 pe-4">{{ __(ucfirst($r->status->value)) }}</td>
+                                        <td class="py-3 pe-4">{{ $r->isComplimentary() ? __('Complimentary') : __(ucfirst($r->status->value)) }}@if ($r->payment_method === \App\Models\Registration::PAID_OFFLINE)<span class="block text-xs text-gray-500">{{ __('offline') }}</span>@endif</td>
                                         <td class="py-3 pe-4 text-right whitespace-nowrap">{{ $inr($r->amount_paise) }}</td>
                                         <td class="py-3 pe-4 whitespace-nowrap">{{ $r->checked_in_at?->format('d M Y, H:i') ?? '—' }}</td>
                                         <td class="py-3 text-xs text-gray-600" data-reminder-cell>

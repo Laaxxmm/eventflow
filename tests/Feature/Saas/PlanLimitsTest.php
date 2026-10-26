@@ -110,7 +110,7 @@ it('soft-blocks registrations at the plan participant cap, for runners and organ
     $this->actingAs($owner)->get('/dashboard')->assertOk()
         ->assertSee('has reached its plan limit (1 of 1 participants). New registrations are paused.')
         ->assertSee('Upgrade to Club Season (₹12,999)')
-        ->assertSee(rawurlencode('Participant pack for Bengaluru City Marathon 2027'), false)
+        ->assertSee(route('billing.show', ['sku' => 'participant_pack', 'event' => $event->id]), false) // Session P1: the Buy page
         ->assertSee('Contact Indefine');
 });
 
