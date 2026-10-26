@@ -1,7 +1,7 @@
 {{-- Graphic stand-in when no photo exists: midnight field, Track/Heat glow, sport line work. --}}
 <div class="absolute inset-0" aria-hidden="true"
      style="background: radial-gradient(120% 90% at 85% 15%, rgb(var(--ri-track) / .55), transparent 60%), radial-gradient(90% 70% at 10% 100%, rgb(var(--ri-heat) / .45), transparent 60%), rgb(var(--ri-midnight));">
-    <svg class="absolute inset-0 h-full w-full text-paper/15" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor">
+    <svg class="absolute inset-0 h-full w-full text-paper/[0.08] sm:text-paper/15" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor">
         @switch($sport)
             @case('cycling')
                 @foreach (range(0, 9) as $i)

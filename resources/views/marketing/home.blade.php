@@ -27,7 +27,7 @@
             <div>
                 <p class="ri-kicker text-heat" data-reveal>{{ __('Race sites for Indian organisers') }}</p>
                 <h1 class="ri-headline mt-6 text-[3.25rem] leading-[0.95] sm:text-[5rem] lg:text-[6.25rem]" data-reveal>
-                    {{ __('Your race,') }}<br>{{ __('online in') }} <span class="text-heat">{{ __('an hour.') }}</span>
+                    {{ __('Your race,') }}<br>{{ __('online in') }} <span class="whitespace-nowrap text-heat">{{ __('an hour.') }}</span>
                 </h1>
                 <p class="mt-8 max-w-xl text-lg text-ink/70 sm:text-xl" data-reveal>
                     {{ __('A race page runners trust, entries paid straight to your Razorpay or Cashfree, and a QR pass for every runner.') }}
@@ -40,7 +40,7 @@
             </div>
 
             {{-- One device: a Race Ink landing on a phone. --}}
-            <div class="relative mx-auto w-full max-w-[18rem] lg:max-w-[19rem]" data-reveal data-device-mock>
+            <div class="relative mx-auto w-full max-w-[15.5rem] sm:max-w-[18rem] lg:max-w-[19rem]" data-reveal data-device-mock>
                 <div class="relative rounded-[2.75rem] bg-ink p-2.5 shadow-[0_40px_80px_-30px_rgb(var(--ri-ink)/0.6)]">
                     <div class="overflow-hidden rounded-[2.25rem] bg-midnight">
                         <img src="{{ asset('images/templates/mobile/gun-lap.jpg') }}" width="390" height="780" alt="{{ __('A race page made with the Gun Lap template, on a phone') }}" class="block h-auto w-full" fetchpriority="high">

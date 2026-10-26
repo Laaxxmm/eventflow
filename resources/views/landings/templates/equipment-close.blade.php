@@ -24,7 +24,7 @@
                 <p class="mt-6 max-w-lg text-lg text-ink/70" data-reveal>{{ $page->config->hero->subtitle ?? $page->config->hero->title }}</p>
                 <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" data-reveal>
                     @if ($page->open)
-                        <a href="{{ $page->registerUrl() }}" class="inline-flex items-center justify-center gap-3 bg-heat px-8 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ __('Grab your bib') }} <span aria-hidden="true">→</span></a>
+                        <a href="{{ $page->registerUrl() }}" data-hero-cta class="inline-flex items-center justify-center gap-3 bg-heat px-8 py-4 font-display text-2xl font-bold uppercase tracking-[0.06em] text-on-heat hover:brightness-95">{{ __('Grab your bib') }} <span aria-hidden="true">→</span></a>
                     @endif
                     <p class="text-sm text-ink/60">{{ __('From :price · :date', ['price' => $page->fromPrice(), 'date' => $page->date->format('j M Y')]) }}</p>
                 </div>
@@ -58,25 +58,26 @@
     <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <p class="ri-kicker text-heat">{{ __('Categories') }}</p>
         <h2 class="ri-headline mt-4 text-6xl sm:text-7xl">{{ __('Pick your race.') }}</h2>
-        <div class="mt-10 grid gap-5 sm:grid-cols-2 {{ count($page->distances) >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
+        {{-- Phones: a compact two-up grid; the sticky bar carries Register. --}}
+        <div class="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-5 {{ count($page->distances) >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }}">
             @foreach ($page->distances as $row)
                 @php($capacity = $row['distance']->capacity)
                 @php($filled = $capacity && $row['left'] !== null ? max(0, min(100, (int) round(100 * ($capacity - $row['left']) / $capacity))) : null)
-                <article data-reveal @class(['flex flex-col bg-white p-6 ring-2 ring-ink', 'opacity-60' => $row['full']])>
-                    <p class="font-display text-7xl font-extrabold leading-none text-track-text">{{ \App\View\LandingPage::numeral($row['distance']) }}</p>
-                    <h3 class="mt-3 font-display text-2xl font-bold uppercase">{{ \App\View\LandingPage::title($row['distance']) }}</h3>
-                    <p class="mt-4 font-display text-4xl font-extrabold">{{ $row['full'] ? __('Full') : $row['price'] }}</p>
+                <article data-reveal @class(['flex flex-col bg-white p-4 ring-2 ring-ink sm:p-6', 'opacity-60' => $row['full']])>
+                    <p class="font-display text-5xl font-extrabold leading-none text-track-text sm:text-7xl">{{ \App\View\LandingPage::numeral($row['distance']) }}</p>
+                    <h3 class="mt-2 font-display text-base font-bold uppercase leading-tight sm:mt-3 sm:text-2xl">{{ \App\View\LandingPage::title($row['distance']) }}</h3>
+                    <p class="mt-3 font-display text-2xl font-extrabold sm:mt-4 sm:text-4xl">{{ $row['full'] ? __('Full') : $row['price'] }}</p>
                     @if ($filled !== null)
-                        <div class="mt-5">
+                        <div class="mt-3 sm:mt-5">
                             <div class="h-2 bg-mist" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $filled }}" aria-label="{{ __('Bibs taken') }}">
                                 <div class="h-2 bg-heat" style="width: {{ $filled }}%"></div>
                             </div>
-                            <p class="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-ink/60">{{ $page->placesLabel($row['left']) }}</p>
+                            <p class="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-ink/60 sm:text-xs">{{ $page->placesLabel($row['left']) }}</p>
                         </div>
                     @endif
                     <div class="flex-1"></div>
                     @unless ($row['full'] || ! $page->open)
-                        <a href="{{ $page->registerUrl() }}" class="mt-6 inline-flex justify-center bg-ink px-5 py-3 font-display text-lg font-bold uppercase tracking-[0.06em] text-paper hover:bg-heat hover:text-on-heat">{{ __('Enter :distance', ['distance' => \App\View\LandingPage::numeral($row['distance'])]) }}</a>
+                        <a href="{{ $page->registerUrl() }}" class="mt-6 hidden justify-center bg-ink px-5 py-3 sm:inline-flex font-display text-lg font-bold uppercase tracking-[0.06em] text-paper hover:bg-heat hover:text-on-heat">{{ __('Enter :distance', ['distance' => \App\View\LandingPage::numeral($row['distance'])]) }}</a>
                     @endunless
                 </article>
             @endforeach

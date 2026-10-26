@@ -1,6 +1,7 @@
 <footer class="bg-ink text-paper/70">
-    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">
-        <div>
+    {{-- Phones: brand on top, then the three link lists side by side in two columns. --}}
+    <div class="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-5 py-14 sm:px-6 sm:py-16 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-8">
+        <div class="col-span-2 lg:col-span-1">
             @include('marketing.partials.wordmark', ['class' => 'text-4xl text-paper'])
             <p class="mt-4 max-w-sm">{{ __('Race sites, registrations, QR passes, check-in and certificates for Indian running, cycling and skating organisers.') }}</p>
         </div>
