@@ -16,7 +16,6 @@
             @if (config('plans.links.docs'))
                 <li><a href="{{ config('plans.links.docs') }}" class="hover:text-paper">{{ __('Docs') }}</a></li>
             @endif
-            <li><a href="{{ route('home') }}#start" class="hover:text-paper">{{ __('Getting started') }}</a></li>
             <li><a href="{{ config('plans.links.status') }}" class="hover:text-paper">{{ __('Status') }}</a></li>
             <li><a href="mailto:{{ config('plans.brand.contact_email') }}" class="hover:text-paper">{{ config('plans.brand.contact_email') }}</a></li>
         </ul>

@@ -26,7 +26,7 @@ class SaasServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([Console\ActivatePlan::class, Console\GrantParticipantPack::class]);
+            $this->commands([Console\ActivatePlan::class, Console\GrantParticipantPack::class, Console\GrantEventAddon::class]);
         }
     }
 }

@@ -561,20 +561,33 @@ Tests: `tests/Feature/Notifications` (mail paths, hold, add-on gates) and `tests
 ## SaaS marketing & auth
 
 The self-serve site that sells EventFlow to organisers, separate from their event pages.
-Design notes and screenshots: [docs/design/homepage-saas.md](docs/design/homepage-saas.md).
+Design notes and screenshots: [docs/design/homepage-slim.md](docs/design/homepage-slim.md) (current slim
+homepage, Session UX-H2) and [docs/design/homepage-saas.md](docs/design/homepage-saas.md) (the first version).
 
 | URL | What |
 |---|---|
-| `/` | Homepage: hero + price line, 3-step time to value, template teaser, product proof, Single-first pricing strip, self-serve trust line, CTA band |
+| `/` | Slim homepage, four bands only: hero (one device mock, one proof line), one featured template, quiet pricing strip with the add-ons line, one-button CTA. No template grid |
 | `/templates` | Public gallery of the 5 Race Ink landing templates |
 | `/templates/{key}` | Full preview on sample data with a **Use this template** bar → `/register?template={key}` (signed-in organisers go straight to the wizard) |
-| `/pricing` | Single / Club / Circuit / Custom, comparison table, overage explainer, add-ons |
+| `/pricing` | Single / Club / Circuit / Custom, comparison table, overage explainer, add-ons table (race sheet ₹599, certificates ₹799, Platform mail, WhatsApp) |
 | `/register` (`/signup`) | Free-trial signup: org, name, email, password, the plan to convert to; carries `?template=` |
 | `/login`, `/forgot-password` | Breeze login and password reset |
 | `/app` | Goes to the right home: dashboard, check-in (volunteers) or `/platform` (Indefine) |
 | `/account/plan` | Plan, trial use and billing note; after signup, "Create your event with {template}" |
 | `/platform/orgs` | Indefine platform console (platform admins only) |
 | `/{org}`, `/{org}/{event}` | Per-event landings |
+| `/organiser/events/{id}` | Event → Overview: live preview of the event page (desktop / mobile), Open public URL, Change template, Edit content, Publish / Unpublish, add-ons |
+
+**Homepage rules (Session UX-H2).** At most four bands below the nav (Logo · Pricing · Templates ·
+Login · Free trial): hero, one featured template, quiet pricing, final CTA. Templates are listed in
+full only on `/templates`. Contact Indefine is never a primary CTA. The hero phone and the featured
+template use the screenshots in `public/images/templates/` (desktop) and `public/images/templates/mobile/`.
+
+**Event Overview.** `organiser.events.show` frames `organiser.events.preview`, an organiser-only
+render of the event's own landing (drafts too, inert, with the "· preview" strip). The desktop view
+is a 1280px page scaled to fit; mobile is a real 390px frame. Picking a template reloads the
+preview with `?template=` and **Apply template** saves it (`PATCH …/template`); **Publish** /
+**Unpublish** toggle `published` / `draft` (`PATCH …/status`, trial publish limit applies).
 
 ### Plans, caps and overage
 
@@ -621,6 +634,25 @@ leads with Single Event ₹3,999 (also in the hero's price line), then Club, Cir
 Custom with no price, only "Contact Indefine". Every price shows its races and participants per race.
 The comparison table marks Email · own SMTP as included and Platform mail and WhatsApp as *Paid add-on*;
 it never shows those two add-ons as included. Race sheets and certificates start at Club Season.
+
+### Per-event add-ons: race sheet ₹599, certificates ₹799
+
+`config/plans.php` → `event_addons` (prices locked). Each unlocks one module for one event:
+
+| Add-on | Price | Unlocks |
+|---|---|---|
+| `race_sheet` | ₹599 / event | Race sheet CSV and PDF downloads |
+| `certificates` | ₹799 / event | Certificate generate, ZIP download, per-runner download and reissue |
+
+- Club Season and up include both modules for every event; Single Event includes neither.
+- `App\Saas\EventAddons::unlocked($event, $module)` is true when the plan includes the module
+  (and Org Settings has not switched it off) or the event has the add-on (`event_addons` table).
+- **Soft-lock:** the race sheet and certificates pages stay viewable and show an amber banner with
+  **Unlock for ₹X** and **Upgrade plan**. Downloads and generation go through
+  `App\Saas\EnsureEventModule`, which redirects back to the page until unlocked.
+- **Buying:** the Overview's Add-ons panel and the lock banner open a request to Indefine (online
+  checkout is not live yet). Staff switch it on with
+  `php artisan plans:event-addon <org-slug> <event-slug> race_sheet|certificates [--amount=INR] [--note=…] [--revoke]`.
 
 ### Free trial and `TRIAL_STUB`
 

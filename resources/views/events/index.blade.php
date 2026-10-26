@@ -50,6 +50,7 @@
                                         <td class="py-3 pr-4">{{ __(ucfirst($event->status)) }}</td>
                                         <td class="py-3 pr-4 text-right">{{ $event->registrations_count }}</td>
                                         <td class="py-3 text-right whitespace-nowrap space-x-3">
+                                            <a href="{{ route('organiser.events.show', $event) }}" class="font-semibold underline text-gray-900 hover:text-gray-700">{{ __('Overview') }}</a>
                                             @if ($event->status === \App\Landing\EventStatus::Published)
                                                 <a href="{{ route('landing.show', [$org->slug, $event->slug]) }}" class="underline text-gray-600 hover:text-gray-900">{{ __('View') }}</a>
                                             @endif

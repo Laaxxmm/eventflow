@@ -7,6 +7,10 @@
     use App\Saas\Plans;
     $quote = __('Quoted');
     $paid = fn (array $p, string $module) => in_array($module, $p['modules'], true) ?: __('Paid add-on');
+    $eventAddons = Plans::eventAddons();
+    $perEvent = fn (string $key) => __('Add-on :price / event', ['price' => Plans::inr($eventAddons[$key]['price_inr'])]);
+    // Plans that include a module for every event (so its per-event add-on is not needed).
+    $includedIn = fn (string $module) => collect($plans)->filter(fn ($p) => in_array($module, $p['modules'], true))->pluck('name')->implode(', ');
     $rows = [
         __('Price (+ GST)') => fn ($p) => Plans::inr($p['price_inr']) ?? $quote,
         __('Races') => fn ($p) => $p['max_events'] === null ? $quote : number_format($p['max_events']),
@@ -15,14 +19,21 @@
         __('Ticket percentage') => fn ($p) => __('None'),
         __('Event page, payments, QR passes') => fn ($p) => true,
         __('Volunteer QR check-in') => fn ($p) => in_array('checkin', $p['modules'], true),
-        __('Race sheets and heats') => fn ($p) => in_array('race_sheets', $p['modules'], true),
-        __('Finisher certificates') => fn ($p) => in_array('certificates', $p['modules'], true),
+        __('Race sheets and heats') => fn ($p) => in_array('race_sheets', $p['modules'], true) ?: $perEvent('race_sheet'),
+        __('Finisher certificates') => fn ($p) => in_array('certificates', $p['modules'], true) ?: $perEvent('certificates'),
         __('Email · own SMTP') => fn ($p) => __('Included · free'),
         __('Platform mail') => fn ($p) => $paid($p, 'email_branding'),
         __('WhatsApp') => fn ($p) => $paid($p, 'sms_whatsapp'),
         __('Support') => fn ($p) => __($p['support'] ?? 'Email'),
     ];
-    $extras = $addons + config('plans.overage');
+    $addonRows = [];
+    foreach ($eventAddons as $key => $addon) {
+        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']).' '.__('per event'), 'what' => $addon['description'], 'note' => __('Included in :plans', ['plans' => $includedIn($addon['module'])])];
+    }
+    foreach ($addons as $key => $addon) {
+        $addonRows[] = ['key' => $key, 'name' => $addon['name'], 'price' => Plans::inr($addon['price_inr']) ?? __('Paid add-on'), 'what' => $addon['description'], 'note' => null];
+    }
+    $pack = config('plans.overage.participant_pack');
 @endphp
 
 @section('content')
@@ -103,18 +114,36 @@
             <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Online checkout is rolling out. Until it is live, Upgrade and Buy a participant pack send your request to Indefine, and nothing is charged automatically.') }}</p>
         @endif
 
-        <h2 class="ri-headline mt-24 text-6xl">{{ __('Add-ons.') }}</h2>
-        <div class="mt-10 grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
-            @foreach ($extras as $item)
-                <div class="bg-paper p-6">
-                    <p class="flex items-baseline justify-between gap-4">
-                        <span class="font-display text-2xl font-bold uppercase">{{ __($item['name']) }}</span>
-                        <span class="whitespace-nowrap font-display text-2xl font-extrabold text-heat">{{ Plans::inr($item['price_inr']) ?? __('Quoted') }}</span>
-                    </p>
-                    <p class="mt-2 text-sm text-ink/70">{{ __($item['description']) }}</p>
-                </div>
-            @endforeach
+        <h2 id="add-ons" class="ri-headline mt-24 scroll-mt-20 text-6xl">{{ __('Add-ons.') }}</h2>
+        <p class="mt-4 max-w-2xl text-ink/70">{{ __('Attach what an event needs. Buy them from the event\'s Overview in your dashboard; until an add-on is active, its downloads stay locked with an unlock button.') }}</p>
+        <div class="mt-10 overflow-x-auto border-2 border-ink bg-white">
+            <table class="min-w-full text-sm" data-addons-table>
+                <thead>
+                    <tr class="border-b-2 border-ink text-left text-xs font-semibold uppercase tracking-[0.16em] text-ink/60">
+                        <th scope="col" class="p-4">{{ __('Add-on') }}</th>
+                        <th scope="col" class="p-4">{{ __('Price') }}</th>
+                        <th scope="col" class="p-4">{{ __('What you get') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink/10">
+                    @foreach ($addonRows as $row)
+                        <tr data-addon="{{ $row['key'] }}">
+                            <th scope="row" class="p-4 text-left font-display text-xl font-bold uppercase">{{ __($row['name']) }}</th>
+                            <td class="whitespace-nowrap p-4 font-display text-xl font-extrabold text-heat">{{ $row['price'] }}</td>
+                            <td class="p-4 text-ink/75">
+                                {{ __($row['what']) }}
+                                @if ($row['note'])
+                                    <span class="mt-1 block text-xs text-ink/50">{{ $row['note'] }}</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+        @if ($pack)
+            <p class="mt-4 text-sm text-ink/60">{{ __(':name: :what Quoted by Indefine.', ['name' => __($pack['name']), 'what' => __($pack['description'])]) }}</p>
+        @endif
     </section>
 
     @include('marketing.partials.cta-band')

@@ -34,8 +34,9 @@
             </div>
         </section>
 
-        <section class="grid gap-4 sm:grid-cols-3">
+        <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ([
+                [__('Preview and publish'), __('See your page on desktop and mobile, switch template, publish or unpublish.'), route('organiser.events.show', $event), __('Event overview')],
                 [__('Fine-tune'), __('Age categories, form questions, FAQ, certificate and heats.'), route('organiser.events.edit', $event), __('Event settings')],
                 [__('Email'), __('Branded emails with the pass PDF go out after payment once your email is set up: your own SMTP (free) or Platform mail.'), Route::has('settings.notifications.show') ? route('settings.notifications.show') : null, __('Email & WhatsApp')],
                 [__('Dashboard'), __('Watch registrations and payments come in.'), route('dashboard'), __('Go to home')],

@@ -7,6 +7,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @include('saas.addon-lock', ['addonKey' => 'race_sheet'])
+            @php($sheetUnlocked = \App\Saas\EventAddons::unlocked($event, \App\Enums\Module::RaceSheets))
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <header class="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -24,12 +26,17 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-4">
-                        <form method="GET" action="{{ route('reports.race-sheet.pdf', $event) }}">
-                            <x-primary-button>{{ __('Print PDF') }}</x-primary-button>
-                        </form>
-                        <form method="GET" action="{{ route('reports.race-sheet.csv', $event) }}">
-                            <x-secondary-button type="submit">{{ __('Export CSV') }}</x-secondary-button>
-                        </form>
+                        @if ($sheetUnlocked)
+                            <form method="GET" action="{{ route('reports.race-sheet.pdf', $event) }}">
+                                <x-primary-button>{{ __('Print PDF') }}</x-primary-button>
+                            </form>
+                            <form method="GET" action="{{ route('reports.race-sheet.csv', $event) }}">
+                                <x-secondary-button type="submit">{{ __('Export CSV') }}</x-secondary-button>
+                            </form>
+                        @else
+                            <x-primary-button disabled title="{{ __('Locked: add the race sheet add-on') }}">{{ __('Print PDF') }} 🔒</x-primary-button>
+                            <x-secondary-button disabled title="{{ __('Locked: add the race sheet add-on') }}">{{ __('Export CSV') }} 🔒</x-secondary-button>
+                        @endif
                     </div>
                 </header>
 

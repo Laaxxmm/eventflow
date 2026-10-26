@@ -70,11 +70,10 @@ test('each event links to its race sheet and certificates when those modules are
         ->assertSee(route('reports.certificates', $this->event), false);
 });
 
-test('race sheet and certificate links are hidden while the modules are off', function () {
-    // No Season Pass: optional modules are off (their routes answer 403).
+test('every event links its overview, race sheet and certificates (locked pages explain the add-on)', function () {
     $this->actingAs($this->owner)->get('/dashboard')
         ->assertOk()
-        ->assertDontSee(route('reports.race-sheet', $this->event), false)
-        ->assertDontSee(route('reports.certificates', $this->event), false)
-        ->assertDontSee('Race sheets');
+        ->assertSee(route('organiser.events.show', $this->event), false)
+        ->assertSee(route('reports.race-sheet', $this->event), false)
+        ->assertSee(route('reports.certificates', $this->event), false);
 });

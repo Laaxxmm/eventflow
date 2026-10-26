@@ -1,9 +1,9 @@
 @php
     $inr = fn (int $paise) => \Illuminate\Support\Number::currency($paise / 100, in: 'INR', locale: 'en_IN');
     $org = auth()->user()->org;
-    $on = fn (\App\Enums\Module $m) => ! app()->bound(\App\Contracts\Entitlements::class) || app(\App\Contracts\Entitlements::class)->enabled($org, $m);
-    $raceSheets = Route::has('reports.race-sheet') && $on(\App\Enums\Module::RaceSheets);
-    $certificates = Route::has('reports.certificates') && $on(\App\Enums\Module::Certificates);
+    // Always linked: without the plan module or the event's add-on the page explains the lock and offers it.
+    $raceSheets = Route::has('reports.race-sheet');
+    $certificates = Route::has('reports.certificates');
     $upcoming = $events->filter(fn ($e) => $e->date->isAfter(now()->subDay()))->sortBy('date');
     $past = $events->reject(fn ($e) => $e->date->isAfter(now()->subDay()));
     $firstName = \Illuminate\Support\Str::of(auth()->user()->name)->before(' ');
@@ -110,8 +110,9 @@
                                         <div class="rounded-xl bg-slate-50 py-2"><dt class="text-xs text-slate-500">{{ __('Collected') }}</dt><dd class="font-bold">{{ $inr((int) $event->paid_total_paise) }}</dd></div>
                                     </dl>
                                     <div class="mt-5 flex flex-wrap gap-2 text-sm">
+                                        <a href="{{ route('organiser.events.show', $event) }}" class="rounded-lg bg-[#0b1020] px-3 py-1.5 font-medium text-white hover:bg-[#1f2a4a]">{{ __('Overview') }}</a>
                                         @if ($event->status === 'published' && $org)
-                                            <a href="{{ route('landing.show', [$org->slug, $event->slug]) }}" target="_blank" class="rounded-lg bg-[#0b1020] px-3 py-1.5 font-medium text-white hover:bg-[#1f2a4a]">{{ __('View page') }} ↗</a>
+                                            <a href="{{ route('landing.show', [$org->slug, $event->slug]) }}" target="_blank" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('View page') }} ↗</a>
                                         @endif
                                         <a href="{{ route('dashboard.participants', ['event' => $event->id]) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Participants') }}</a>
                                         <a href="{{ route('organiser.events.edit', $event) }}" class="rounded-lg px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Edit') }}</a>
