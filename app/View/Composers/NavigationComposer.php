@@ -84,7 +84,7 @@ class NavigationComposer
                 }
             }
             if (Route::has('account.plan')) {
-                $settings[] = $this->item(__('Plan and billing'), 'account.plan', 'card', 'account.plan');
+                $settings[] = $this->item(__('Plan and billing'), 'account.plan', 'card', ['account.plan', 'billing.*']);
             }
             $groups[] = ['label' => __('Settings'), 'items' => $settings];
         }
@@ -104,13 +104,13 @@ class NavigationComposer
     }
 
     /** @return array{label: string, href: string, icon: string, active: bool} */
-    private function item(string $label, string $routeOrUrl, string $icon, string $activePattern): array
+    private function item(string $label, string $routeOrUrl, string $icon, string|array $activePattern): array
     {
         return [
             'label' => $label,
             'href' => str_starts_with($routeOrUrl, 'http') ? $routeOrUrl : route($routeOrUrl),
             'icon' => self::ICONS[$icon],
-            'active' => request()->routeIs($activePattern),
+            'active' => request()->routeIs(...(array) $activePattern),
         ];
     }
 }

@@ -12,8 +12,8 @@
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:{{ $font }}; font-size:15px;">
             @foreach ($rows as $label => $value)
                 <tr>
-                    <td style="padding:10px 0; border-bottom:1px solid #eef0f3; color:#6b7280; width:120px; vertical-align:top;">{{ $label }}</td>
-                    <td style="padding:10px 0; border-bottom:1px solid #eef0f3; color:#0f172a; font-weight:600;">{{ $value }}</td>
+                    <td style="padding:10px 0; border-bottom:1px solid #EEF0F6; color:#4A5372; width:120px; vertical-align:top;">{{ $label }}</td>
+                    <td style="padding:10px 0; border-bottom:1px solid #EEF0F6; color:#121A33; font-weight:600;">{{ $value }}</td>
                 </tr>
             @endforeach
         </table>

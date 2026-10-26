@@ -20,7 +20,7 @@
     <body class="font-sans text-ink antialiased bg-paper" style="{{ $theme->style() }}">
         @yield('content')
 
-        <footer class="py-8 text-center text-xs text-muted">
+        <footer class="pb-32 pt-8 text-center text-xs text-muted">
             {{ __('Registrations powered by :app', ['app' => config('app.name', 'EventFlow')]) }}
         </footer>
     </body>

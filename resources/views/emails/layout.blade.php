@@ -12,13 +12,13 @@
     <meta name="color-scheme" content="light">
     <title>@yield('heading')</title>
 </head>
-<body style="margin:0; padding:0; background:#f2f4f7; -webkit-text-size-adjust:100%;">
+<body style="margin:0; padding:0; background:#F3F5FA; -webkit-text-size-adjust:100%;">
     <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">@yield('preheader')&#8199;&#847;&#8199;&#847;&#8199;&#847;</div>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f2f4f7;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F5FA;">
         <tr>
             <td align="center" style="padding:24px 12px;">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background:#ffffff; border-radius:24px; overflow:hidden;">
                     {{-- Brand header --}}
                     <tr>
                         <td style="background:{{ $brand->secondary }}; padding:22px 32px;">
@@ -34,8 +34,8 @@
                     {{-- Heading --}}
                     <tr>
                         <td style="padding:36px 32px 8px; font-family:{{ $font }};">
-                            <p style="margin:0 0 8px; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#6b7280;">{{ $brand->eventName }}</p>
-                            <h1 style="margin:0; font-size:26px; line-height:1.25; font-weight:800; color:#0f172a;">@yield('heading')</h1>
+                            <p style="margin:0 0 8px; font-size:14px; font-weight:600; color:#4A5372;">{{ $brand->eventName }}</p>
+                            <h1 style="margin:0; font-size:26px; line-height:1.25; font-weight:800; letter-spacing:-0.4px; color:#121A33;">@yield('heading')</h1>
                         </td>
                     </tr>
 
@@ -43,7 +43,7 @@
 
                     {{-- Footer --}}
                     <tr>
-                        <td style="padding:24px 32px 32px; border-top:1px solid #eef0f3; font-family:{{ $font }}; font-size:12px; line-height:1.6; color:#6b7280;">
+                        <td style="padding:24px 32px 32px; border-top:1px solid #EEF0F6; font-family:{{ $font }}; font-size:12px; line-height:1.6; color:#4A5372;">
                             {{ __('Sent by :org.', ['org' => $brand->orgName]) }}
                             @if ($brand->replyTo)
                                 {{ __('Questions? Just reply to this email to reach the organiser.') }}
