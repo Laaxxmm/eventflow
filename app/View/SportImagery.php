@@ -18,10 +18,14 @@ final class SportImagery
     {
         return self::$cache[$set] ??= (function () use ($set) {
             $dir = public_path('images/race-ink/'.basename($set));
-            $files = is_dir($dir) ? glob($dir.'/*.{jpg,jpeg,webp}', GLOB_BRACE) : [];
+            // scandir + filter, not glob(GLOB_BRACE): GLOB_BRACE does not exist on Alpine (musl).
+            $files = is_dir($dir) ? array_values(array_filter(
+                scandir($dir) ?: [],
+                fn (string $f) => preg_match('/\.(jpe?g|webp)$/i', $f) === 1,
+            )) : [];
             sort($files);
 
-            return array_map(fn (string $f) => asset('images/race-ink/'.basename($set).'/'.basename($f)), $files ?: []);
+            return array_map(fn (string $f) => asset('images/race-ink/'.basename($set).'/'.$f), $files);
         })();
     }
 
