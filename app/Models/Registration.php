@@ -9,6 +9,7 @@ use Database\Factories\RegistrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Registration extends Model
 {
@@ -29,6 +30,7 @@ class Registration extends Model
             'answers' => 'array',
             'paid_at' => 'immutable_datetime',
             'checked_in_at' => 'immutable_datetime',
+            'reminders_opted_out_at' => 'immutable_datetime',
         ];
     }
 
@@ -45,6 +47,12 @@ class Registration extends Model
     public static function newPassNo(): string
     {
         return config('eventflow.pass.prefix').strtoupper(bin2hex(random_bytes(6)));
+    }
+
+    /** Payment reminders sent or queued for this registration (Session N2). */
+    public function reminderLogs(): HasMany
+    {
+        return $this->hasMany(RegistrationReminderLog::class)->withoutGlobalScopes();
     }
 
     public function event(): BelongsTo

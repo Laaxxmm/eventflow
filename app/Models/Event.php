@@ -34,6 +34,7 @@ class Event extends Model
             'colours' => 'array',
             'form_fields' => 'array',
             'config' => 'array',
+            'payment_reminders' => 'array',
         ];
     }
 

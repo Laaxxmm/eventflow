@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ParticipantReminderController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::middleware(['auth', 'verified', 'can:view-dashboard'])->prefix('dashboard
     Route::get('/participants/export', [DashboardController::class, 'export'])
         ->middleware('can:export-participants')
         ->name('dashboard.participants.export');
+    // Session N2: manual "Send reminder now" for selected unpaid registrations.
+    Route::post('/participants/remind', [ParticipantReminderController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('dashboard.participants.remind');
 });
 
 Route::middleware('auth')->group(function () {

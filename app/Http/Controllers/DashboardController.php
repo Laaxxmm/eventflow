@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Payments\PaymentStatus;
+use App\Reminders\ReminderSchedule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -51,7 +52,7 @@ class DashboardController extends Controller
             'event' => $event,
             'status' => $status,
             'statuses' => PaymentStatus::cases(),
-            'registrations' => $this->participantsQuery($event, $status)->paginate(50)->withQueryString(),
+            'registrations' => $this->participantsQuery($event, $status)->with('reminderLogs', 'event:id,name,date,payment_reminders')->paginate(50)->withQueryString(),
         ]);
     }
 
@@ -96,21 +97,23 @@ class DashboardController extends Controller
     {
         $request->validate([
             'event' => ['nullable', 'integer'],
-            'status' => ['nullable', Rule::enum(PaymentStatus::class)],
+            // "unpaid" = pending or failed (Session N2 payment reminders).
+            'status' => ['nullable', Rule::in([...array_column(PaymentStatus::cases(), 'value'), 'unpaid'])],
         ]);
 
         return [
             $request->filled('event') ? Event::findOrFail($request->integer('event')) : null,
-            $request->enum('status', PaymentStatus::class),
+            $request->input('status') === 'unpaid' ? 'unpaid' : $request->enum('status', PaymentStatus::class),
         ];
     }
 
-    private function participantsQuery(?Event $event, ?PaymentStatus $status): Builder
+    private function participantsQuery(?Event $event, PaymentStatus|string|null $status): Builder
     {
         return Registration::query()
             ->with('event:id,name')
             ->when($event, fn (Builder $q) => $q->whereBelongsTo($event))
-            ->when($status, fn (Builder $q) => $q->where('status', $status))
+            ->when($status === 'unpaid', fn (Builder $q) => $q->whereIn('status', ReminderSchedule::UNPAID))
+            ->when($status instanceof PaymentStatus, fn (Builder $q) => $q->where('status', $status))
             ->latest('id');
     }
 

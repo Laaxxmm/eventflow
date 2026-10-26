@@ -154,6 +154,7 @@ class NotificationSettingsController extends Controller
             'whatsapp_token' => ['nullable', 'string', 'max:1000'],
             'whatsapp_template_confirmed' => ['nullable', 'required_if:whatsapp_enabled,1', 'regex:/^[a-z0-9_]{1,120}$/'],
             'whatsapp_template_reminder' => ['nullable', 'regex:/^[a-z0-9_]{1,120}$/'],
+            'whatsapp_template_payment' => ['nullable', 'regex:/^[a-z0-9_]{1,120}$/'], // Session N2 payment reminders
             'whatsapp_language' => ['required', 'regex:/^[a-z]{2}(_[A-Z]{2})?$/'],
         ]);
 
