@@ -5,20 +5,24 @@
 
 @php
     use App\Saas\Plans;
-    $addon = fn (string $key) => Plans::addons()[$key] ?? null;
-    $addonLabel = fn (string $key) => ($a = $addon($key)) && $a['season_inr'] !== null ? __('Add-on · :price', ['price' => Plans::inr($a['season_inr'])]) : __('Add-on');
+    $quote = __('Quoted');
+    $paid = fn (array $p, string $module) => in_array($module, $p['modules'], true) ?: __('Paid add-on');
     $rows = [
-        __('Price') => fn ($p) => Plans::inr($p['season_pass_inr']) ?? __('Quoted'),
-        __('Races') => fn ($p) => $p['max_events'] === null ? __('Unlimited') : number_format($p['max_events']),
-        __('Duration') => fn ($p) => __($p['term']),
-        __('Participants') => fn ($p) => $p['pax_per_event'] === null ? __('Unlimited') : ($p['max_events'] === 1 ? number_format($p['pax_per_event']) : __(':n per race', ['n' => number_format($p['pax_per_event'])])),
+        __('Price (+ GST)') => fn ($p) => Plans::inr($p['price_inr']) ?? $quote,
+        __('Races') => fn ($p) => $p['max_events'] === null ? $quote : number_format($p['max_events']),
+        __('Duration') => fn ($p) => $p['term_label'] ? __($p['term_label']).($p['renews'] ? __(', renews yearly') : __(', one-off')) : $quote,
+        __('Participants per race') => fn ($p) => $p['max_participants_per_event'] === null ? $quote : number_format($p['max_participants_per_event']),
         __('Ticket percentage') => fn ($p) => __('None'),
-        __('Event page, QR passes, check-in, certificates') => fn ($p) => true,
-        __('Email confirmations · own SMTP') => fn ($p) => __('Included · free'),
-        __('Platform mail') => fn ($p) => $p['self_serve'] ? $addonLabel('platform_mail') : true,
-        __('WhatsApp') => fn ($p) => in_array('sms_whatsapp', $p['modules'], true) ?: $addonLabel('whatsapp'),
-        __('Support') => fn ($p) => __($p['support']),
+        __('Event page, payments, QR passes') => fn ($p) => true,
+        __('Volunteer QR check-in') => fn ($p) => in_array('checkin', $p['modules'], true),
+        __('Race sheets and heats') => fn ($p) => in_array('race_sheets', $p['modules'], true),
+        __('Finisher certificates') => fn ($p) => in_array('certificates', $p['modules'], true),
+        __('Email · own SMTP') => fn ($p) => __('Included · free'),
+        __('Platform mail') => fn ($p) => $paid($p, 'email_branding'),
+        __('WhatsApp') => fn ($p) => $paid($p, 'sms_whatsapp'),
+        __('Support') => fn ($p) => __($p['support'] ?? 'Email'),
     ];
+    $extras = $addons + config('plans.overage');
 @endphp
 
 @section('content')
@@ -79,7 +83,7 @@
             <div>
                 <p class="ri-kicker text-heat">{{ __('Outgrowing your plan') }}</p>
                 <h2 class="ri-headline mt-4 text-6xl">{{ __('A nudge, not a locked door.') }}</h2>
-                <p class="mt-6 text-ink/70">{{ __('Participant caps are soft. When a race reaches its plan cap, new entries pause and you choose how to carry on — from your settings, the same day.') }}</p>
+                <p class="mt-6 text-ink/70">{{ __('When a race reaches its plan\'s participant limit, new registrations pause with a clear message for runners and for you — never silently going over. Then you choose how to carry on from Plan & billing.') }}</p>
             </div>
             <ol class="grid gap-px border-2 border-ink bg-ink sm:grid-cols-3">
                 @foreach ([
@@ -96,16 +100,16 @@
             </ol>
         </div>
         @if (\App\Saas\Trial::stubbed())
-            <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Online checkout for upgrades and participant packs is rolling out. Until it is live, nothing pauses at a cap and nothing is charged automatically.') }}</p>
+            <p class="mt-6 border-l-4 border-heat bg-white p-4 text-sm text-ink/70">{{ __('Online checkout is rolling out. Until it is live, Upgrade and Buy a participant pack send your request to Indefine, and nothing is charged automatically.') }}</p>
         @endif
 
         <h2 class="ri-headline mt-24 text-6xl">{{ __('Add-ons.') }}</h2>
         <div class="mt-10 grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
-            @foreach ($addons as $item)
+            @foreach ($extras as $item)
                 <div class="bg-paper p-6">
                     <p class="flex items-baseline justify-between gap-4">
                         <span class="font-display text-2xl font-bold uppercase">{{ __($item['name']) }}</span>
-                        <span class="whitespace-nowrap font-display text-2xl font-extrabold text-heat">{{ Plans::inr($item['season_inr']) ?? __('Ask us') }}</span>
+                        <span class="whitespace-nowrap font-display text-2xl font-extrabold text-heat">{{ Plans::inr($item['price_inr']) ?? __('Quoted') }}</span>
                     </p>
                     <p class="mt-2 text-sm text-ink/70">{{ __($item['description']) }}</p>
                 </div>

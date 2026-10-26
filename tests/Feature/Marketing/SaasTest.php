@@ -5,7 +5,6 @@ use App\Enums\Role;
 use App\Models\Org;
 use App\Models\SeasonPass;
 use App\Models\User;
-use App\Saas\Plans;
 use Database\Seeders\PlatformSeeder;
 use Illuminate\Support\Str;
 
@@ -62,7 +61,7 @@ it('keeps the nav to Product, Templates, Pricing, Login and Start free trial', f
 });
 
 it('reads every price on the homepage from config', function () {
-    config(['plans.plans.single.season_pass_inr' => 4499]);
+    config(['plans.plans.single_event.price_inr' => 4499]);
 
     $this->get('/')->assertOk()->assertSee('₹4,499')->assertDontSee('₹3,999');
 });
@@ -70,23 +69,40 @@ it('reads every price on the homepage from config', function () {
 it('lists Single, Club, Circuit and a contact-only Custom on /pricing', function () {
     $this->get('/pricing')
         ->assertOk()
-        ->assertSeeInOrder(['Single Event', '₹3,999', '90-day window', 'Club Season', '₹12,999', 'Circuit Season', '₹29,999', 'Custom'])
-        ->assertSee('1 race')->assertSee('500 pax')
-        ->assertSee('5 races')->assertSee('1,500 pax/event')
-        ->assertSee('25 races')->assertSee('5,000 pax/event')
-        ->assertSee(route('register', ['plan' => 'single']), false)
-        ->assertSee(route('register', ['plan' => 'club']), false)
-        ->assertSee(route('register', ['plan' => 'circuit']), false)
+        ->assertSeeInOrder(['Single Event', '₹3,999', '90-day window', 'Club Season', '₹12,999', '12 months', 'Circuit Season', '₹29,999', 'Custom'])
+        ->assertSee('1 race · 500 participants per race')
+        ->assertSee('Up to 5 races · 1,500 participants per race')
+        ->assertSee('Up to 25 races · 5,000 participants per race')
+        ->assertSee(route('register', ['plan' => 'single_event']), false)
+        ->assertSee(route('register', ['plan' => 'club_season']), false)
+        ->assertSee(route('register', ['plan' => 'circuit_season']), false)
         ->assertDontSee(route('register', ['plan' => 'custom']), false) // contact-only
-        ->assertSee('mailto:hello@indefine.in', false);
+        ->assertSee('mailto:hello@indefine.in', false)
+        ->assertDontSee('on paid registrations');
 });
 
 it('compares races, duration, pax, mail, WhatsApp and support, and explains overage', function () {
-    $this->get('/pricing')
+    $html = $this->get('/pricing')
         ->assertSee('data-compare', false)
-        ->assertSeeInOrder(['Races', 'Duration', 'Participants', 'Ticket percentage', 'Email confirmations · own SMTP', 'Platform mail', 'WhatsApp', 'Support'])
+        ->assertSeeInOrder(['Races', 'Duration', 'Participants per race', 'Ticket percentage', 'Email · own SMTP', 'Platform mail', 'WhatsApp', 'Support'])
         ->assertSee('data-overage', false)
-        ->assertSeeInOrder(['Upgrade', 'Buy a participant pack', 'Contact Indefine']);
+        ->assertSeeInOrder(['Upgrade', 'Buy a participant pack', 'Contact Indefine'])
+        ->getContent();
+
+    // Platform mail and WhatsApp are never shown as included on any plan.
+    foreach (['Platform mail', 'WhatsApp'] as $row) {
+        expect($html)->toMatch('#>'.$row.'</th>(\s*<td class="p-4[^"]*">\s*Paid add-on\s*</td>){4}\s*</tr>#');
+    }
+});
+
+it('locks plan prices, terms and caps in config', function () {
+    expect(config('plans.plans.single_event'))->toMatchArray(['price_inr' => 3999, 'term' => ['days' => 90], 'renews' => false, 'max_events' => 1, 'max_participants_per_event' => 500])
+        ->and(config('plans.plans.club_season'))->toMatchArray(['price_inr' => 12999, 'term' => ['months' => 12], 'renews' => true, 'max_events' => 5, 'max_participants_per_event' => 1500])
+        ->and(config('plans.plans.circuit_season'))->toMatchArray(['price_inr' => 29999, 'term' => ['months' => 12], 'renews' => true, 'max_events' => 25, 'max_participants_per_event' => 5000])
+        ->and(config('plans.plans.custom'))->toMatchArray(['price_inr' => null, 'self_serve' => false])
+        ->and(array_key_first(config('plans.plans')))->toBe('single_event')
+        ->and(config('plans.addons.platform_mail.module'))->toBe('email_branding')
+        ->and(config('plans.addons.whatsapp.module'))->toBe('sms_whatsapp');
 });
 
 it('can hide the Indefine brand line', function () {
@@ -96,14 +112,14 @@ it('can hide the Indefine brand line', function () {
 });
 
 it('registers an organiser on a free trial of the chosen plan', function () {
-    $this->get('/register?plan=club')
+    $this->get('/register?plan=club_season')
         ->assertOk()
         ->assertSee('Start your free trial')
         ->assertSee('14 days · 1 event you can publish · up to 25 test registrations · no card.')
-        ->assertSee('value="club"', false)
+        ->assertSee('value="club_season"', false)
         ->assertDontSee('% on paid registrations');
 
-    $this->post('/register', signupForm(['plan' => 'club', 'addons' => ['whatsapp']]))
+    $this->post('/register', signupForm(['plan' => 'club_season', 'addons' => ['whatsapp']]))
         ->assertRedirect(route('account.plan', ['welcome' => 1], absolute: false));
 
     $user = User::where('email', 'meera@sunrise.test')->sole();
@@ -113,19 +129,19 @@ it('registers an organiser on a free trial of the chosen plan', function () {
     expect($user->role)->toBe(Role::Owner)
         ->and($user->isPlatformAdmin())->toBeFalse()
         ->and($org->slug)->toBe('sunrise-sports-club')
-        ->and($org->plan)->toBe('club')
+        ->and($org->plan)->toBe('club_season')
         ->and($org->addons)->toBe(['whatsapp'])
         ->and($org->subscription_status)->toBe('trialing')
         ->and($org->trial_ends_at->toDateString())->toBe(now()->addDays(14)->toDateString())
-        ->and($org->modules)->toMatchArray(['race_sheets' => true, 'certificates' => true, 'sms_whatsapp' => true, 'email_branding' => true]);
+        ->and($org->modules)->toMatchArray(['race_sheets' => true, 'certificates' => true, 'sms_whatsapp' => true, 'email_branding' => false]);
 
     $pass = SeasonPass::withoutGlobalScopes()->where('org_id', $org->id)->sole();
     expect($pass->status)->toBe('active')
         ->and($pass->amount_paise)->toBe(0)
-        ->and($pass->max_events)->toBe(1)          // the trial's limits, not Club's
-        ->and($pass->max_registrations)->toBe(25)
+        ->and($pass->max_events)->toBe(5)
+        ->and($pass->max_registrations)->toBe(1500)
         ->and($pass->modules->contains(Module::SmsWhatsapp))->toBeTrue()
-        ->and($pass->modules->contains(Module::EmailBranding))->toBeTrue(); // own SMTP is free
+        ->and($pass->modules->contains(Module::EmailBranding))->toBeFalse(); // Platform mail is a paid add-on
 });
 
 it('defaults to the Single Event trial and rejects contact-only plans or unknown add-ons', function () {
@@ -133,15 +149,7 @@ it('defaults to the Single Event trial and rejects contact-only plans or unknown
     $this->post('/register', signupForm(['addons' => ['free-money']]))->assertSessionHasErrors('addons.0');
 
     $this->post('/register', signupForm())->assertSessionHasNoErrors();
-    expect(User::where('email', 'meera@sunrise.test')->sole()->org->plan)->toBe('single');
-});
-
-it('resolves pre-M2 plan keys to their successors', function () {
-    expect(Plans::resolve('starter'))->toBe('club')
-        ->and(Plans::resolve('growth'))->toBe('circuit')
-        ->and(Plans::resolve('scale'))->toBe('custom')
-        ->and(Plans::get('growth')['name'])->toBe('Circuit Season')
-        ->and(Plans::forOrg('starter')['name'])->toBe('Club Season');
+    expect(User::where('email', 'meera@sunrise.test')->sole()->org->plan)->toBe('single_event');
 });
 
 it('never lets a signup make itself a platform admin', function () {
@@ -157,7 +165,7 @@ it('keeps org slugs off reserved site paths', function () {
 });
 
 it('shows the organiser their plan, trial use and billing note', function () {
-    $this->post('/register', signupForm(['plan' => 'single']));
+    $this->post('/register', signupForm(['plan' => 'single_event']));
 
     $this->get('/account/plan?welcome=1')
         ->assertOk()
@@ -165,7 +173,11 @@ it('shows the organiser their plan, trial use and billing note', function () {
         ->assertSee('We sent a verification link to meera@sunrise.test.')
         ->assertSee('Free trial until')
         ->assertSee('0 of 1 live events · 0 of 25 registrations')
-        ->assertSee('Self-serve checkout for Single Event, Club and Circuit is coming to this page.');
+        ->assertSee('₹3,999')->assertSee('one-off, does not auto-renew')
+        ->assertSee('On hold: set up email')
+        ->assertSee('Upgrade to Club Season (₹12,999)')
+        ->assertSee('Buy a participant pack')
+        ->assertSee('Online plan billing is being connected');
 });
 
 it('logs organisers in to the dashboard and platform admins in to the console', function () {
@@ -189,16 +201,16 @@ it('keeps /platform to platform admins', function () {
 });
 
 it('lists every organisation with plan and status for platform admins', function () {
-    $this->post('/register', signupForm(['plan' => 'circuit']));
+    $this->post('/register', signupForm(['plan' => 'club_season']));
     $this->post('/logout');
     organiserOf('Lake City Skaters');
 
     $this->actingAs(platformAdmin())->get('/platform/orgs')
         ->assertOk()
-        ->assertSee('Sunrise Sports Club')->assertSee('Circuit Season')->assertSee('Trialing')
+        ->assertSee('Sunrise Sports Club')->assertSee('Club Season')->assertSee('Trialing')
         ->assertSee('Lake City Skaters');
 
-    $this->actingAs(platformAdmin())->get('/platform/orgs?plan=circuit')
+    $this->actingAs(platformAdmin())->get('/platform/orgs?plan=club_season')
         ->assertSee('Sunrise Sports Club')->assertDontSee('Lake City Skaters');
 });
 
@@ -238,7 +250,7 @@ it('seeds the demo platform admin and organiser from env passwords', function ()
     expect($admin->isPlatformAdmin())->toBeTrue()->and($admin->org_id)->toBeNull()
         ->and(Hash::check('admin-secret-1', $admin->password))->toBeTrue()
         ->and($organiser->isPlatformAdmin())->toBeFalse()
-        ->and($organiser->org->plan)->toBe('single')
+        ->and($organiser->org->plan)->toBe('single_event')
         ->and(SeasonPass::withoutGlobalScopes()->where('org_id', $organiser->org_id)->count())->toBe(1);
 });
 

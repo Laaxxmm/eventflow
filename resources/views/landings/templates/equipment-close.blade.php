@@ -17,7 +17,7 @@
                         <x-ri.chip tone="heat">{{ __('Limited bibs') }}</x-ri.chip>
                         <x-ri.chip tone="outline">{{ trans_choice(':count bib left|:count bibs left', $page->placesLeft(), ['count' => number_format($page->placesLeft())]) }}</x-ri.chip>
                     @else
-                        <x-ri.chip tone="heat">{{ __('Entries open') }}</x-ri.chip>
+                        <x-ri.chip tone="heat">{{ $page->open ? __('Entries open') : $page->closedLabel() }}</x-ri.chip>
                     @endif
                 </div>
                 <h1 class="ri-headline mt-6 text-7xl sm:text-8xl xl:text-[8.5rem]" data-reveal>{{ $page->config->name }}</h1>

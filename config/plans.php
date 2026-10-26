@@ -1,14 +1,22 @@
 <?php
 
 /*
- * EventFlow SaaS plans (marketing site, pricing page, signup).
+ * EventFlow SaaS plans (marketing site, pricing page, signup, plan caps).
  *
- * Organisers buy a flat pass (Single Event, Club Season, Circuit Season) with no
- * percentage on tickets, or talk to Indefine for Custom. Change prices here,
- * never in the Blade views.
+ * Prices are LOCKED (Indefine, Session M2). Change them here only, never in Blade.
+ * Amounts are INR, exclusive of GST. null price = quoted by Indefine ("Contact Indefine").
  *
- * Modules use App\Enums\Module values. Core modules (registration, payments,
- * passes) are in every plan.
+ * term: how long a paid plan runs from activation. Single Event is a 90-day window that
+ * never renews; the season plans run 12 months and renew yearly. Race slots are counted
+ * per term and unused slots do not roll over into the next one.
+ *
+ * max_events: races an org can create in one term (null = quote).
+ * max_participants_per_event: registrations per race before the soft-block (null = quote).
+ * Participant packs raise one race's cap; Indefine grants them (php artisan plans:pack).
+ *
+ * Modules use App\Enums\Module values. Core modules (registration, payments, passes)
+ * are in every plan. Email with the organiser's own SMTP is free on every plan;
+ * Platform mail (module email_branding) and WhatsApp (sms_whatsapp) are paid add-ons.
  */
 
 return [
@@ -33,15 +41,15 @@ return [
 
     /*
      * Free trial (product-led: no card, no human gate before the first publish).
+     * The trial's Season Pass carries the chosen plan's caps (App\Saas\PlanLimits, always
+     * enforced). On top, App\Saas\Trial adds trial-only limits:
      *
-     *   trial_days           length of the trial
-     *   trial_events         events a trial org can create and publish
-     *   trial_registrations  test registrations across the trial org's events
+     *   trial_events         events a trial org can publish
+     *   trial_registrations  test registrations across the trial org
      *   trial_watermark      subtle "Powered by EventFlow" on landings until paid
      *
-     * TRIAL_STUB=true (the default until SaaS billing checkout is live) keeps the
-     * limits visible in the UI but never hard-blocks: there is no way to pay yet,
-     * so blocking would strand a trial. Set TRIAL_STUB=false once checkout ships.
+     * TRIAL_STUB=true (default until SaaS checkout is live) shows the trial-only limits but
+     * never enforces them: there is nothing to check out yet. Set TRIAL_STUB=false once it ships.
      */
     'trial_days' => 14,
     'trial_events' => 1,
@@ -50,125 +58,111 @@ return [
     'trial_stub' => (bool) env('TRIAL_STUB', true),
 
     // Plan new organisers get when they sign up without choosing one.
-    'default' => 'single',
+    'default' => 'single_event',
 
-    // Plan keys from before Single/Club/Circuit, resolved to their successor.
-    'legacy' => [
-        'starter' => 'club',
-        'growth' => 'circuit',
-        'scale' => 'custom',
-    ],
-
-    /*
-     * No ticket percentage on any plan: organisers pay one flat price per pass.
-     * max_events per pass window; pax_per_event is a soft cap per event
-     * (over it: Upgrade, Buy a participant pack, or Contact Indefine).
-     */
+    // Display order: Single Event leads on / and /pricing.
     'plans' => [
-        'single' => [
+        'single_event' => [
             'name' => 'Single Event',
-            'tagline' => 'One race, done properly.',
-            'season_pass_inr' => 3999,
-            'term' => '90-day window',
-            'duration_days' => 90,
-            'participant_fee_percent' => null,
-            'self_serve' => true,
-            'highlight' => true, // where the pricing strip starts the eye
+            'tagline' => 'One race, from entries to finish line.',
+            'price_inr' => 3999,
+            'term' => ['days' => 90],
+            'term_label' => '90-day window',
+            'renews' => false, // one-off: does not auto-renew next year
             'max_events' => 1,
-            'pax_per_event' => 500,
+            'max_participants_per_event' => 500,
+            'self_serve' => true,
+            'highlight' => true, // Single-first: where the pricing strip starts the eye
+            'upgrade_to' => 'club_season',
             'support' => 'Email',
-            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
+            'modules' => ['checkin'],
             'features' => [
-                '1 race over a 90-day window',
-                'Up to 500 participants',
-                'QR passes, gate check-in and certificates',
-                'Email confirmations · own SMTP free',
+                'Branded event page, Razorpay or Cashfree checkout',
+                'EF- passes (PNG + PDF) by email',
+                'QR check-in on volunteers\' phones',
+                'Email included: connect your own SMTP free',
             ],
         ],
-        'club' => [
+        'club_season' => [
             'name' => 'Club Season',
-            'tagline' => 'A club calendar for the year.',
-            'season_pass_inr' => 12999,
-            'term' => '12 months',
-            'duration_days' => 365,
-            'participant_fee_percent' => null,
-            'self_serve' => true,
+            'tagline' => 'A club calendar, all season.',
+            'price_inr' => 12999,
+            'term' => ['months' => 12],
+            'term_label' => '12 months',
+            'renews' => true, // yearly; unused race slots do not roll over
             'max_events' => 5,
-            'pax_per_event' => 1500,
-            'support' => 'Priority email',
-            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
+            'max_participants_per_event' => 1500,
+            'self_serve' => true,
+            'upgrade_to' => 'circuit_season',
+            'support' => 'Email',
+            'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
-                '5 races over 12 months',
-                'Up to 1,500 participants per race',
                 'Everything in Single Event',
-                'Priority email support',
+                'Race sheets: heats by distance, age band and gender',
+                'Finisher certificates (A4 template gallery)',
             ],
         ],
-        'circuit' => [
+        'circuit_season' => [
             'name' => 'Circuit Season',
-            'tagline' => 'Series, circuits and busy organisers.',
-            'season_pass_inr' => 29999,
-            'term' => '12 months',
-            'duration_days' => 365,
-            'participant_fee_percent' => null,
-            'self_serve' => true,
+            'tagline' => 'Series, circuits and multi-city calendars.',
+            'price_inr' => 29999,
+            'term' => ['months' => 12],
+            'term_label' => '12 months',
+            'renews' => true,
             'max_events' => 25,
-            'pax_per_event' => 5000,
-            'support' => 'Priority email + race-week chat',
-            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding'],
+            'max_participants_per_event' => 5000,
+            'self_serve' => true,
+            'upgrade_to' => 'custom',
+            'support' => 'Priority email',
+            'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
-                '25 races over 12 months',
-                'Up to 5,000 participants per race',
                 'Everything in Club Season',
-                'Race-week chat support',
+                'Built for big fields and busy calendars',
             ],
         ],
         'custom' => [
             'name' => 'Custom',
-            'tagline' => 'Federations, city marathons, managed race ops.',
-            'season_pass_inr' => null, // quoted by Indefine
-            'term' => 'Custom term',
-            'duration_days' => null,
-            'participant_fee_percent' => null,
-            'self_serve' => false,
+            'tagline' => 'Federations, city marathons, special requirements.',
+            'price_inr' => null, // quote
+            'term' => null,
+            'term_label' => null,
+            'renews' => null,
             'max_events' => null,
-            'pax_per_event' => null,
-            'support' => 'Named contact + race-day support',
-            'modules' => ['checkin', 'race_sheets', 'certificates', 'email_branding', 'sms_whatsapp'],
+            'max_participants_per_event' => null,
+            'self_serve' => false,
+            'upgrade_to' => null,
+            'support' => 'Onboarding + race-day support',
+            'modules' => ['checkin', 'race_sheets', 'certificates'],
             'features' => [
-                'Unlimited races and participants',
-                'Platform mail and WhatsApp included',
-                'Custom certificate layouts',
-                'Managed race ops by Indefine',
+                'Races, field sizes and term to suit you',
+                'Custom certificate layouts by Indefine',
+                'Onboarding and race-day support',
             ],
         ],
     ],
 
-    // What every self-serve plan includes for participant messaging.
-    'messaging' => [
-        'email' => true,          // confirmations and passes by email
-        'own_smtp' => true,       // free: plug in your own SMTP in Settings
-    ],
-
-    // Optional add-ons, bought in Settings. "module" switches an App\Enums\Module on.
+    // Paid add-ons. "module" switches an App\Enums\Module on. Prices are quoted by Indefine.
     'addons' => [
         'platform_mail' => [
             'name' => 'Platform mail',
-            'description' => 'We send participant email for you from a verified EventFlow sender. Skip it if you use your own SMTP.',
-            'season_inr' => null, // TODO: price not confirmed by Indefine yet
-            'module' => null,
+            'description' => 'No SMTP of your own? Indefine sends participant emails for you (Brevo / Amazon SES), with your name and reply-to.',
+            'price_inr' => null,
+            'module' => 'email_branding',
         ],
         'whatsapp' => [
             'name' => 'WhatsApp notifications',
-            'description' => 'Confirmation with the pass link and race-day reminders on WhatsApp (Meta charges extra).',
-            'season_inr' => 4999, // placeholder
+            'description' => 'Confirmation with the pass link and race-day reminders on WhatsApp (Meta charges per message).',
+            'price_inr' => null,
             'module' => 'sms_whatsapp',
         ],
+    ],
+
+    // When a race reaches its participant cap: soft-block, then these ways out.
+    'overage' => [
         'participant_pack' => [
             'name' => 'Participant pack',
-            'description' => 'Extra participants on one event when it outgrows its plan cap.',
-            'season_inr' => null, // TODO: price not confirmed by Indefine yet
-            'module' => null,
+            'description' => 'More places for one race on your current plan.',
+            'price_inr' => null, // quoted by Indefine
         ],
     ],
 

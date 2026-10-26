@@ -24,7 +24,7 @@
             @if ($page->open)
                 <a href="{{ $page->registerUrl() }}" data-reveal class="mt-10 inline-flex items-center gap-3 bg-heat px-10 py-4 font-display text-2xl font-bold uppercase tracking-[0.12em] text-on-heat hover:brightness-95">{{ __('Enter the meet') }}</a>
             @else
-                <p class="mt-10 font-display text-2xl font-bold uppercase tracking-[0.12em] text-ink/55">{{ __('Entries closed') }}</p>
+                <p class="mt-10 font-display text-2xl font-bold uppercase tracking-[0.12em] text-ink/55">{{ $page->closedLabel() }}</p>
             @endif
         </div>
     </header>

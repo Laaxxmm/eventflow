@@ -13,6 +13,7 @@ use App\Landing\InvalidEventConfig;
 use App\Landing\LogoInspector;
 use App\Models\Event;
 use App\Models\Org;
+use App\Saas\PlanLimits;
 use App\Saas\Trial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,9 +40,12 @@ class EventController extends Controller
     }
 
     /** The 5-step create wizard (App\Landing\EventWizard). */
-    public function create(Request $request, SportPackRepository $packs): View
+    public function create(Request $request, SportPackRepository $packs): View|RedirectResponse
     {
         $org = $this->org($request);
+        if (! PlanLimits::canCreateRace($org)) {
+            return redirect()->route('account.plan')->with('plan_limit', 'races');
+        }
 
         return view('events.wizard', [
             'org' => $org,
@@ -57,6 +61,9 @@ class EventController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $org = $this->org($request);
+        if (! PlanLimits::canCreateRace($org)) {
+            return redirect()->route('account.plan')->with('plan_limit', 'races');
+        }
         $validator = Validator::make($request->all(), EventWizard::rules(), EventWizard::messages());
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput($request->except(['logo', 'hero']))
@@ -189,7 +196,7 @@ class EventController extends Controller
 
     private static function trialLimitMessage(): string
     {
-        return __('Your free trial covers :n live event. Pick Single Event, Club or Circuit in Plan & billing to publish more.', ['n' => Trial::eventLimit()]);
+        return __('Your free trial covers :n live event. Pick Single Event, Club Season or Circuit Season in Plan & billing to publish more.', ['n' => Trial::eventLimit()]);
     }
 
     /** A template picked on the public /templates gallery, if it is one we ship. */

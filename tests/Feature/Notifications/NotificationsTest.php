@@ -21,6 +21,7 @@ use App\Payments\PaymentStatus;
 use App\Services\WhatsApp\PhoneNumber;
 use App\Services\WhatsApp\WhatsAppException;
 use App\Services\WhatsApp\WhatsAppGatewayFactory;
+use Illuminate\Contracts\Mail\Factory;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\Artisan;
@@ -132,7 +133,7 @@ it('queues the confirmation instead of sending during the request', function () 
         ->toBeInstanceOf(ShouldQueue::class);
 });
 
-it('uses custom SMTP only when enabled, verified and in the Season Pass', function () {
+it('uses own SMTP when enabled and verified, free of any add-on', function () {
     $registration = notifiedRegistration();
     $org = $registration->event->org;
     $settings = NotificationSettings::for($org)->fill([
@@ -147,8 +148,40 @@ it('uses custom SMTP only when enabled, verified and in the Season Pass', functi
         ->and(config("mail.mailers.org_{$org->id}"))->toMatchArray(['host' => 'smtp.runners.test', 'port' => 587, 'scheme' => 'smtp', 'password' => 'p4ss'])
         ->and(OrgMailer::from($org, $settings)->getAddress())->toBe('hello@runners.test');
 
+    // Own SMTP is free: switching the Platform mail add-on off does not affect it.
     $org->update(['modules' => ['email_branding' => false]]);
-    expect(OrgMailer::mailerName($org->fresh(), $settings))->toBe('array');
+    expect(OrgMailer::mailerName($org->fresh(), $settings))->toBe("org_{$org->id}");
+
+    // Without own SMTP and without Platform mail, participant mail is held.
+    $settings->smtp_enabled = false;
+    expect(OrgMailer::mailerName($org->fresh(), $settings))->toBeNull();
+});
+
+it('holds participant mail without own SMTP or Platform mail, and logs why', function () {
+    $registration = notifiedRegistration();
+    $org = $registration->event->org;
+    $org->update(['modules' => ['email_branding' => false]]);
+
+    (new RegistrationConfirmedMail($registration->id))->send(app(Factory::class));
+
+    expect(notificationMails())->toBe([]);
+    $delivery = NotificationDelivery::withoutGlobalScopes()->where('registration_id', $registration->id)->where('channel', 'mail')->sole();
+    expect($delivery->status)->toBe(NotificationDelivery::SKIPPED)
+        ->and($delivery->error)->toContain('own SMTP');
+
+    $owner = User::withoutGlobalScopes()->where('email', 'owner@runners.test')->sole();
+    $owner->forceFill(['email_verified_at' => now()])->save();
+    $this->actingAs($owner)->get('/dashboard/settings/notifications')
+        ->assertOk()->assertSee('Participant emails are on hold.')->assertSee('Add Platform mail');
+    $this->actingAs($owner)->get('/dashboard')->assertOk()->assertSee('Participant emails are on hold.');
+    $this->actingAs($owner)->post('/dashboard/settings/notifications/platform/test', ['test_email' => 'owner@runners.test'])
+        ->assertForbidden();
+
+    // The participant still gets the pass from the payment return page.
+    auth()->logout();
+    $page = $this->get(route('payments.return', $registration))->assertOk()->assertSee('Download your pass (PDF)');
+    preg_match('#href="([^"]+/passes/'.$registration->id.'/pass\.pdf[^"]*)"#', $page->getContent(), $m);
+    $this->get(html_entity_decode($m[1]))->assertOk()->assertHeader('Content-Type', 'application/pdf');
 });
 
 it('stores SMTP passwords and WhatsApp tokens encrypted', function () {
@@ -276,7 +309,8 @@ it('lets owners manage notification settings and test SMTP', function () {
     $owner->forceFill(['email_verified_at' => now()])->save();
 
     $this->actingAs($owner)->get('/dashboard/settings/notifications')
-        ->assertOk()->assertSee('Platform email')->assertSee('Custom SMTP')->assertSee('Setup checklist')
+        ->assertOk()->assertSeeInOrder(['Participant emails', 'Use my SMTP', 'Free', 'Platform mail', 'Add-on', 'WhatsApp notifications', 'Add-on'])
+        ->assertSee('Participant emails go through Platform mail')->assertSee('myaccount.google.com/apppasswords')->assertSee('Setup checklist')
         ->assertSee('Registration confirmed');
 
     $this->actingAs($owner)->put('/dashboard/settings/notifications/smtp', [
@@ -323,7 +357,10 @@ it('hides paid add-ons outside the Season Pass and blocks non-owners', function 
     $owner = User::withoutGlobalScopes()->where('email', 'owner@runners.test')->sole();
 
     $this->actingAs($owner)->get('/dashboard/settings/notifications')
-        ->assertOk()->assertSee('not in your Season Pass')->assertDontSee('Setup checklist');
+        ->assertOk()->assertSee('WhatsApp is a paid add-on and is not on your plan')->assertSee('Add WhatsApp')
+        ->assertSee('Platform mail is a paid add-on and is not on your plan')
+        ->assertSee('name="smtp_host"', false) // own SMTP stays available
+        ->assertDontSee('Setup checklist')->assertDontSee('name="whatsapp_token"', false);
     $this->actingAs($owner)->put('/dashboard/settings/notifications/whatsapp', ['whatsapp_provider' => 'meta', 'whatsapp_language' => 'en'])
         ->assertForbidden();
 

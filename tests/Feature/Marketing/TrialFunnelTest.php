@@ -17,7 +17,7 @@ require_once __DIR__.'/../Events/helpers.php';
 function trialOwner(): User
 {
     $org = Org::create(['name' => 'Sunrise Sports Club', 'slug' => 'sunrise-sports-club']);
-    PlanAssigner::startTrial($org, 'single');
+    PlanAssigner::startTrial($org, 'club_season'); // 5 races, so trial-only limits are what bite
 
     return User::factory()->create(['org_id' => $org->id, 'role' => Role::Owner, 'email_verified_at' => now()]);
 }
@@ -61,7 +61,7 @@ it('holds a trial to one live event once the paywall is on', function () {
 
     $this->actingAs($owner)->post(route('organiser.events.store'), trialWizard())->assertSessionHasNoErrors();
     $this->actingAs($owner)->post(route('organiser.events.store'), trialWizard(['name' => 'Winter 5K']))
-        ->assertSessionHasErrors(['publish' => 'Your free trial covers 1 live event. Pick Single Event, Club or Circuit in Plan & billing to publish more.']);
+        ->assertSessionHasErrors(['publish' => 'Your free trial covers 1 live event. Pick Single Event, Club Season or Circuit Season in Plan & billing to publish more.']);
 
     // A draft is still fine.
     $this->actingAs($owner)->post(route('organiser.events.store'), trialWizard(['name' => 'Winter 5K', 'publish' => '0']))->assertSessionHasNoErrors();
@@ -70,7 +70,7 @@ it('holds a trial to one live event once the paywall is on', function () {
 
 it('caps a trial at 25 test registrations once the paywall is on', function () {
     $event = syncMarathon();
-    $event->org->forceFill(['plan' => 'single', 'subscription_status' => 'trialing', 'trial_ends_at' => now()->addDays(10)])->save();
+    $event->org->forceFill(['plan' => 'single_event', 'subscription_status' => 'trialing', 'trial_ends_at' => now()->addDays(10)])->save();
     Registration::factory()->count(25)->create(['event_id' => $event->id]);
 
     $this->post('/demo-runners/bengaluru-city-marathon-2027/register', registrationInput())->assertSessionHasNoErrors(); // stubbed
@@ -85,7 +85,7 @@ it('shows "Powered by EventFlow" on trial landings only', function () {
 
     $this->get('/demo-runners/bengaluru-city-marathon-2027')->assertOk()->assertDontSee('data-watermark', false);
 
-    $event->org->forceFill(['plan' => 'single', 'subscription_status' => 'trialing', 'trial_ends_at' => now()->addDays(10)])->save();
+    $event->org->forceFill(['plan' => 'single_event', 'subscription_status' => 'trialing', 'trial_ends_at' => now()->addDays(10)])->save();
     $this->get('/demo-runners/bengaluru-city-marathon-2027')->assertSee('data-watermark', false)->assertSee('Powered by EventFlow');
 
     config(['plans.trial_watermark' => false]);
@@ -158,13 +158,4 @@ it('ignores a template key it does not ship', function () {
         'organization_name' => 'Sunrise', 'name' => 'Meera', 'email' => 'meera@sunrise.test',
         'password' => 'correct-horse-battery', 'password_confirmation' => 'correct-horse-battery', 'template' => 'neon',
     ])->assertSessionHasErrors('template');
-});
-
-it('moves orgs on old plan keys to their successor', function () {
-    $org = Org::create(['name' => 'Old Club', 'slug' => 'old-club']);
-    $org->forceFill(['plan' => 'growth'])->save();
-
-    (require database_path('migrations/2026_11_02_000001_move_orgs_to_single_club_circuit_plans.php'))->up();
-
-    expect($org->fresh()->plan)->toBe('circuit');
 });

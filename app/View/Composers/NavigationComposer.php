@@ -73,7 +73,7 @@ class NavigationComposer
                     $settings[] = $this->item(__('Modules'), 'settings.edit', 'settings', 'settings.edit');
                 }
                 if (Route::has('settings.notifications.show')) {
-                    $settings[] = $this->item(__('Notifications'), 'settings.notifications.show', 'bell', 'settings.notifications.*');
+                    $settings[] = $this->item(__('Email & WhatsApp'), 'settings.notifications.show', 'bell', 'settings.notifications.*');
                 }
                 if (Route::has('settings.payments.show')) {
                     $settings[] = $this->item(__('Payments'), 'settings.payments.show', 'wallet', 'settings.payments.*');

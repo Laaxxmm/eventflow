@@ -15,8 +15,8 @@
         [__('QR pass on every entry'), __('A branded EF- pass by email the moment an entry is paid. Signed QR codes cannot be forged.')],
         [__('Gate check-in'), __('Volunteers scan passes on any phone. Duplicates are flagged with the first check-in time.')],
         [__('Distance pricing'), __('5K, 10K, half, full — each with its own price, age bands and form fields.')],
-        [__('Soft pax caps'), __('Set places per distance. Near your plan cap you get a nudge, not a locked door.')],
-        [__('Finisher certificates'), __('Print-ready A4 designs with an EF-CERT number and a verify QR on each.')],
+        [__('Soft pax caps'), __('At your plan\'s participant limit, entries pause with a clear message. Upgrade or add a participant pack and they reopen.')],
+        [__('Finisher certificates'), __('Print-ready A4 designs with an EF-CERT number and a verify QR on each. Club Season and up.')],
         [__('Your logo, your colours'), __('Upload a logo and pick brand colours; every template tints itself, contrast-checked.')],
     ];
     $steps = [
@@ -57,7 +57,7 @@
                 @foreach ($selfServe as $key => $plan)
                     <a href="{{ route('pricing') }}#{{ $key }}" class="flex items-baseline gap-2 hover:text-paper">
                         <span class="font-display text-lg font-bold uppercase text-paper/70">{{ $plan['name'] }}</span>
-                        <span class="font-display text-2xl font-extrabold {{ $loop->first ? 'text-heat' : 'text-paper' }}">{{ Plans::inr($plan['season_pass_inr']) }}</span>
+                        <span class="font-display text-2xl font-extrabold {{ $loop->first ? 'text-heat' : 'text-paper' }}">{{ Plans::inr($plan['price_inr']) }}</span>
                     </a>
                 @endforeach
                 <a href="{{ route('pricing') }}" class="ml-auto font-semibold text-paper/75 underline decoration-heat decoration-2 underline-offset-4 hover:text-paper">{{ __('Full pricing') }}</a>
@@ -105,7 +105,7 @@
             <div class="lg:sticky lg:top-28 lg:self-start">
                 <p class="ri-kicker text-heat">{{ __('Product') }}</p>
                 <h2 class="ri-headline mt-4 text-6xl sm:text-8xl">{{ __('Race day,') }} <span class="text-heat">{{ __('ticked off.') }}</span></h2>
-                <p class="mt-6 max-w-md text-paper/70">{{ __('Every plan, including the trial, has all of it. You only choose how many races and runners.') }}</p>
+                <p class="mt-6 max-w-md text-paper/70">{{ __('Pages, payments, passes and check-in come with every plan, the trial included. Race sheets and certificates start at Club Season.') }}</p>
             </div>
             <ul class="grid gap-px bg-paper/15 sm:grid-cols-2">
                 @foreach ($proof as [$title, $body])
@@ -143,7 +143,7 @@
         <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <p class="font-display text-3xl font-bold uppercase leading-tight sm:text-4xl" data-trust-line>{{ __('Upgrade, participant packs, and SMTP — all in settings. No waiting on a quote to go live.') }}</p>
             @if (\App\Saas\Trial::stubbed())
-                <p class="mt-3 text-sm opacity-80">{{ __('Online checkout for upgrades and packs is rolling out. Until it is live, your trial is never blocked at its limits.') }}</p>
+                <p class="mt-3 text-sm opacity-80">{{ __('Online checkout is rolling out: until it is live, Upgrade and Buy a participant pack in Plan & billing send your request to Indefine, and trial-only limits are not enforced.') }}</p>
             @endif
         </div>
     </section>

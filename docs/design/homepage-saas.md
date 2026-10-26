@@ -2,7 +2,7 @@
 
 The marketing site sells EventFlow to organisers who sign up and publish on their own.
 It uses the Race Ink system ([race-ink.md](race-ink.md)): ink, paper, Heat for the one primary
-action, volt for emphasis bands. Violet Track is kept off the marketing pages (no purple SaaS look).
+action, volt for emphasis bands. Pricing, caps and add-ons are Session M2's (`config/plans.php`); this page only presents them. Violet Track is kept off the marketing pages (no purple SaaS look).
 
 ## Funnel
 
@@ -41,13 +41,15 @@ Everything the pages promise is either built or labelled:
 
 | Promise | Status |
 |---|---|
-| Prices, races, windows, pax | `config/plans.php`, the only source |
-| No ticket % | `participant_fee_percent` is `null` on every plan |
-| Own SMTP free | `email_branding` module in every plan; Settings → Notifications → SMTP |
+| Prices, races, windows, pax | `config/plans.php` (locked in Session M2), the only source |
+| No ticket % | No plan has a percentage; organisers pay a flat price per pass |
+| Own SMTP free | Every plan; Settings → Notifications → SMTP |
+| Soft pax caps | `App\Saas\PlanLimits` pauses registrations at the plan's participant limit (M2) |
+| Certificates, race sheets | Club Season and up; the homepage says so |
 | Publish without a call | Signup → verify email → wizard publishes; no approval step |
 | Trial limits (14 d, 1 event, 25 regs, watermark) | `App\Saas\Trial`; banner on the dashboard and `/account/plan` |
-| Upgrade / participant packs in settings | **Checkout not built.** `TRIAL_STUB=true` (default) never blocks, and the homepage, pricing page and `/account/plan` say checkout is rolling out |
-| Platform mail / participant pack prices | `null` in config, shown as "Ask us" |
+| Upgrade / participant packs in settings | Plan & billing has **Upgrade**, **Buy a participant pack** and **Contact Indefine**. Online checkout is not built: until it is, those send the request to Indefine (M2), `TRIAL_STUB=true` keeps trial-only limits from blocking, and the homepage, pricing page and Plan & billing say so |
+| Platform mail / WhatsApp / participant pack prices | `null` in config, shown as "Quoted" / "Paid add-on" |
 
 ## Screenshots
 

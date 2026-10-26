@@ -3,6 +3,7 @@
 namespace App\Saas;
 
 use App\Enums\Module;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Number;
 
 /**
@@ -19,39 +20,19 @@ final class Plans
     /** @return array<string, mixed> */
     public static function get(string $key): array
     {
-        return self::all()[self::resolve($key)] ?? throw new \InvalidArgumentException("Unknown plan [{$key}]");
-    }
-
-    /** A plan key, with pre-Single/Club/Circuit keys (starter, growth, scale) mapped to their successor. */
-    public static function resolve(string $key): string
-    {
-        return config("plans.legacy.{$key}", $key);
-    }
-
-    /** @return array<string, mixed>|null The plan an org is on, or null when it has none. */
-    public static function forOrg(?string $key): ?array
-    {
-        return $key === null ? null : (self::all()[self::resolve($key)] ?? null);
-    }
-
-    /** Total participants a pass covers: events × pax per event, or null for unlimited. */
-    public static function maxRegistrations(array $plan): ?int
-    {
-        return $plan['max_events'] === null || $plan['pax_per_event'] === null
-            ? null
-            : $plan['max_events'] * $plan['pax_per_event'];
+        return self::all()[$key] ?? throw new \InvalidArgumentException("Unknown plan [{$key}]");
     }
 
     /**
      * Plans cheapest first, custom-priced ones last: the order the pricing strip shows
-     * (Single → Club → Circuit → Custom).
+     * (Single → Club → Circuit → Custom once those plans are configured).
      *
      * @return array<string, array<string, mixed>>
      */
     public static function ordered(): array
     {
         $plans = self::all();
-        uasort($plans, fn (array $a, array $b) => ($a['season_pass_inr'] ?? PHP_INT_MAX) <=> ($b['season_pass_inr'] ?? PHP_INT_MAX));
+        uasort($plans, fn (array $a, array $b) => ($a['price_inr'] ?? PHP_INT_MAX) <=> ($b['price_inr'] ?? PHP_INT_MAX));
 
         return $plans;
     }
@@ -64,7 +45,7 @@ final class Plans
     public static function entry(): ?array
     {
         foreach (self::ordered() as $key => $plan) {
-            if (($plan['self_serve'] ?? false) && $plan['season_pass_inr'] !== null) {
+            if (($plan['self_serve'] ?? false) && $plan['price_inr'] !== null) {
                 return ['key' => $key, 'plan' => $plan];
             }
         }
@@ -92,6 +73,36 @@ final class Plans
     public static function inr(?int $amount): ?string
     {
         return $amount === null ? null : Number::currency($amount, in: 'INR', locale: 'en_IN', precision: 0);
+    }
+
+    /** "₹3,999", or the quote wording when Indefine prices it. */
+    public static function priceLabel(?int $amount): string
+    {
+        return self::inr($amount) ?? __('Contact Indefine');
+    }
+
+    /** "1 race · 500 participants" for a plan card or table. */
+    public static function limitsLabel(array $plan): string
+    {
+        if ($plan['max_events'] === null) {
+            return __('Races and field size to suit you');
+        }
+
+        return trans_choice('{1} 1 race|[2,*] Up to :count races', $plan['max_events'], ['count' => $plan['max_events']])
+            .' · '.__(':pax participants per race', ['pax' => number_format($plan['max_participants_per_event'])]);
+    }
+
+    /** Last day (inclusive) of a paid term that starts on $from. */
+    public static function termEnd(string $plan, \DateTimeInterface $from): ?CarbonImmutable
+    {
+        $term = self::get($plan)['term'];
+        if ($term === null) {
+            return null;
+        }
+        $start = CarbonImmutable::instance($from)->startOfDay();
+        $end = isset($term['days']) ? $start->addDays($term['days']) : $start->addMonthsNoOverflow($term['months']);
+
+        return $end->subDay();
     }
 
     /**

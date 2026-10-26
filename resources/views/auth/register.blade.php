@@ -22,8 +22,8 @@
                     <label class="flex cursor-pointer items-start gap-3 border-2 border-ink/15 p-3 has-[:checked]:border-ink">
                         <input type="radio" name="plan" value="{{ $key }}" class="mt-1 text-ink focus:ring-ink" @checked(old('plan', $selectedPlan) === $key)>
                         <span class="flex-1 text-sm">
-                            <span class="flex justify-between gap-3 font-semibold text-ink"><span>{{ $plan['name'] }}</span><span>{{ \App\Saas\Plans::inr($plan['season_pass_inr']) }}</span></span>
-                            <span class="block text-ink/60">@include('marketing.partials.plan-limits', ['plan' => $plan])</span>
+                            <span class="flex justify-between gap-3 font-semibold text-ink"><span>{{ $plan['name'] }}</span><span>{{ \App\Saas\Plans::inr($plan['price_inr']) }}</span></span>
+                            <span class="block text-ink/60">{{ \App\Saas\Plans::limitsLabel($plan) }} · {{ __($plan['term_label']) }}</span>
                         </span>
                     </label>
                 @endforeach

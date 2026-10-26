@@ -58,19 +58,35 @@ class NotificationSettings extends Model
         return static::withoutGlobalScopes()->firstOrNew(['org_id' => $org->id]);
     }
 
-    /** Every field custom SMTP needs is filled in. */
+    /** Every field own SMTP needs is filled in. */
     public function smtpConfigured(): bool
     {
         return filled($this->smtp_host) && filled($this->smtp_port) && filled($this->smtp_from_email);
     }
 
-    /** Custom SMTP is used for this org's mail. */
+    /** The org's own SMTP is used for participant mail. Free on every plan: no add-on needed. */
     public function usesCustomSmtp(Org $org): bool
     {
         return $this->smtp_enabled
             && $this->smtpConfigured()
-            && $this->smtp_verified_at !== null
-            && NotificationModules::enabled($org, Module::EmailBranding);
+            && $this->smtp_verified_at !== null;
+    }
+
+    /** Platform mail (Brevo / SES via Indefine): only with the paid add-on (module email_branding). */
+    public function usesPlatformMail(Org $org): bool
+    {
+        return ! $this->usesCustomSmtp($org) && self::platformMailIncluded($org);
+    }
+
+    public static function platformMailIncluded(Org $org): bool
+    {
+        return NotificationModules::enabled($org, Module::EmailBranding);
+    }
+
+    /** Participant emails go out (own SMTP or Platform mail); otherwise they are held and logged. */
+    public function canSendParticipantMail(Org $org): bool
+    {
+        return $this->usesCustomSmtp($org) || $this->usesPlatformMail($org);
     }
 
     public function whatsappConfigured(): bool
