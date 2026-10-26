@@ -1,135 +1,148 @@
+{{--
+    Platform console: organisations (Daylight Track, docs/design/daylight-track/PlatformOrgs.dc.html).
+    Totals, search + filters, one white table card. Actions are the existing extend-trial / suspend / reactivate.
+--}}
+@php
+    use App\Saas\PlanLimits;
+    $field = 'min-h-[44px] rounded-full border-0 bg-white px-4 text-sm text-ink ring-1 ring-inset ring-mist focus:ring-2 focus:ring-track';
+    $action = 'inline-flex min-h-[44px] items-center px-1.5 text-sm font-semibold';
+@endphp
 <x-app-layout>
+    <x-slot name="title">{{ __('Organisations') }}</x-slot>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-ink leading-tight">
-            {{ __('Platform: organisations') }}
-        </h2>
+        <div>
+            <p class="text-sm text-muted">{{ __('Indefine only') }}</p>
+            <h2 class="mt-1">{{ __('Organisations') }}</h2>
+        </div>
+        <form method="get" action="{{ route('platform.orgs.index') }}" class="flex w-full flex-wrap gap-2 sm:w-auto" role="search">
+            <label class="min-w-0 basis-full sm:basis-auto">
+                <span class="sr-only">{{ __('Search organisations') }}</span>
+                <input type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Name or slug') }}" class="{{ $field }} w-full sm:w-[280px]">
+            </label>
+            <label class="min-w-0 flex-1 sm:flex-none">
+                <span class="sr-only">{{ __('Status') }}</span>
+                <select name="status" class="{{ $field }} w-full pe-9" onchange="this.form.submit()">
+                    <option value="">{{ __('All statuses') }}</option>
+                    @foreach (['trialing' => __('On trial'), 'trial_expired' => __('Trial expired'), 'active' => __('Active'), 'past_due' => __('Past due'), 'cancelled' => __('Cancelled'), 'suspended' => __('Suspended')] as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="min-w-0 flex-1 sm:flex-none">
+                <span class="sr-only">{{ __('Plan') }}</span>
+                <select name="plan" class="{{ $field }} w-full pe-9" onchange="this.form.submit()">
+                    <option value="">{{ __('All plans') }}</option>
+                    @foreach ($plans as $key => $plan)
+                        <option value="{{ $key }}" @selected(($filters['plan'] ?? '') === $key)>{{ $plan['name'] }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <button type="submit" class="sr-only focus:not-sr-only focus:rounded-full focus:bg-ink focus:px-4 focus:text-white">{{ __('Filter') }}</button>
+        </form>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('status'))
-                <p class="px-4 sm:px-0 text-sm font-medium text-green-600">{{ session('status') }}</p>
-            @endif
+    <div class="mx-auto max-w-[1180px] space-y-5 px-4 pb-12 pt-4 sm:px-6 lg:px-10">
+        @if (session('status'))
+            <p class="rounded-[18px] bg-[#E3F4EE] px-4 py-3 text-sm text-[#0B4A38]" role="status">{{ session('status') }}</p>
+        @endif
 
-            <dl class="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 sm:px-0">
-                @foreach ([__('Organisations') => $totals['orgs'], __('On trial') => $totals['trialing'], __('Active') => $totals['active'], __('Suspended') => $totals['suspended']] as $label => $value)
-                    <div class="p-4 sm:p-6 rounded-[28px] bg-white">
-                        <dt class="text-sm text-muted">{{ $label }}</dt>
-                        <dd class="mt-1 text-2xl font-semibold text-ink">{{ number_format($value) }}</dd>
-                    </div>
-                @endforeach
-            </dl>
+        <dl class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="{{ __('Totals') }}">
+            @foreach ([__('Organisations') => $totals['orgs'], __('On trial') => $totals['trialing'], __('Paying') => $totals['active'], __('Suspended') => $totals['suspended']] as $label => $value)
+                <div class="flex min-w-0 flex-col gap-1.5 rounded-[22px] bg-white p-[18px] sm:p-5">
+                    <dt class="text-sm text-muted">{{ $label }}</dt>
+                    <dd class="ri-headline text-[26px] leading-tight sm:text-[30px]">{{ number_format($value) }}</dd>
+                </div>
+            @endforeach
+        </dl>
 
-            <div class="rounded-[28px] bg-white p-5 sm:p-8">
-                <form method="get" action="{{ route('platform.orgs.index') }}" class="flex flex-col sm:flex-row sm:items-end gap-4">
-                    <div class="flex-1">
-                        <x-input-label for="q" :value="__('Search')" />
-                        <x-text-input id="q" name="q" type="search" class="mt-1 block w-full" :value="$filters['q'] ?? ''" :placeholder="__('Name or slug')" />
-                    </div>
-                    <div>
-                        <x-input-label for="status" :value="__('Status')" />
-                        <select id="status" name="status" class="border-mist focus:border-track focus:ring-track rounded-md shadow-sm mt-1 block w-full">
-                            <option value="">{{ __('All') }}</option>
-                            @foreach (['trialing' => __('On trial'), 'trial_expired' => __('Trial expired'), 'active' => __('Active'), 'past_due' => __('Past due'), 'cancelled' => __('Cancelled'), 'suspended' => __('Suspended')] as $value => $label)
-                                <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label for="plan" :value="__('Plan')" />
-                        <select id="plan" name="plan" class="border-mist focus:border-track focus:ring-track rounded-md shadow-sm mt-1 block w-full">
-                            <option value="">{{ __('All') }}</option>
-                            @foreach ($plans as $key => $plan)
-                                <option value="{{ $key }}" @selected(($filters['plan'] ?? '') === $key)>{{ $plan['name'] }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <x-secondary-button type="submit">{{ __('Filter') }}</x-secondary-button>
-                </form>
-
-                @if ($orgs->isEmpty())
-                    <p class="mt-6 text-sm text-muted">{{ __('No organisations match.') }}</p>
-                @else
-                    <div class="mt-6 overflow-x-auto">
-                        <table class="min-w-full text-sm">
-                            <thead>
-                                <tr class="text-left text-muted border-b">
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Organisation') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Plan') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Status') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Users') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Events') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium text-right">{{ __('Registrations') }}</th>
-                                    <th scope="col" class="py-2 pe-4 font-medium">{{ __('Signed up') }}</th>
-                                    <th scope="col" class="py-2 font-medium"><span class="sr-only">{{ __('Actions') }}</span></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y">
-                                @foreach ($orgs as $org)
-                                    @php($expired = $org->subscription_status === 'trialing' && $org->trial_ends_at?->isPast())
-                                    <tr>
-                                        <td class="py-3 pe-4">
-                                            <span class="block font-semibold text-ink">{{ $org->name }}</span>
-                                            <a href="{{ url('/'.$org->slug) }}" class="text-muted underline hover:text-ink">/{{ $org->slug }}</a>
-                                        </td>
-                                        <td class="py-3 pe-4">
-                                            {{ $plans[$org->plan]['name'] ?? '—' }}
-                                            @if ($org->addons)
-                                                <span class="block text-muted">+ {{ collect($org->addons)->map(fn ($a) => __(config("plans.addons.{$a}.name", $a)))->implode(', ') }}</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3 pe-4">
-                                            <span @class([
-                                                'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
-                                                'bg-[#FBE4E4] text-[#6E1414]' => $org->isSuspended() || $expired,
-                                                'bg-green-100 text-green-800' => ! $org->isSuspended() && $org->subscription_status === 'active',
-                                                'bg-paper text-ink' => ! $org->isSuspended() && ! $expired && $org->subscription_status !== 'active',
-                                            ])>
-                                                @if ($org->isSuspended())
-                                                    {{ __('Suspended') }}
-                                                @elseif ($expired)
-                                                    {{ __('Trial expired') }}
-                                                @else
-                                                    {{ __(ucfirst(str_replace('_', ' ', $org->subscription_status))) }}
-                                                @endif
-                                            </span>
-                                            @if ($org->subscription_status === 'trialing' && $org->trial_ends_at)
-                                                <span class="block text-muted">{{ __('until :date', ['date' => $org->trial_ends_at->setTimezone('Asia/Kolkata')->format('j M Y')]) }}</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-3 pe-4 text-right">{{ $org->users_count }}</td>
-                                        <td class="py-3 pe-4 text-right">{{ $org->events_count }}</td>
-                                        <td class="py-3 pe-4 text-right">{{ number_format($org->registrations_count) }}</td>
-                                        <td class="py-3 pe-4 whitespace-nowrap">{{ $org->created_at->setTimezone('Asia/Kolkata')->format('j M Y') }}</td>
-                                        <td class="py-3 whitespace-nowrap text-right">
-                                            <div class="flex justify-end gap-2">
-                                                @if ($org->subscription_status === 'trialing')
-                                                    <form method="post" action="{{ route('platform.orgs.extend-trial', $org) }}">
-                                                        @csrf
-                                                        <x-secondary-button type="submit">{{ __('Extend trial') }}</x-secondary-button>
-                                                    </form>
-                                                @endif
-                                                @if ($org->isSuspended())
-                                                    <form method="post" action="{{ route('platform.orgs.reactivate', $org) }}">
-                                                        @csrf
-                                                        <x-secondary-button type="submit">{{ __('Reactivate') }}</x-secondary-button>
-                                                    </form>
-                                                @else
-                                                    <form method="post" action="{{ route('platform.orgs.suspend', $org) }}" onsubmit="return confirm(@js(__('Suspend :org? Its members will be signed out.', ['org' => $org->name])))">
-                                                        @csrf
-                                                        <x-danger-button>{{ __('Suspend') }}</x-danger-button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-6">{{ $orgs->links() }}</div>
-                @endif
+        @if ($orgs->isEmpty())
+            <p class="rounded-[24px] bg-white px-5 py-8 text-center text-sm text-muted">{{ __('No organisations match.') }}</p>
+        @else
+            <div class="relative overflow-x-auto rounded-[24px] bg-white">
+                <table class="w-full min-w-[960px] text-sm">
+                    <thead>
+                        <tr class="text-left text-[13px] text-muted">
+                            <th scope="col" class="px-5 py-4 font-semibold">{{ __('Organisation') }}</th>
+                            <th scope="col" class="pe-4 font-semibold">{{ __('Plan') }}</th>
+                            <th scope="col" class="pe-4 font-semibold">{{ __('Valid until') }}</th>
+                            <th scope="col" class="pe-4 font-semibold">{{ __('Races') }}</th>
+                            <th scope="col" class="pe-4 font-semibold">{{ __('Status') }}</th>
+                            <th scope="col" class="pe-5 text-right font-semibold">{{ __('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($orgs as $org)
+                            @php
+                                $expired = $org->subscription_status === 'trialing' && $org->trial_ends_at?->isPast();
+                                // ponytail: one pass lookup per row (25 per page); eager-load passes if this page grows.
+                                $pass = PlanLimits::pass($org);
+                                $until = $org->subscription_status === 'trialing' ? $org->trial_ends_at : $pass?->ends_on;
+                                $tone = match (true) {
+                                    $org->isSuspended() => 'suspended',
+                                    $expired => 'unpaid',
+                                    $org->subscription_status === 'active' => 'paid',
+                                    $org->subscription_status === 'trialing' => 'trial',
+                                    default => 'ended',
+                                };
+                            @endphp
+                            <tr class="border-t border-[#EEF0F6] align-middle">
+                                <td class="px-5 py-3.5">
+                                    <strong class="block text-[15px] text-ink">{{ $org->name }}</strong>
+                                    <span class="text-[13px] text-muted">
+                                        <a href="{{ url('/'.$org->slug) }}" class="underline-offset-2 hover:text-ink hover:underline">/{{ $org->slug }}</a>
+                                        · {{ trans_choice('{1} 1 user|[0,*] :count users', $org->users_count) }}
+                                        · {{ __('since :date', ['date' => $org->created_at->setTimezone('Asia/Kolkata')->format('j M Y')]) }}
+                                    </span>
+                                </td>
+                                <td class="pe-4">
+                                    {{ $plans[$org->plan]['name'] ?? '—' }}
+                                    @if ($org->addons)
+                                        <span class="block text-[13px] text-muted">+ {{ collect($org->addons)->map(fn ($a) => __(config("plans.addons.{$a}.name", $a)))->implode(', ') }}</span>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap pe-4 text-[#3B4463]">{{ $until ? $until->setTimezone('Asia/Kolkata')->format('d-M-Y') : '—' }}</td>
+                                <td class="whitespace-nowrap pe-4">
+                                    {{ $pass?->max_events ? __(':used of :allowed', ['used' => PlanLimits::racesUsed($org), 'allowed' => $pass->max_events]) : number_format($org->events_count) }}
+                                    <span class="block text-[13px] text-muted">{{ trans_choice('{1} 1 registration|[0,*] :count registrations', $org->registrations_count, ['count' => number_format($org->registrations_count)]) }}</span>
+                                </td>
+                                <td class="pe-4">
+                                    <x-ri.chip :tone="$tone">
+                                        @if ($org->isSuspended())
+                                            {{ __('Suspended') }}
+                                        @elseif ($expired)
+                                            {{ __('Trial expired') }}
+                                        @else
+                                            {{ __(ucfirst(str_replace('_', ' ', $org->subscription_status))) }}
+                                        @endif
+                                    </x-ri.chip>
+                                </td>
+                                <td class="whitespace-nowrap pe-5 text-right">
+                                    <div class="flex justify-end gap-3">
+                                        @if ($org->subscription_status === 'trialing')
+                                            <form method="post" action="{{ route('platform.orgs.extend-trial', $org) }}">
+                                                @csrf
+                                                <button type="submit" class="{{ $action }} text-track hover:text-track-deep">{{ __('Extend trial') }}</button>
+                                            </form>
+                                        @endif
+                                        @if ($org->isSuspended())
+                                            <form method="post" action="{{ route('platform.orgs.reactivate', $org) }}">
+                                                @csrf
+                                                <button type="submit" class="{{ $action }} text-track hover:text-track-deep">{{ __('Reactivate') }}</button>
+                                            </form>
+                                        @else
+                                            <form method="post" action="{{ route('platform.orgs.suspend', $org) }}" onsubmit="return confirm(@js(__('Suspend :org? Its members will be signed out.', ['org' => $org->name])))">
+                                                @csrf
+                                                <button type="submit" class="{{ $action }} text-danger hover:underline">{{ __('Suspend') }}</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-        </div>
+            <div>{{ $orgs->links() }}</div>
+        @endif
     </div>
 </x-app-layout>
