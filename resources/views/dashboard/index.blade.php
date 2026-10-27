@@ -73,7 +73,7 @@
                     $hero = \App\Landing\Theme::url($next->config['hero']['image'] ?? null) ?? \App\View\SportImagery::pick($next->sport?->value);
                 @endphp
                 <section class="flex flex-wrap gap-6 rounded-[28px] bg-white p-3.5" data-next-race>
-                    <x-ri.photo :src="$hero" :sport="$next->sport?->value ?? 'running'" class="min-h-[230px] w-full rounded-[20px] sm:max-w-[340px] sm:flex-[0_1_340px]">
+                    <x-ri.photo :src="$hero" eager :sport="$next->sport?->value ?? 'running'" class="min-h-[230px] w-full rounded-[20px] sm:max-w-[340px] sm:flex-[0_1_340px]">
                         @if ($nextLive)
                             <x-ri.chip tone="live" class="absolute left-3.5 top-3.5">{{ __('Live') }}</x-ri.chip>
                         @else
