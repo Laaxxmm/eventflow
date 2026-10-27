@@ -51,7 +51,7 @@
             <svg width="100%" height="100%" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMid slice" class="absolute inset-0"><path d="M-40 600 C 300 520, 700 560, 1480 420" stroke="#fff" stroke-opacity=".18" stroke-width="2" fill="none"/><path d="M-40 640 C 320 560, 720 600, 1480 460" stroke="#fff" stroke-opacity=".14" stroke-width="2" fill="none"/><circle cx="1160" cy="180" r="120" fill="#F2A93B" fill-opacity=".45"/></svg>
         </div>
         @if ($hero)
-            <img src="{{ $hero }}" alt="{{ $page->config->hero->title }}" class="ri-grade absolute inset-0 -z-20 h-full w-full object-cover" style="object-position: 70% 50%" onerror="this.remove()">
+            <img src="{{ $hero }}" alt="{{ $page->config->hero->title }}" class="ri-grade absolute inset-0 -z-20 h-full w-full object-cover" fetchpriority="high" style="object-position: 70% 50%" onerror="this.remove()">
         @endif
         <div class="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgb(18_26_51/.25)_0%,rgb(18_26_51/0)_30%,rgb(18_26_51/.55)_100%)]" aria-hidden="true"></div>
 

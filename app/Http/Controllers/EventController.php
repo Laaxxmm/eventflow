@@ -11,6 +11,7 @@ use App\Landing\EventStatus;
 use App\Landing\EventWizard;
 use App\Landing\InvalidEventConfig;
 use App\Landing\LogoInspector;
+use App\Landing\UploadedImage;
 use App\Models\Event;
 use App\Models\Org;
 use App\Saas\PlanLimits;
@@ -77,8 +78,8 @@ class EventController extends Controller
                 ->with('wizard_step', EventWizard::stepFor(['publish']));
         }
 
-        $logo = $request->file('logo')?->storePublicly("branding/{$org->id}", 'public');
-        $hero = $request->file('hero')?->storePublicly("branding/{$org->id}", 'public');
+        $logo = $request->hasFile('logo') ? UploadedImage::logo($request->file('logo'), "branding/{$org->id}") : null;
+        $hero = $request->hasFile('hero') ? UploadedImage::photo($request->file('hero'), "branding/{$org->id}") : null;
         $logoCheck = $logo ? LogoInspector::inspect(Storage::disk('public')->path($logo)) : null;
 
         $slug = Event::uniqueSlug($org->id, $input['name']);
@@ -180,7 +181,8 @@ class EventController extends Controller
                 data_set($input, $key, null);
             }
             if ($request->hasFile($file)) {
-                data_set($input, $key, $request->file($file)->storePublicly("branding/{$org->id}", 'public'));
+                $upload = $request->file($file);
+                data_set($input, $key, $file === 'logo_upload' ? UploadedImage::logo($upload, "branding/{$org->id}") : UploadedImage::photo($upload, "branding/{$org->id}"));
             }
         }
 
